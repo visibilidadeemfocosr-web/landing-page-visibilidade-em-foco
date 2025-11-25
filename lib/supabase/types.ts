@@ -1,0 +1,38 @@
+export type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'radio' | 'checkbox' | 'yesno' | 'scale' | 'image'
+
+export interface Question {
+  id: string
+  text: string
+  field_type: FieldType
+  required: boolean
+  order: number
+  options?: string[] // Para select, radio
+  min_value?: number // Para scale
+  max_value?: number // Para scale
+  placeholder?: string
+  created_at: string
+  updated_at: string
+  active: boolean
+}
+
+export interface Answer {
+  id: string
+  question_id: string
+  submission_id: string
+  value: string | number | boolean
+  file_url?: string
+  created_at: string
+}
+
+export interface Submission {
+  id: string
+  created_at: string
+  updated_at: string
+}
+
+export interface AdminUser {
+  id: string
+  email: string
+  created_at: string
+}
+

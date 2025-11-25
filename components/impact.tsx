@@ -1,0 +1,79 @@
+export function Impact() {
+  const impacts = [
+    {
+      number: "01",
+      title: "Reconhecimento",
+      description: "Valida a existência e o trabalho de artistas LGBTS, criando espaço de representatividade e pertencimento."
+    },
+    {
+      number: "02",
+      title: "Memória",
+      description: "Documenta trajetórias e produções artísticas, construindo um acervo histórico para a comunidade."
+    },
+    {
+      number: "03",
+      title: "Conexão",
+      description: "Fortalece redes de apoio mútuo, colaboração e troca entre artistas da região."
+    },
+    {
+      number: "04",
+      title: "Transformação",
+      description: "Promove mudanças culturais e sociais através da arte e da visibilidade LGBTS."
+    }
+  ]
+
+  return (
+    <section className="py-24 md:py-32 bg-muted/30">
+      <div className="container mx-auto px-6">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <span className="text-sm font-semibold uppercase tracking-wider text-primary">
+              Impacto Social
+            </span>
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground mt-4 mb-6 text-balance">
+              A importância de existir e resistir
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-pretty">
+              Mais do que um levantamento de dados, este projeto é sobre <strong className="text-foreground">dar voz</strong>, <strong className="text-foreground">criar memória</strong> e <strong className="text-foreground">transformar realidades</strong>.
+            </p>
+          </div>
+
+          {/* Grid de impactos */}
+          <div className="grid md:grid-cols-2 gap-8">
+            {impacts.map((impact) => (
+              <div
+                key={impact.number}
+                className="bg-card border border-border rounded-2xl p-8 hover:shadow-xl transition-shadow duration-300"
+              >
+                <div className="flex items-start gap-6">
+                  <span className="text-5xl font-bold text-primary/20">
+                    {impact.number}
+                  </span>
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-bold text-foreground mb-3">
+                      {impact.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {impact.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Quote */}
+          <div className="mt-16 text-center max-w-3xl mx-auto">
+            <blockquote className="text-2xl md:text-3xl font-bold text-foreground italic text-balance leading-tight">
+              "Nosso direito de existir enquanto corpos e mentes e espíritos que fazem arte"
+            </blockquote>
+            <p className="mt-4 text-sm text-muted-foreground">
+              — Inspirado no Centro de Memória MAIS
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
