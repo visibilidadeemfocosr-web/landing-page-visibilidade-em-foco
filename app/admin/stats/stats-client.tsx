@@ -321,6 +321,101 @@ export default function AdminStatsClient() {
                   </div>
                 )}
 
+                {/* Gráfico de Distribuição por Bairro (apenas para CEP) */}
+                {question.field_type === 'cep' && hasData && (() => {
+                  // Agrupar CEPs por bairro
+                  const bairroCounts: Record<string, number> = {}
+                  let totalComBairro = 0
+                  
+                  Object.entries(percentages).forEach(([key, data]) => {
+                    if (key.includes(' - ')) {
+                      const [, bairro] = key.split(' - ')
+                      if (bairro && bairro !== 'Bairro não informado') {
+                        bairroCounts[bairro] = (bairroCounts[bairro] || 0) + data.count
+                        totalComBairro += data.count
+                      }
+                    }
+                  })
+                  
+                  const bairroData = Object.entries(bairroCounts)
+                    .map(([bairro, count]) => ({
+                      bairro,
+                      quantidade: count,
+                      percentual: totalComBairro > 0 ? (count / totalComBairro) * 100 : 0
+                    }))
+                    .sort((a, b) => b.quantidade - a.quantidade)
+                  
+                  const hasBairroData = bairroData.length > 0
+                  
+                  return hasBairroData ? (
+                    <div className="bg-gradient-to-br from-primary/5 to-purple-500/5 p-6 rounded-xl border border-primary/10">
+                      <h4 className="text-lg font-semibold mb-6 text-center">Distribuição por Bairro</h4>
+                      <p className="text-sm text-muted-foreground text-center mb-6">
+                        Total de respostas com bairro identificado: <span className="font-semibold text-primary">{totalComBairro}</span>
+                      </p>
+                      <ResponsiveContainer width="100%" height={Math.max(300, bairroData.length * 50)}>
+                        <BarChart
+                          data={bairroData}
+                          layout="vertical"
+                          margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
+                          <XAxis 
+                            type="number" 
+                            tick={{ fill: '#6b7280', fontSize: 12 }}
+                            label={{ value: 'Quantidade', position: 'insideBottom', offset: -5, style: { fill: '#6b7280' } }}
+                          />
+                          <YAxis 
+                            type="category" 
+                            dataKey="bairro" 
+                            width={150}
+                            tick={{ fill: '#6b7280', fontSize: 12 }}
+                            style={{ textAnchor: 'end' }}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                              border: '1px solid #e5e7eb',
+                              borderRadius: '8px',
+                              padding: '12px',
+                              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                            }}
+                            formatter={(value: any, name: string) => {
+                              if (name === 'quantidade') {
+                                const item = bairroData.find(d => d.quantidade === value)
+                                return [
+                                  `${value} resposta${value !== 1 ? 's' : ''} (${item?.percentual.toFixed(1)}%)`,
+                                  'Quantidade'
+                                ]
+                              }
+                              return [value, name]
+                            }}
+                          />
+                          <Bar 
+                            dataKey="quantidade" 
+                            radius={[0, 8, 8, 0]}
+                            fill="url(#colorGradientBairro)"
+                            animationDuration={800}
+                          >
+                            <LabelList 
+                              dataKey="quantidade" 
+                              position="right" 
+                              style={{ fill: '#8b5cf6', fontSize: 12, fontWeight: 600 }}
+                              formatter={(value: number) => `${value}`}
+                            />
+                            <defs>
+                              <linearGradient id="colorGradientBairro" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#ec4899" stopOpacity={0.8} />
+                                <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                              </linearGradient>
+                            </defs>
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : null
+                })()}
+
                 {/* Gráficos */}
                 {question.field_type === 'yesno' && hasData && (
                   <div className="bg-gradient-to-br from-primary/5 to-purple-500/5 p-6 rounded-xl border border-primary/10">
