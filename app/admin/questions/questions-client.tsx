@@ -19,9 +19,10 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Edit, Trash2, GripVertical, Check, X, Bold as BoldIcon, Italic as ItalicIcon } from 'lucide-react'
+import { Plus, Edit, Trash2, GripVertical, Check, X, Bold as BoldIcon, Italic as ItalicIcon, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Question, FieldType } from '@/lib/supabase/types'
+import { DynamicForm } from '@/components/dynamic-form'
 import {
   DndContext,
   closestCenter,
@@ -239,6 +240,7 @@ export default function AdminQuestionsClient() {
   const [editingSectionName, setEditingSectionName] = useState('')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [questionToDelete, setQuestionToDelete] = useState<string | null>(null)
+  const [previewOpen, setPreviewOpen] = useState(false)
   const [formData, setFormData] = useState({
     text: '',
     field_type: 'text' as FieldType,
@@ -908,6 +910,43 @@ export default function AdminQuestionsClient() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Botão de Preview */}
+      <div className="mb-6 flex justify-end">
+        <Button
+          onClick={() => setPreviewOpen(true)}
+          variant="outline"
+          className="min-h-[48px] touch-manipulation"
+        >
+          <Eye className="mr-2 h-4 w-4" />
+          Visualizar Formulário
+        </Button>
+      </div>
+
+      {/* Dialog de Preview */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="!max-w-[100vw] !w-[100vw] !max-h-[100vh] !h-[100vh] !top-0 !left-0 !translate-x-0 !translate-y-0 rounded-none p-0 overflow-hidden flex flex-col">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b bg-background z-10 flex-shrink-0">
+            <DialogTitle className="text-2xl font-bold">Preview do Formulário</DialogTitle>
+            <p className="text-sm text-muted-foreground mt-2">
+              Esta é a visualização exata de como o formulário aparece para os usuários
+            </p>
+          </DialogHeader>
+          <div className="px-6 py-6 overflow-y-auto flex-1">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <p className="text-muted-foreground">Carregando formulário...</p>
+              </div>
+            ) : questions.length === 0 ? (
+              <div className="flex items-center justify-center py-12">
+                <p className="text-muted-foreground">Nenhuma pergunta cadastrada ainda.</p>
+              </div>
+            ) : (
+              <DynamicForm questions={questions.filter(q => q.active)} previewMode={true} />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="space-y-6">
         {(() => {

@@ -19,6 +19,7 @@ import type { Question } from '@/lib/supabase/types'
 
 interface DynamicFormProps {
   questions: Question[]
+  previewMode?: boolean
 }
 
 // Componente para renderizar HTML formatado de forma segura
@@ -45,7 +46,7 @@ function FormattedText({ html }: { html: string }) {
   return <span>{html}</span>
 }
 
-export function DynamicForm({ questions }: DynamicFormProps) {
+export function DynamicForm({ questions, previewMode = false }: DynamicFormProps) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState<Record<string, boolean>>({})
   const [fileUrls, setFileUrls] = useState<Record<string, string>>({})
@@ -138,6 +139,12 @@ export function DynamicForm({ questions }: DynamicFormProps) {
   }
 
   const onSubmit = async (data: FormData) => {
+    // Em modo preview, não enviar dados
+    if (previewMode) {
+      toast.info('Este é apenas um preview. O formulário não será enviado.')
+      return
+    }
+    
     // Verificar se a cidade do CEP é válida (São Roque)
     if (cepCityValid === false) {
       toast.error('Este mapeamento é exclusivo para a cidade de São Roque')
@@ -571,6 +578,13 @@ export function DynamicForm({ questions }: DynamicFormProps) {
       {/* Mostrar consentimento e botão apenas se CEP for válido */}
       {showOtherQuestions && (
         <>
+          {previewMode && (
+            <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                📋 Modo Preview: Este é apenas uma visualização. O formulário não será enviado.
+              </p>
+            </div>
+          )}
           <div className="flex items-start gap-3 py-4 bg-muted/30 p-4 sm:p-6 rounded-lg touch-manipulation">
             <Checkbox
               id="consent"
@@ -591,9 +605,9 @@ export function DynamicForm({ questions }: DynamicFormProps) {
       <Button
         type="submit"
         className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
-        disabled={loading || !watch('consent') || isCepInvalid}
+        disabled={loading || !watch('consent') || isCepInvalid || previewMode}
       >
-            {loading ? 'Enviando...' : 'Enviar Cadastro'}
+            {previewMode ? 'Preview - Envio Desabilitado' : loading ? 'Enviando...' : 'Enviar Cadastro'}
           </Button>
 
           <p className="text-xs text-center text-muted-foreground pb-safe sm:pb-0">
