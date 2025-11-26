@@ -1,12 +1,22 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, Edit, Trash2, GripVertical, Check, X, Bold as BoldIcon, Italic as ItalicIcon } from 'lucide-react'
@@ -217,6 +227,9 @@ const translateFieldType = (type: FieldType): string => {
 export default function AdminQuestionsClient() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const submittingRef = useRef(false)
+  const dialogOpeningRef = useRef(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [dialogSection, setDialogSection] = useState<string | null>(null) // Seção selecionada para nova pergunta
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null)
@@ -224,6 +237,8 @@ export default function AdminQuestionsClient() {
   const [newSectionName, setNewSectionName] = useState('')
   const [editingSection, setEditingSection] = useState<string | null>(null)
   const [editingSectionName, setEditingSectionName] = useState('')
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [questionToDelete, setQuestionToDelete] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     text: '',
     field_type: 'text' as FieldType,
@@ -255,6 +270,16 @@ export default function AdminQuestionsClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    e.stopPropagation() // Prevenir propagação do evento
+    
+    // Prevenir duplo clique com useRef (mais confiável que state)
+    if (submittingRef.current) {
+      console.log('Submit já em andamento, ignorando...')
+      return
+    }
+    
+    submittingRef.current = true
+    setSubmitting(true)
     try {
       const url = '/api/admin/questions'
       const method = editingQuestion ? 'PUT' : 'POST'
@@ -282,27 +307,45 @@ export default function AdminQuestionsClient() {
       const errorMessage = error.message || 'Erro ao salvar pergunta'
       toast.error(errorMessage)
       console.error('Erro ao salvar:', error)
+    } finally {
+      submittingRef.current = false
+      setSubmitting(false)
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja deletar esta pergunta?')) return
+  const handleDeleteClick = (id: string) => {
+    setQuestionToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!questionToDelete) return
 
     try {
-      const response = await fetch(`/api/admin/questions?id=${id}`, {
+      const response = await fetch(`/api/admin/questions?id=${questionToDelete}`, {
         method: 'DELETE',
       })
 
       if (!response.ok) throw new Error('Erro ao deletar')
 
       toast.success('Pergunta deletada!')
+      setDeleteDialogOpen(false)
+      setQuestionToDelete(null)
       loadQuestions()
     } catch (error) {
       toast.error('Erro ao deletar pergunta')
+      setDeleteDialogOpen(false)
+      setQuestionToDelete(null)
     }
   }
 
   const handleEdit = (question: Question) => {
+    // Prevenir múltiplos cliques
+    if (dialogOpeningRef.current || dialogOpen) {
+      return
+    }
+    
+    dialogOpeningRef.current = true
     setEditingQuestion(question)
     setDialogSection(null) // Resetar seção ao editar
     setFormData({
@@ -318,6 +361,11 @@ export default function AdminQuestionsClient() {
       active: question.active,
     })
     setDialogOpen(true)
+    
+    // Resetar após um pequeno delay
+    setTimeout(() => {
+      dialogOpeningRef.current = false
+    }, 300)
   }
 
   const handleEditSection = (sectionName: string) => {
@@ -449,6 +497,12 @@ export default function AdminQuestionsClient() {
   }
 
   const openNewQuestionDialog = (sectionName: string | null) => {
+    // Prevenir múltiplos cliques
+    if (dialogOpeningRef.current || dialogOpen) {
+      return
+    }
+    
+    dialogOpeningRef.current = true
     setDialogSection(sectionName)
     setEditingQuestion(null)
     const nextOrder = questions.length > 0 ? questions.length + 1 : 1
@@ -465,6 +519,11 @@ export default function AdminQuestionsClient() {
       active: true,
     })
     setDialogOpen(true)
+    
+    // Resetar após um pequeno delay para permitir novo clique depois
+    setTimeout(() => {
+      dialogOpeningRef.current = false
+    }, 500)
   }
 
   const handleCreateSection = () => {
@@ -549,7 +608,11 @@ export default function AdminQuestionsClient() {
 
       <Dialog open={dialogOpen} onOpenChange={(open) => {
         setDialogOpen(open)
+        // Resetar estado de submissão quando o diálogo fecha
         if (!open) {
+          submittingRef.current = false
+          setSubmitting(false)
+          dialogOpeningRef.current = false
           setDialogSection(null)
           setEditingQuestion(null)
         }
@@ -813,14 +876,38 @@ export default function AdminQuestionsClient() {
               </Button>
               <Button 
                 type="submit"
+                disabled={submitting}
                 className="w-full sm:w-auto min-h-[48px] touch-manipulation"
               >
-                {editingQuestion ? 'Atualizar Pergunta' : 'Criar Pergunta'}
+                {submitting ? 'Salvando...' : editingQuestion ? 'Atualizar Pergunta' : 'Criar Pergunta'}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog de Confirmação de Exclusão */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja deletar esta pergunta? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setQuestionToDelete(null)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Deletar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="space-y-6">
         {(() => {
@@ -924,6 +1011,7 @@ export default function AdminQuestionsClient() {
                     {section !== 'Sem seção' && !editingSection && (
                       <Button
                         onClick={() => openNewQuestionDialog(section)}
+                        disabled={dialogOpeningRef.current || dialogOpen}
                         size="sm"
                         className="min-h-[44px] touch-manipulation shrink-0"
                       >
@@ -949,7 +1037,7 @@ export default function AdminQuestionsClient() {
                             key={question.id}
                             question={question}
                             onEdit={handleEdit}
-                            onDelete={handleDelete}
+                            onDelete={handleDeleteClick}
                           />
                         ))}
                       </div>
@@ -960,6 +1048,7 @@ export default function AdminQuestionsClient() {
                     <Button
                       variant="outline"
                       onClick={() => openNewQuestionDialog(null)}
+                      disabled={dialogOpeningRef.current || dialogOpen}
                       className="w-full min-h-[48px] touch-manipulation border-dashed mt-3"
                     >
                       <Plus className="mr-2 h-4 w-4" />

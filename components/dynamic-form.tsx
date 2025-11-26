@@ -185,8 +185,8 @@ export function DynamicForm({ questions }: DynamicFormProps) {
     switch (question.field_type) {
       case 'text':
         return (
-          <div key={fieldId} className="space-y-2">
-            <div className="text-base sm:text-sm font-medium">
+          <div key={fieldId} className="space-y-3">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
             </div>
@@ -209,8 +209,8 @@ export function DynamicForm({ questions }: DynamicFormProps) {
 
       case 'textarea':
         return (
-          <div key={fieldId} className="space-y-2">
-            <div className="text-base sm:text-sm font-medium">
+          <div key={fieldId} className="space-y-3">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
             </div>
@@ -232,8 +232,8 @@ export function DynamicForm({ questions }: DynamicFormProps) {
 
       case 'number':
         return (
-          <div key={fieldId} className="space-y-2">
-            <div className="text-base sm:text-sm font-medium">
+          <div key={fieldId} className="space-y-3">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
             </div>
@@ -257,8 +257,8 @@ export function DynamicForm({ questions }: DynamicFormProps) {
 
       case 'select':
         return (
-          <div key={fieldId} className="space-y-2">
-            <div className="text-base sm:text-sm font-medium">
+          <div key={fieldId} className="space-y-3">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
             </div>
@@ -288,8 +288,8 @@ export function DynamicForm({ questions }: DynamicFormProps) {
 
       case 'radio':
         return (
-          <div key={fieldId} className="space-y-3">
-            <div className="text-base sm:text-sm font-medium block">
+          <div key={fieldId} className="space-y-4">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
             </div>
@@ -345,8 +345,8 @@ export function DynamicForm({ questions }: DynamicFormProps) {
 
       case 'yesno':
         return (
-          <div key={fieldId} className="space-y-3">
-            <div className="text-base sm:text-sm font-medium block">
+          <div key={fieldId} className="space-y-4">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
             </div>
@@ -383,11 +383,11 @@ export function DynamicForm({ questions }: DynamicFormProps) {
 
       case 'scale':
         return (
-          <div key={fieldId} className="space-y-3">
-            <div className="text-base sm:text-sm font-medium block">
+          <div key={fieldId} className="space-y-4">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
-              <span className="ml-2 text-sm text-muted-foreground">
+              <span className="ml-2 text-sm sm:text-base text-muted-foreground font-normal">
                 ({question.min_value || 1} a {question.max_value || 5})
               </span>
             </div>
@@ -419,8 +419,8 @@ export function DynamicForm({ questions }: DynamicFormProps) {
 
       case 'image':
         return (
-          <div key={fieldId} className="space-y-2">
-            <div className="text-base sm:text-sm font-medium block">
+          <div key={fieldId} className="space-y-3">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
             </div>
@@ -549,7 +549,7 @@ export function DynamicForm({ questions }: DynamicFormProps) {
             })
 
             return sortedSections.map((section) => (
-              <div key={section} className="space-y-5 sm:space-y-6">
+              <div key={section} className="space-y-6 sm:space-y-8">
                 {section !== 'Geral' && (
                   <div className="border-b-2 border-primary/30 pb-3 -mx-2 sm:-mx-0">
                     <h3 className="text-xl sm:text-2xl font-bold text-primary">{section}</h3>
@@ -557,7 +557,11 @@ export function DynamicForm({ questions }: DynamicFormProps) {
                 )}
                 {grouped[section]
                   .sort((a, b) => a.order - b.order)
-                  .map((question) => renderField(question))}
+                  .map((question) => (
+                    <div key={question.id} className="pb-2 sm:pb-3">
+                      {renderField(question)}
+                    </div>
+                  ))}
               </div>
             ))
           })()}
@@ -714,8 +718,12 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
       console.log('Dados da API ViaCEP:', data)
 
       // Buscar campos relacionados pelo texto da pergunta e preencher
+      // Apenas campos de input (text, number) que são realmente campos de formulário
       questions.forEach((q) => {
         const questionText = q.text.toLowerCase()
+        const isInputField = q.field_type === 'text' || q.field_type === 'number'
+        
+        if (!isInputField) return // Ignorar perguntas que não são campos de input
         
         // Logradouro / Endereço / Rua
         if (
@@ -738,8 +746,10 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
           if (addressInfo.bairro) setValue(q.id as any, addressInfo.bairro)
         }
         
-        // Cidade / Município
-        if (questionText.includes('cidade') || questionText.includes('município') || questionText.includes('municipio')) {
+        // Cidade / Município - apenas se for um campo de input específico sobre cidade
+        if (questionText.includes('cidade') || 
+            (questionText.includes('município') && (questionText.includes('qual') || questionText.includes('sua') || questionText.includes('em qual'))) ||
+            (questionText.includes('municipio') && (questionText.includes('qual') || questionText.includes('sua') || questionText.includes('em qual')))) {
           if (addressInfo.cidade) setValue(q.id as any, addressInfo.cidade)
         }
         
@@ -777,25 +787,38 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
   }
 
   // Encontrar campos relacionados para exibir
+  // Apenas campos de input (text, number) que são realmente campos de formulário
   const logradouroQuestion = questions.find(q => {
     const text = q.text.toLowerCase()
-    return (text.includes('logradouro') || text.includes('endereço') || text.includes('rua') || text.includes('endereco')) && !text.includes('complemento')
+    const isInputField = q.field_type === 'text' || q.field_type === 'number'
+    return isInputField && 
+           (text.includes('logradouro') || text.includes('endereço') || text.includes('rua') || text.includes('endereco')) && 
+           !text.includes('complemento')
   })
-  const bairroQuestion = questions.find(q => q.text.toLowerCase().includes('bairro'))
+  const bairroQuestion = questions.find(q => {
+    const isInputField = q.field_type === 'text' || q.field_type === 'number'
+    return isInputField && q.text.toLowerCase().includes('bairro')
+  })
   const cidadeQuestion = questions.find(q => {
     const text = q.text.toLowerCase()
-    return text.includes('cidade') || text.includes('município') || text.includes('municipio')
+    const isInputField = q.field_type === 'text' || q.field_type === 'number'
+    // Verificar se é um campo de input E se a pergunta é específica sobre cidade (não apenas menciona "município")
+    return isInputField && 
+           (text.includes('cidade') || 
+            (text.includes('município') && (text.includes('qual') || text.includes('sua') || text.includes('em qual'))) ||
+            (text.includes('municipio') && (text.includes('qual') || text.includes('sua') || text.includes('em qual'))))
   })
   const estadoQuestion = questions.find(q => {
     const text = q.text.toLowerCase()
-    return text.includes('estado') || text.includes('uf')
+    const isInputField = q.field_type === 'text' || q.field_type === 'number'
+    return isInputField && (text.includes('estado') || text.includes('uf'))
   })
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor={fieldId} className="text-base sm:text-sm">
-          {question.text}
+      <div className="space-y-3">
+        <Label htmlFor={fieldId} className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
+          <FormattedText html={question.text} />
           {question.required && <span className="text-red-500 ml-1">*</span>}
         </Label>
         <div className="relative">
@@ -826,7 +849,7 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
       {/* Exibir campos de endereço desabilitados quando CEP for preenchido */}
       {(addressData.logradouro || addressData.bairro || addressData.cidade || addressData.estado) && (
         <div className="space-y-3 p-4 pb-5 bg-muted/30 rounded-lg border border-border mb-2">
-          <p className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+          <p className="text-sm sm:text-base font-semibold text-foreground mb-3 flex items-center gap-2">
             <MapPin className="h-4 w-4" />
             Endereço encontrado:
           </p>
@@ -836,8 +859,14 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
             {addressData.logradouro && (
               <div className="space-y-1.5">
                 <Label className="text-xs sm:text-sm text-muted-foreground font-medium">
-                  {logradouroQuestion?.text || 'Logradouro'}
-                  {logradouroQuestion?.required && <span className="text-red-500 ml-1">*</span>}
+                  {logradouroQuestion ? (
+                    <>
+                      <FormattedText html={logradouroQuestion.text} />
+                      {logradouroQuestion.required && <span className="text-red-500 ml-1">*</span>}
+                    </>
+                  ) : (
+                    'Logradouro'
+                  )}
                 </Label>
                 <Input
                   {...(logradouroQuestion ? register(logradouroQuestion.id as keyof FormData) : {})}
@@ -853,8 +882,14 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
             {addressData.bairro && (
               <div className="space-y-1.5">
                 <Label className="text-xs sm:text-sm text-muted-foreground font-medium">
-                  {bairroQuestion?.text || 'Bairro'}
-                  {bairroQuestion?.required && <span className="text-red-500 ml-1">*</span>}
+                  {bairroQuestion ? (
+                    <>
+                      <FormattedText html={bairroQuestion.text} />
+                      {bairroQuestion.required && <span className="text-red-500 ml-1">*</span>}
+                    </>
+                  ) : (
+                    'Bairro'
+                  )}
                 </Label>
                 <Input
                   {...(bairroQuestion ? register(bairroQuestion.id as keyof FormData) : {})}
@@ -871,8 +906,14 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
               {addressData.cidade && (
                 <div className="space-y-1.5">
                   <Label className="text-xs sm:text-sm text-muted-foreground font-medium">
-                    {cidadeQuestion?.text || 'Cidade'}
-                    {cidadeQuestion?.required && <span className="text-red-500 ml-1">*</span>}
+                    {cidadeQuestion ? (
+                      <>
+                        <FormattedText html={cidadeQuestion.text} />
+                        {cidadeQuestion.required && <span className="text-red-500 ml-1">*</span>}
+                      </>
+                    ) : (
+                      'Cidade'
+                    )}
                   </Label>
                   <Input
                     {...(cidadeQuestion ? register(cidadeQuestion.id as keyof FormData) : {})}
@@ -888,8 +929,14 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
               {addressData.estado && (
                 <div className="space-y-1.5">
                   <Label className="text-xs sm:text-sm text-muted-foreground font-medium">
-                    {estadoQuestion?.text || 'Estado'}
-                    {estadoQuestion?.required && <span className="text-red-500 ml-1">*</span>}
+                    {estadoQuestion ? (
+                      <>
+                        <FormattedText html={estadoQuestion.text} />
+                        {estadoQuestion.required && <span className="text-red-500 ml-1">*</span>}
+                      </>
+                    ) : (
+                      'Estado'
+                    )}
                   </Label>
                   <Input
                     {...(estadoQuestion ? register(estadoQuestion.id as keyof FormData) : {})}
