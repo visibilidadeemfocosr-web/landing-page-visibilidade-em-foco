@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { DynamicForm } from "@/components/dynamic-form"
@@ -7,6 +8,12 @@ import { RegistrationFormLoader } from "@/components/registration-form-loader"
 import Image from "next/image"
 
 export function Hero() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#1a4b8c] via-[#2d1b69] to-[#4a1942]">
       <div className="absolute inset-0 overflow-hidden">
@@ -59,7 +66,7 @@ export function Hero() {
 
           {/* Subtítulo */}
           <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed tracking-wide text-pretty font-medium drop-shadow-lg">
-            Mapeamento de Artistas LGBTS do Interior de São Paulo
+            Mapeamento de Artistas LGBTS da Cidade de São Roque
           </p>
 
           {/* Descrição */}
@@ -69,24 +76,37 @@ export function Hero() {
 
           {/* Call to Action */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 sm:px-12 py-6 text-base sm:text-lg font-semibold rounded-full shadow-2xl hover:shadow-primary/50 transition-all duration-300 active:scale-95 touch-manipulation min-h-[56px]">
-                  PARTICIPE
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="!max-w-[100vw] w-[100vw] !max-h-[100vh] h-[100vh] rounded-none p-4 sm:max-w-[95vw] sm:w-[95vw] sm:max-h-[95vh] sm:h-[95vh] sm:rounded-lg md:p-6 overflow-hidden flex flex-col">
-                <DialogHeader className="flex-shrink-0 pb-4 border-b">
-                  <DialogTitle className="text-xl sm:text-2xl font-bold">Cadastro de Artista</DialogTitle>
-                  <DialogDescription className="text-sm sm:text-base leading-relaxed pt-2">
-                    Preencha o formulário abaixo para fazer parte do mapeamento Visibilidade em Foco. Seus dados serão tratados com total segurança e privacidade.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex-1 overflow-y-auto -mx-4 px-4 sm:mx-0 sm:px-0 mt-4">
-                  <RegistrationFormLoader />
-                </div>
-              </DialogContent>
-            </Dialog>
+            {mounted ? (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button 
+                    size="lg" 
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 sm:px-12 py-6 text-base sm:text-lg font-semibold rounded-full shadow-2xl hover:shadow-primary/50 transition-all duration-300 active:scale-95 touch-manipulation min-h-[56px]"
+                  >
+                    PARTICIPE
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="!max-w-[100vw] w-[100vw] !max-h-[100vh] h-[100vh] !top-0 !left-0 !translate-x-0 !translate-y-0 rounded-none p-0 sm:max-w-[95vw] sm:w-[95vw] sm:max-h-[95vh] sm:h-[95vh] sm:!top-[50%] sm:!left-[50%] sm:!translate-x-[-50%] sm:!translate-y-[-50%] sm:rounded-lg sm:p-6 overflow-hidden flex flex-col">
+                  <DialogHeader className="flex-shrink-0 pb-4 pt-4 px-4 sm:px-0 border-b bg-background z-10">
+                    <DialogTitle className="text-xl sm:text-2xl font-bold">Cadastro de Artista</DialogTitle>
+                    <DialogDescription className="text-sm sm:text-base leading-relaxed pt-2">
+                      Preencha o formulário abaixo para fazer parte do mapeamento Visibilidade em Foco. Seus dados serão tratados com total segurança e privacidade.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex-1 overflow-y-auto px-4 sm:px-0 mt-4 pb-12 sm:pb-4 pb-safe">
+                    <RegistrationFormLoader />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            ) : (
+              <Button 
+                size="lg" 
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 sm:px-12 py-6 text-base sm:text-lg font-semibold rounded-full shadow-2xl hover:shadow-primary/50 transition-all duration-300 active:scale-95 touch-manipulation min-h-[56px]"
+                disabled
+              >
+                PARTICIPE
+              </Button>
+            )}
 
             <Button 
               size="lg" 

@@ -20,16 +20,6 @@ export const metadata: Metadata = {
   title: 'Visibilidade em Foco | Mapeamento de Artistas LGBTS - São Roque',
   description: 'Projeto de mapeamento e visibilidade de artistas LGBTS da cidade de São Roque. Participe e faça parte dessa história.',
   generator: 'v0.app',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
-  ],
   icons: {
     icon: [
       {
@@ -52,6 +42,17 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'Visibilidade em Foco',
   },
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover', // Para suportar safe-area no iPhone
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+  ],
 }
 
 export default function RootLayout({

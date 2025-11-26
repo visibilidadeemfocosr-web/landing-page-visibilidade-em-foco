@@ -1,4 +1,4 @@
-export type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'radio' | 'checkbox' | 'yesno' | 'scale' | 'image'
+export type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'radio' | 'checkbox' | 'yesno' | 'scale' | 'image' | 'cep'
 
 export interface Question {
   id: string
@@ -6,6 +6,7 @@ export interface Question {
   field_type: FieldType
   required: boolean
   order: number
+  section?: string // Bloco/Seção da pergunta
   options?: string[] // Para select, radio
   min_value?: number // Para scale
   max_value?: number // Para scale

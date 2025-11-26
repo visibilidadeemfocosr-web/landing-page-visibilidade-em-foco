@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Slider } from '@/components/ui/slider'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Upload, Loader2 } from 'lucide-react'
+import { Upload, Loader2, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Question } from '@/lib/supabase/types'
 
@@ -21,10 +21,35 @@ interface DynamicFormProps {
   questions: Question[]
 }
 
+// Componente para renderizar HTML formatado de forma segura
+function FormattedText({ html }: { html: string }) {
+  if (!html) return null
+  
+  // Verificar se contém tags HTML (melhor regex para detectar tags)
+  const hasHtml = /<[^>]+>/g.test(html)
+  
+  if (hasHtml) {
+    // Limpar e sanitizar o HTML básico (apenas permitir tags seguras)
+    const sanitizedHtml = html
+      .replace(/<script[^>]*>.*?<\/script>/gi, '') // Remover scripts
+      .replace(/<style[^>]*>.*?<\/style>/gi, '') // Remover estilos inline
+    
+    return (
+      <span 
+        dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+        className="inline [&_strong]:font-bold [&_em]:italic [&_i]:italic [&_p]:mb-0 [&_p]:inline [&_p_strong]:font-bold [&_p_em]:italic [&_p]:leading-normal [&_p]:m-0 [&_p]:p-0"
+      />
+    )
+  }
+  
+  return <span>{html}</span>
+}
+
 export function DynamicForm({ questions }: DynamicFormProps) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState<Record<string, boolean>>({})
   const [fileUrls, setFileUrls] = useState<Record<string, string>>({})
+  const [cepCityValid, setCepCityValid] = useState<boolean | null>(null)
 
   // Criar schema Zod dinamicamente
   const createSchema = () => {
@@ -52,6 +77,9 @@ export function DynamicForm({ questions }: DynamicFormProps) {
           break
         case 'image':
           fieldSchema = question.required ? z.string().min(1, 'Imagem obrigatória') : z.string().optional()
+          break
+        case 'cep':
+          fieldSchema = question.required ? z.string().min(8, 'CEP inválido').max(9, 'CEP inválido') : z.string().optional()
           break
         default:
           fieldSchema = question.required ? z.string().min(1, 'Campo obrigatório') : z.string().optional()
@@ -110,6 +138,12 @@ export function DynamicForm({ questions }: DynamicFormProps) {
   }
 
   const onSubmit = async (data: FormData) => {
+    // Verificar se a cidade do CEP é válida (São Roque)
+    if (cepCityValid === false) {
+      toast.error('Este mapeamento é exclusivo para a cidade de São Roque')
+      return
+    }
+    
     setLoading(true)
     try {
       const answers = questions.map((question) => {
@@ -152,9 +186,12 @@ export function DynamicForm({ questions }: DynamicFormProps) {
       case 'text':
         return (
           <div key={fieldId} className="space-y-2">
-            <Label htmlFor={fieldId} className="text-base sm:text-sm">
-              {question.text}
+            <div className="text-base sm:text-sm font-medium">
+              <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
+            </div>
+            <Label htmlFor={fieldId} className="sr-only">
+              {question.text.replace(/<[^>]+>/g, '')}
             </Label>
             <Input
               id={fieldId}
@@ -173,9 +210,12 @@ export function DynamicForm({ questions }: DynamicFormProps) {
       case 'textarea':
         return (
           <div key={fieldId} className="space-y-2">
-            <Label htmlFor={fieldId} className="text-base sm:text-sm">
-              {question.text}
+            <div className="text-base sm:text-sm font-medium">
+              <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
+            </div>
+            <Label htmlFor={fieldId} className="sr-only">
+              {question.text.replace(/<[^>]+>/g, '')}
             </Label>
             <Textarea
               id={fieldId}
@@ -193,9 +233,12 @@ export function DynamicForm({ questions }: DynamicFormProps) {
       case 'number':
         return (
           <div key={fieldId} className="space-y-2">
-            <Label htmlFor={fieldId} className="text-base sm:text-sm">
-              {question.text}
+            <div className="text-base sm:text-sm font-medium">
+              <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
+            </div>
+            <Label htmlFor={fieldId} className="sr-only">
+              {question.text.replace(/<[^>]+>/g, '')}
             </Label>
             <Input
               id={fieldId}
@@ -215,9 +258,12 @@ export function DynamicForm({ questions }: DynamicFormProps) {
       case 'select':
         return (
           <div key={fieldId} className="space-y-2">
-            <Label className="text-base sm:text-sm">
-              {question.text}
+            <div className="text-base sm:text-sm font-medium">
+              <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
+            </div>
+            <Label htmlFor={fieldId} className="sr-only">
+              {question.text.replace(/<[^>]+>/g, '')}
             </Label>
             <Select
               onValueChange={(value) => setValue(fieldId as keyof FormData, value as any)}
@@ -243,9 +289,12 @@ export function DynamicForm({ questions }: DynamicFormProps) {
       case 'radio':
         return (
           <div key={fieldId} className="space-y-3">
-            <Label className="text-base sm:text-sm block">
-              {question.text}
+            <div className="text-base sm:text-sm font-medium block">
+              <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
+            </div>
+            <Label htmlFor={fieldId} className="sr-only">
+              {question.text.replace(/<[^>]+>/g, '')}
             </Label>
             <RadioGroup
               onValueChange={(value) => setValue(fieldId as keyof FormData, value as any)}
@@ -284,7 +333,7 @@ export function DynamicForm({ questions }: DynamicFormProps) {
                 className="h-5 w-5 mt-0.5"
               />
               <Label htmlFor={fieldId} className="font-normal cursor-pointer text-base sm:text-sm flex-1">
-                {question.text}
+                <FormattedText html={question.text} />
                 {question.required && <span className="text-red-500 ml-1">*</span>}
               </Label>
             </label>
@@ -297,9 +346,12 @@ export function DynamicForm({ questions }: DynamicFormProps) {
       case 'yesno':
         return (
           <div key={fieldId} className="space-y-3">
-            <Label className="text-base sm:text-sm block">
-              {question.text}
+            <div className="text-base sm:text-sm font-medium block">
+              <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
+            </div>
+            <Label htmlFor={fieldId} className="sr-only">
+              {question.text.replace(/<[^>]+>/g, '')}
             </Label>
             <RadioGroup
               onValueChange={(value) => setValue(fieldId as keyof FormData, value as any)}
@@ -332,12 +384,15 @@ export function DynamicForm({ questions }: DynamicFormProps) {
       case 'scale':
         return (
           <div key={fieldId} className="space-y-3">
-            <Label className="text-base sm:text-sm block">
-              {question.text}
+            <div className="text-base sm:text-sm font-medium block">
+              <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
               <span className="ml-2 text-sm text-muted-foreground">
                 ({question.min_value || 1} a {question.max_value || 5})
               </span>
+            </div>
+            <Label htmlFor={fieldId} className="sr-only">
+              {question.text.replace(/<[^>]+>/g, '')}
             </Label>
             <div className="px-2 py-4 bg-muted/30 rounded-lg">
               <Slider
@@ -365,9 +420,12 @@ export function DynamicForm({ questions }: DynamicFormProps) {
       case 'image':
         return (
           <div key={fieldId} className="space-y-2">
-            <Label className="text-base sm:text-sm block">
-              {question.text}
+            <div className="text-base sm:text-sm font-medium block">
+              <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
+            </div>
+            <Label htmlFor={fieldId} className="sr-only">
+              {question.text.replace(/<[^>]+>/g, '')}
             </Label>
             <div className="border-2 border-dashed border-border rounded-lg p-6 sm:p-8 text-center hover:border-primary/50 transition-colors touch-manipulation">
               <input
@@ -409,50 +467,440 @@ export function DynamicForm({ questions }: DynamicFormProps) {
           </div>
         )
 
+      case 'cep':
+        return (
+          <CepField
+            key={fieldId}
+            question={question}
+            fieldId={fieldId}
+            register={register}
+            setValue={setValue}
+            watch={watch}
+            error={error}
+            questions={questions}
+            onCityValidationChange={setCepCityValid}
+          />
+        )
+
       default:
         return null
     }
   }
 
+  // Separar pergunta CEP das outras
+  const cepQuestion = questions.find(q => q.field_type === 'cep')
+  const otherQuestions = questions.filter(q => q.field_type !== 'cep')
+
+  // Mostrar outras perguntas apenas se CEP for explicitamente válido (true)
+  // Inicialmente (null) ou se inválido (false), mostrar apenas CEP
+  const showOtherQuestions = cepCityValid === true
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-12 sm:pb-6 mb-4 sm:mb-0">
       <Alert className="text-left">
         <AlertDescription className="text-xs sm:text-sm leading-relaxed">
           <strong>Privacidade e Proteção de Dados:</strong> Seus dados serão utilizados exclusivamente para o projeto Visibilidade em Foco e não serão compartilhados com terceiros sem seu consentimento. Você pode solicitar a remoção das suas informações a qualquer momento.
         </AlertDescription>
       </Alert>
 
-      <div className="space-y-5 sm:space-y-6">
-        {questions.map((question) => renderField(question))}
-      </div>
-
-      <div className="flex items-start gap-3 py-4 bg-muted/30 p-4 sm:p-6 rounded-lg touch-manipulation">
-        <Checkbox
-          id="consent"
-          checked={watch('consent')}
-          onCheckedChange={(checked) => setValue('consent', checked as boolean)}
-          className="h-5 w-5 mt-0.5 flex-shrink-0"
-        />
-        <label htmlFor="consent" className="text-sm sm:text-base leading-relaxed cursor-pointer flex-1">
-          Eu concordo com o uso das minhas informações para o projeto Visibilidade em Foco e estou ciente dos meus direitos de privacidade conforme a LGPD. *
-        </label>
-      </div>
-      {errors.consent && (
-        <p className="text-sm text-red-500 ml-11">{errors.consent.message}</p>
+      {/* Sempre mostrar a pergunta CEP primeiro */}
+      {cepQuestion && (
+        <div className="space-y-6 sm:space-y-8">
+          {renderField(cepQuestion)}
+        </div>
       )}
 
-      <Button
-        type="submit"
-        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
-        disabled={loading || !watch('consent')}
-      >
-        {loading ? 'Enviando...' : 'Enviar Cadastro'}
-      </Button>
+      {/* Se CEP não for válido, mostrar apenas mensagem de agradecimento */}
+      {cepCityValid === false && (
+        <Alert variant="default" className="bg-primary/5 border-primary/20">
+          <AlertDescription className="text-base sm:text-lg text-center py-6">
+            <p className="font-semibold text-primary mb-2">Obrigado pelo interesse!</p>
+            <p className="text-foreground">
+              Este mapeamento é exclusivo para artistas da cidade de <strong>São Roque</strong>.
+            </p>
+            <p className="text-muted-foreground mt-2">
+              Se você é de outra cidade, agradecemos sua compreensão.
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
 
-      <p className="text-xs text-center text-muted-foreground">
-        * Campos obrigatórios
-      </p>
+      {/* Mostrar outras perguntas apenas se CEP for explicitamente válido (true) */}
+      {showOtherQuestions && otherQuestions.length > 0 && (
+        <div className="space-y-6 sm:space-y-8">
+          {(() => {
+            // Agrupar perguntas por seção
+            const grouped = otherQuestions.reduce((acc, question) => {
+              const section = question.section || 'Geral'
+              if (!acc[section]) {
+                acc[section] = []
+              }
+              acc[section].push(question)
+              return acc
+            }, {} as Record<string, Question[]>)
+
+            // Ordenar perguntas dentro de cada seção e ordenar seções
+            const sortedSections = Object.keys(grouped).sort((a, b) => {
+              if (a === 'Geral') return 1
+              if (b === 'Geral') return -1
+              return a.localeCompare(b)
+            })
+
+            return sortedSections.map((section) => (
+              <div key={section} className="space-y-5 sm:space-y-6">
+                {section !== 'Geral' && (
+                  <div className="border-b-2 border-primary/30 pb-3 -mx-2 sm:-mx-0">
+                    <h3 className="text-xl sm:text-2xl font-bold text-primary">{section}</h3>
+                  </div>
+                )}
+                {grouped[section]
+                  .sort((a, b) => a.order - b.order)
+                  .map((question) => renderField(question))}
+              </div>
+            ))
+          })()}
+        </div>
+      )}
+
+      {/* Mostrar consentimento e botão apenas se CEP for válido */}
+      {showOtherQuestions && (
+        <>
+          <div className="flex items-start gap-3 py-4 bg-muted/30 p-4 sm:p-6 rounded-lg touch-manipulation">
+            <Checkbox
+              id="consent"
+              checked={watch('consent')}
+              onCheckedChange={(checked) => setValue('consent', checked as boolean)}
+              className="h-5 w-5 mt-0.5 flex-shrink-0"
+            />
+            <label htmlFor="consent" className="text-sm sm:text-base leading-relaxed cursor-pointer flex-1">
+              Eu concordo com o uso das minhas informações para o projeto Visibilidade em Foco e estou ciente dos meus direitos de privacidade conforme a LGPD. *
+            </label>
+          </div>
+          {errors.consent && (
+            <p className="text-sm text-red-500 ml-11">{errors.consent.message}</p>
+          )}
+
+          <Button
+            type="submit"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
+            disabled={loading || !watch('consent') || cepCityValid === false}
+          >
+            {loading ? 'Enviando...' : 'Enviar Cadastro'}
+          </Button>
+
+          <p className="text-xs text-center text-muted-foreground pb-safe sm:pb-0">
+            * Campos obrigatórios
+          </p>
+        </>
+      )}
     </form>
+  )
+}
+
+// Componente CEP com busca automática
+interface CepFieldProps {
+  question: Question
+  fieldId: string
+  register: any
+  setValue: any
+  watch: any
+  error: any
+  questions: Question[]
+  onCityValidationChange?: (isValid: boolean | null) => void
+}
+
+function CepField({ question, fieldId, register, setValue, watch, error, questions, onCityValidationChange }: CepFieldProps) {
+  const [loadingCep, setLoadingCep] = useState(false)
+  const [lastSearchedCep, setLastSearchedCep] = useState('')
+  const [addressData, setAddressData] = useState<{
+    logradouro?: string
+    bairro?: string
+    cidade?: string
+    estado?: string
+  }>({})
+  const [isValidCity, setIsValidCity] = useState<boolean | null>(null)
+  const cepValue = watch(fieldId as any) || ''
+
+  // Buscar CEP quando tiver 8 dígitos
+  useEffect(() => {
+    const cleanCep = cepValue.replace(/\D/g, '')
+    if (cleanCep.length === 8 && cleanCep !== lastSearchedCep) {
+      setLastSearchedCep(cleanCep)
+      searchCep(cleanCep)
+    } else if (cleanCep.length < 8) {
+      // Limpar dados se CEP estiver incompleto
+      setAddressData({})
+      setIsValidCity(null)
+      if (onCityValidationChange) {
+        onCityValidationChange(null)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cepValue])
+
+  const searchCep = async (cep: string) => {
+    setLoadingCep(true)
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`)
+      const data = await response.json()
+
+      if (data.erro) {
+        toast.error('CEP não encontrado')
+        setAddressData({}) // Limpar dados anteriores
+        setIsValidCity(null)
+        if (onCityValidationChange) {
+          onCityValidationChange(null)
+        }
+        setLoadingCep(false)
+        return
+      }
+
+      // Preencher o CEP formatado
+      const formattedCep = `${cep.slice(0, 5)}-${cep.slice(5)}`
+      setValue(fieldId as any, formattedCep)
+
+      // Armazenar dados do endereço para exibir nos campos desabilitados
+      const addressInfo = {
+        logradouro: data.logradouro || '',
+        bairro: data.bairro || '',
+        cidade: data.localidade || '',
+        estado: data.uf || '',
+      }
+      
+      // Verificar se a cidade é São Roque
+      const cidade = data.localidade?.toLowerCase().trim() || ''
+      const isSaoRoque = cidade === 'são roque' || cidade === 'sao roque'
+      setIsValidCity(isSaoRoque)
+      
+      // Notificar o componente pai sobre a validação
+      if (onCityValidationChange) {
+        onCityValidationChange(isSaoRoque)
+      }
+      
+      if (!isSaoRoque) {
+        // Limpar dados se não for São Roque
+        setAddressData({})
+        // Limpar campos relacionados
+        questions.forEach((q) => {
+          const questionText = q.text.toLowerCase()
+          if (
+            questionText.includes('logradouro') || 
+            questionText.includes('endereço') || 
+            questionText.includes('rua') ||
+            questionText.includes('endereco') ||
+            questionText.includes('bairro') ||
+            questionText.includes('cidade') ||
+            questionText.includes('município') ||
+            questionText.includes('municipio') ||
+            questionText.includes('estado') ||
+            questionText.includes('uf')
+          ) {
+            setValue(q.id as any, '')
+          }
+        })
+        setLoadingCep(false)
+        return
+      }
+      
+      // Sempre atualizar o estado, mesmo se alguns campos estiverem vazios
+      setAddressData(addressInfo)
+      
+      // Debug
+      console.log('CEP encontrado:', addressInfo)
+      console.log('Dados da API ViaCEP:', data)
+
+      // Buscar campos relacionados pelo texto da pergunta e preencher
+      questions.forEach((q) => {
+        const questionText = q.text.toLowerCase()
+        
+        // Logradouro / Endereço / Rua
+        if (
+          (questionText.includes('logradouro') || 
+           questionText.includes('endereço') || 
+           questionText.includes('rua') ||
+           questionText.includes('endereco')) &&
+          !questionText.includes('complemento')
+        ) {
+          if (addressInfo.logradouro) setValue(q.id as any, addressInfo.logradouro)
+        }
+        
+        // Complemento
+        if (questionText.includes('complemento')) {
+          // Não preenche automaticamente, deixa o usuário preencher
+        }
+        
+        // Bairro
+        if (questionText.includes('bairro')) {
+          if (addressInfo.bairro) setValue(q.id as any, addressInfo.bairro)
+        }
+        
+        // Cidade / Município
+        if (questionText.includes('cidade') || questionText.includes('município') || questionText.includes('municipio')) {
+          if (addressInfo.cidade) setValue(q.id as any, addressInfo.cidade)
+        }
+        
+        // Estado / UF
+        if (questionText.includes('estado') || questionText.includes('uf')) {
+          if (addressInfo.estado) setValue(q.id as any, addressInfo.estado)
+        }
+      })
+
+      toast.success('Endereço preenchido automaticamente!')
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error)
+      toast.error('Erro ao buscar CEP')
+      setAddressData({})
+      setIsValidCity(null)
+      if (onCityValidationChange) {
+        onCityValidationChange(null)
+      }
+    } finally {
+      setLoadingCep(false)
+    }
+  }
+
+  // Formatar CEP enquanto digita
+  const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '')
+    if (value.length > 8) value = value.slice(0, 8)
+    
+    // Formatar com hífen
+    if (value.length > 5) {
+      value = `${value.slice(0, 5)}-${value.slice(5)}`
+    }
+    
+    setValue(fieldId as any, value)
+  }
+
+  // Encontrar campos relacionados para exibir
+  const logradouroQuestion = questions.find(q => {
+    const text = q.text.toLowerCase()
+    return (text.includes('logradouro') || text.includes('endereço') || text.includes('rua') || text.includes('endereco')) && !text.includes('complemento')
+  })
+  const bairroQuestion = questions.find(q => q.text.toLowerCase().includes('bairro'))
+  const cidadeQuestion = questions.find(q => {
+    const text = q.text.toLowerCase()
+    return text.includes('cidade') || text.includes('município') || text.includes('municipio')
+  })
+  const estadoQuestion = questions.find(q => {
+    const text = q.text.toLowerCase()
+    return text.includes('estado') || text.includes('uf')
+  })
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor={fieldId} className="text-base sm:text-sm">
+          {question.text}
+          {question.required && <span className="text-red-500 ml-1">*</span>}
+        </Label>
+        <div className="relative">
+          <Input
+            id={fieldId}
+            {...register(fieldId as keyof FormData)}
+            value={cepValue}
+            onChange={handleCepChange}
+            placeholder={question.placeholder || '00000-000'}
+            required={question.required}
+            maxLength={9}
+            className="min-h-[48px] text-base sm:text-sm touch-manipulation pl-10"
+            autoComplete="postal-code"
+          />
+          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          {loadingCep && (
+            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
+          )}
+        </div>
+        {error && (
+          <p className="text-sm text-red-500">{error.message as string}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          Digite o CEP e o endereço será preenchido automaticamente
+        </p>
+      </div>
+
+      {/* Exibir campos de endereço desabilitados quando CEP for preenchido */}
+      {(addressData.logradouro || addressData.bairro || addressData.cidade || addressData.estado) && (
+        <div className="space-y-3 p-4 pb-5 bg-muted/30 rounded-lg border border-border mb-2">
+          <p className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+            <MapPin className="h-4 w-4" />
+            Endereço encontrado:
+          </p>
+          
+          <div className="space-y-3">
+            {/* Logradouro - sempre mostrar se tiver dados */}
+            {addressData.logradouro && (
+              <div className="space-y-1.5">
+                <Label className="text-xs sm:text-sm text-muted-foreground font-medium">
+                  {logradouroQuestion?.text || 'Logradouro'}
+                  {logradouroQuestion?.required && <span className="text-red-500 ml-1">*</span>}
+                </Label>
+                <Input
+                  {...(logradouroQuestion ? register(logradouroQuestion.id as keyof FormData) : {})}
+                  value={addressData.logradouro}
+                  disabled
+                  readOnly
+                  className="min-h-[44px] text-base sm:text-sm bg-background/80 cursor-not-allowed opacity-90"
+                />
+              </div>
+            )}
+
+            {/* Bairro - sempre mostrar se tiver dados */}
+            {addressData.bairro && (
+              <div className="space-y-1.5">
+                <Label className="text-xs sm:text-sm text-muted-foreground font-medium">
+                  {bairroQuestion?.text || 'Bairro'}
+                  {bairroQuestion?.required && <span className="text-red-500 ml-1">*</span>}
+                </Label>
+                <Input
+                  {...(bairroQuestion ? register(bairroQuestion.id as keyof FormData) : {})}
+                  value={addressData.bairro}
+                  disabled
+                  readOnly
+                  className="min-h-[44px] text-base sm:text-sm bg-background/80 cursor-not-allowed opacity-90"
+                />
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Cidade - sempre mostrar se tiver dados */}
+              {addressData.cidade && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs sm:text-sm text-muted-foreground font-medium">
+                    {cidadeQuestion?.text || 'Cidade'}
+                    {cidadeQuestion?.required && <span className="text-red-500 ml-1">*</span>}
+                  </Label>
+                  <Input
+                    {...(cidadeQuestion ? register(cidadeQuestion.id as keyof FormData) : {})}
+                    value={addressData.cidade}
+                    disabled
+                    readOnly
+                    className="min-h-[44px] text-base sm:text-sm bg-background/80 cursor-not-allowed opacity-90"
+                  />
+                </div>
+              )}
+
+              {/* Estado - sempre mostrar se tiver dados */}
+              {addressData.estado && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs sm:text-sm text-muted-foreground font-medium">
+                    {estadoQuestion?.text || 'Estado'}
+                    {estadoQuestion?.required && <span className="text-red-500 ml-1">*</span>}
+                  </Label>
+                  <Input
+                    {...(estadoQuestion ? register(estadoQuestion.id as keyof FormData) : {})}
+                    value={addressData.estado}
+                    disabled
+                    readOnly
+                    className="min-h-[44px] text-base sm:text-sm bg-background/80 cursor-not-allowed opacity-90"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 

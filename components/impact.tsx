@@ -66,10 +66,10 @@ export function Impact() {
           {/* Quote */}
           <div className="mt-16 text-center max-w-3xl mx-auto">
             <blockquote className="text-2xl md:text-3xl font-bold text-foreground italic text-balance leading-tight">
-              "Nosso direito de existir enquanto corpos e mentes e espíritos que fazem arte"
+              "É nossa voz, nossa expressão e nosso talento que nos colocam no mundo — e a arte é parte essencial disso."
             </blockquote>
             <p className="mt-4 text-sm text-muted-foreground">
-              — Inspirado no Centro de Memória MAIS
+              — Equipe Visibilidade em Foco
             </p>
           </div>
         </div>

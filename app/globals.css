@@ -141,4 +141,22 @@
   * {
     -webkit-overflow-scrolling: touch;
   }
+
+  /* Safe area para iPhone (notch e home indicator) */
+  @supports (padding: max(0px)) {
+    body {
+      padding-left: max(0px, env(safe-area-inset-left));
+      padding-right: max(0px, env(safe-area-inset-right));
+    }
+  }
+}
+
+/* Classe utilitária para safe-area bottom */
+.pb-safe {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem));
+}
+
+/* Classe utilitária para safe-area top */
+.pt-safe {
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0.5rem));
 }

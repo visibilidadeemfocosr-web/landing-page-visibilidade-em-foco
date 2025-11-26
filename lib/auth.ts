@@ -2,12 +2,18 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
 export async function checkAdminAccess() {
-  // Verificação simples por email - pode ser melhorado com Supabase Auth
-  const adminEmail = process.env.ADMIN_EMAIL
+  const supabase = await createClient()
   
-  // Por enquanto, retornamos true se ADMIN_EMAIL estiver configurado
-  // Em produção, você deve usar Supabase Auth para verificar o usuário autenticado
-  return !!adminEmail
+  const { data: { user }, error } = await supabase.auth.getUser()
+  
+  if (error || !user) {
+    return false
+  }
+
+  // Verificar se o email está na lista de admins permitidos
+  const adminEmail = process.env.ADMIN_EMAIL || 'visibilidade.emfocosr@gmail.com'
+  
+  return user.email === adminEmail
 }
 
 export async function requireAdmin() {

@@ -1,30 +1,46 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 // GET - Obter estatísticas gerais (admin)
 export async function GET() {
   try {
+    // Verificar autenticação
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+    
+    // Verificar se é admin
+    const adminEmail = process.env.ADMIN_EMAIL || 'visibilidade.emfocosr@gmail.com'
+    if (user.email !== adminEmail) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 403 })
+    }
+    
+    // Usar admin client para bypass RLS
+    const adminClient = createAdminClient()
     
     // Total de submissões
-    const { count: totalSubmissions } = await supabase
+    const { count: totalSubmissions } = await adminClient
       .from('submissions')
       .select('*', { count: 'exact', head: true })
 
     // Total de perguntas ativas
-    const { count: totalQuestions } = await supabase
+    const { count: totalQuestions } = await adminClient
       .from('questions')
       .select('*', { count: 'exact', head: true })
       .eq('active', true)
 
     // Estatísticas por tipo de campo
-    const { data: questions } = await supabase
+    const { data: questions } = await adminClient
       .from('questions')
       .select('id, field_type, text')
       .eq('active', true)
 
     // Estatísticas por resposta (para campos específicos)
-    const { data: allAnswers } = await supabase
+    const { data: allAnswers } = await adminClient
       .from('answers')
       .select(`
         value,

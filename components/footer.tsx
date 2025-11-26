@@ -16,12 +16,20 @@ export function Footer() {
             Visibilidade em Foco
           </h3>
           <p className="text-gray-200 leading-relaxed text-lg drop-shadow-lg">
-            Mapeamento de Artistas LGBTS • São Roque • Interior de São Paulo
+            Mapeamento de Artistas LGBTS da Cidade de São Roque
           </p>
           
           <div className="pt-8 border-t border-white/30">
             <p className="text-sm text-gray-300">
               © 2025 Visibilidade em Foco. Todos os direitos reservados.
+            </p>
+            <p className="text-sm text-gray-300/60 mt-2">
+              <a 
+                href="/admin" 
+                className="hover:text-gray-300 transition-colors underline underline-offset-2"
+              >
+                Área Administrativa
+              </a>
             </p>
             <p className="text-sm text-gray-300 mt-2">
               Este projeto respeita a privacidade e os dados pessoais conforme a LGPD.
