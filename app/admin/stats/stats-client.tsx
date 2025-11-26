@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LabelList } from 'recharts'
 import { Download, FileText, Search, X } from 'lucide-react'
+import { toast } from 'sonner'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 const COLORS = ['#ec4899', '#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#14b8a6', '#a855f7', '#f97316', '#06b6d4']
@@ -137,14 +138,42 @@ export default function AdminStatsClient() {
     <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h2 className="text-2xl sm:text-3xl font-bold">Estatísticas e Relatórios</h2>
-        <Button 
-          onClick={exportToCSV} 
-          disabled={!stats || stats.answers_by_question?.length === 0}
-          className="w-full sm:w-auto min-h-[44px] touch-manipulation"
-        >
-          <Download className="mr-2 h-4 w-4" />
-          Exportar Relatório CSV
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button 
+            onClick={exportToCSV} 
+            disabled={!stats || stats.answers_by_question?.length === 0}
+            className="w-full sm:w-auto min-h-[44px] touch-manipulation"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Exportar Relatório CSV
+          </Button>
+          <Button 
+            onClick={async () => {
+              try {
+                const response = await fetch('/api/admin/generate-report')
+                if (!response.ok) throw new Error('Erro ao gerar relatório')
+                const blob = await response.blob()
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `relatorio-mapeamento-artistas-lgbts-sao-roque-${new Date().toISOString().split('T')[0]}.docx`
+                document.body.appendChild(a)
+                a.click()
+                window.URL.revokeObjectURL(url)
+                document.body.removeChild(a)
+                toast.success('Relatório Word gerado com sucesso!')
+              } catch (error: any) {
+                toast.error('Erro ao gerar relatório: ' + (error.message || 'Erro desconhecido'))
+              }
+            }}
+            disabled={!stats || stats.answers_by_question?.length === 0}
+            variant="default"
+            className="w-full sm:w-auto min-h-[44px] touch-manipulation bg-purple-600 hover:bg-purple-700"
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Gerar Relatório Word
+          </Button>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6 mb-8">
