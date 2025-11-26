@@ -117,10 +117,12 @@ export default function AdminStatsClient() {
 
               {question.field_type === 'scale' && (
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={Object.entries(question.unique_values || {}).map(([key, value]) => ({
-                    valor: key,
-                    quantidade: value,
-                  }))}>
+                  <BarChart
+                    data={Object.entries(question.unique_values || {}).map(([key, value]) => ({
+                      valor: key,
+                      quantidade: typeof value === 'number' ? value : Number(value ?? 0),
+                    }))}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="valor" />
                     <YAxis />
@@ -134,10 +136,13 @@ export default function AdminStatsClient() {
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart
                     data={Object.entries(question.unique_values || {})
-                      .map(([key, value]) => ({
-                        opcao: key.length > 20 ? key.substring(0, 20) + '...' : key,
-                        quantidade: value,
-                      }))
+                      .map(([key, value]) => {
+                        const quantidade = typeof value === 'number' ? value : Number(value ?? 0)
+                        return {
+                          opcao: key.length > 20 ? key.substring(0, 20) + '...' : key,
+                          quantidade,
+                        }
+                      })
                       .sort((a, b) => b.quantidade - a.quantidade)
                       .slice(0, 10)}
                     layout="vertical"

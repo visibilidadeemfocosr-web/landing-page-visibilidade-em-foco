@@ -495,6 +495,8 @@ export function DynamicForm({ questions }: DynamicFormProps) {
   // Inicialmente (null) ou se inválido (false), mostrar apenas CEP
   const showOtherQuestions = cepCityValid === true
 
+  const isCepInvalid = cepCityValid === false
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-12 sm:pb-6 mb-4 sm:mb-0">
       <Alert className="text-left">
@@ -576,15 +578,17 @@ export function DynamicForm({ questions }: DynamicFormProps) {
               Eu concordo com o uso das minhas informações para o projeto Visibilidade em Foco e estou ciente dos meus direitos de privacidade conforme a LGPD. *
             </label>
           </div>
-          {errors.consent && (
-            <p className="text-sm text-red-500 ml-11">{errors.consent.message}</p>
-          )}
+      {errors.consent?.message && (
+        <p className="text-sm text-red-500 ml-11">
+          {String(errors.consent.message)}
+        </p>
+      )}
 
-          <Button
-            type="submit"
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
-            disabled={loading || !watch('consent') || cepCityValid === false}
-          >
+      <Button
+        type="submit"
+        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
+        disabled={loading || !watch('consent') || isCepInvalid}
+      >
             {loading ? 'Enviando...' : 'Enviar Cadastro'}
           </Button>
 
