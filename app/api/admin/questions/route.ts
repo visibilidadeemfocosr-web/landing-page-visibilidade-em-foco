@@ -72,6 +72,8 @@ export async function POST(request: Request) {
         min_value: body.min_value ?? null,
         max_value: body.max_value ?? null,
         placeholder: body.placeholder ?? null,
+        has_other_option: body.has_other_option ?? false,
+        other_option_label: body.other_option_label || null,
         active: body.active ?? true,
       }])
       .select()

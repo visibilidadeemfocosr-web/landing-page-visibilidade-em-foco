@@ -11,6 +11,8 @@ export interface Question {
   min_value?: number // Para scale
   max_value?: number // Para scale
   placeholder?: string
+  has_other_option?: boolean // Se permite opção "outros"
+  other_option_label?: string // Label do campo "outros" (ex: "Qual?")
   created_at: string
   updated_at: string
   active: boolean

@@ -67,15 +67,17 @@ export function ArtistsShowcase() {
               className="group relative bg-white/10 backdrop-blur-md rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-white/20"
             >
               <div className="relative h-64 overflow-hidden">
-                {/* Removed the overlay escuro bg-black/30 for the photos to be more visible */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${type.color} z-10`} />
+                {/* Renderizar imagem primeiro */}
                 <Image 
                   src={type.imageUrl || "/placeholder.svg"}
                   alt={type.title}
-                  width={400}
-                  height={256}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover group-hover:scale-110 transition-transform duration-700 z-0"
+                  unoptimized
                 />
+                {/* Gradient overlay por cima */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${type.color} z-10`} />
               </div>
 
               <div className="p-8">

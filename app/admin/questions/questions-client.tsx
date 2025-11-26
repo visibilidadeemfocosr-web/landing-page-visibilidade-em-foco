@@ -251,6 +251,8 @@ export default function AdminQuestionsClient() {
     min_value: 1,
     max_value: 5,
     placeholder: '',
+    has_other_option: false,
+    other_option_label: 'Qual?',
     active: true,
   })
 
@@ -360,6 +362,8 @@ export default function AdminQuestionsClient() {
       min_value: question.min_value || 1,
       max_value: question.max_value || 5,
       placeholder: question.placeholder || '',
+      has_other_option: question.has_other_option || false,
+      other_option_label: question.other_option_label || 'Qual?',
       active: question.active,
     })
     setDialogOpen(true)
@@ -401,6 +405,8 @@ export default function AdminQuestionsClient() {
             min_value: question.min_value || null,
             max_value: question.max_value || null,
             placeholder: question.placeholder || null,
+            has_other_option: question.has_other_option || false,
+            other_option_label: question.other_option_label || null,
             active: question.active,
           }),
         })
@@ -494,6 +500,8 @@ export default function AdminQuestionsClient() {
       max_value: 5,
       placeholder: '',
       section: '',
+      has_other_option: false,
+      other_option_label: 'Qual?',
       active: true,
     })
   }
@@ -518,6 +526,8 @@ export default function AdminQuestionsClient() {
       max_value: 5,
       placeholder: '',
       section: sectionName || '',
+      has_other_option: false,
+      other_option_label: 'Qual?',
       active: true,
     })
     setDialogOpen(true)
@@ -831,6 +841,37 @@ export default function AdminQuestionsClient() {
                     <Plus className="mr-2 h-4 w-4" />
                     Adicionar Opção
                   </Button>
+                </div>
+                
+                {/* Opção "Outros" */}
+                <div className="mt-4 p-4 border rounded-lg bg-muted/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <Label htmlFor="has_other_option" className="text-sm font-medium cursor-pointer">
+                      Permitir opção "Outros"
+                    </Label>
+                    <Switch
+                      id="has_other_option"
+                      checked={formData.has_other_option}
+                      onCheckedChange={(checked) => setFormData({ ...formData, has_other_option: checked })}
+                    />
+                  </div>
+                  {formData.has_other_option && (
+                    <div className="space-y-2">
+                      <Label htmlFor="other_option_label" className="text-sm">
+                        Texto do campo "Outros"
+                      </Label>
+                      <Input
+                        id="other_option_label"
+                        value={formData.other_option_label}
+                        onChange={(e) => setFormData({ ...formData, other_option_label: e.target.value })}
+                        placeholder="Qual?"
+                        className="min-h-[44px]"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Quando o respondente selecionar uma opção contendo "outros", será exibido um campo de texto com este label.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

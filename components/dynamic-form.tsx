@@ -54,6 +54,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   const [cepCityValid, setCepCityValid] = useState<boolean | null>(null)
   const [submitted, setSubmitted] = useState(false)
   const [cepBairro, setCepBairro] = useState<string>('') // Armazenar bairro do CEP
+  const [otherOptionValues, setOtherOptionValues] = useState<Record<string, string>>({}) // Armazenar valores de "outros"
 
   // Criar schema Zod dinamicamente
   const createSchema = () => {
@@ -90,6 +91,12 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       }
 
       schemaFields[question.id] = fieldSchema
+      
+      // Adicionar campo para "outros" se a pergunta permitir
+      if ((question.field_type === 'radio' || question.field_type === 'select') && question.has_other_option) {
+        // O campo "outros" será validado dinamicamente - será obrigatório apenas se "outros" estiver selecionado
+        schemaFields[`${question.id}_other`] = z.string().optional()
+      }
     })
 
     // Adicionar consentimento
@@ -109,12 +116,44 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
     setValue,
     watch,
     formState: { errors },
+    trigger,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       consent: false,
     },
   })
+
+  // Função para validar campos "outros" dinamicamente
+  const validateOtherFields = (data: FormData): boolean => {
+    let isValid = true
+    const fieldsToValidate: string[] = []
+    
+    questions.forEach((question) => {
+      if ((question.field_type === 'radio' || question.field_type === 'select') && 
+          question.has_other_option) {
+        const selectedValue = data[question.id as keyof FormData] as string
+        const isOtherOption = selectedValue && question.options?.some(opt => 
+          opt.toLowerCase().includes('outro') && opt === selectedValue
+        )
+        
+        if (isOtherOption) {
+          const otherValue = data[`${question.id}_other` as keyof FormData] as string
+          if (!otherValue || !otherValue.trim()) {
+            isValid = false
+            fieldsToValidate.push(`${question.id}_other`)
+          }
+        }
+      }
+    })
+    
+    // Trigger validação nos campos que falharam
+    if (fieldsToValidate.length > 0) {
+      trigger(fieldsToValidate as any)
+    }
+    
+    return isValid
+  }
 
   const handleFileUpload = async (questionId: string, file: File) => {
     setUploading({ ...uploading, [questionId]: true })
@@ -154,6 +193,12 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       return
     }
     
+    // Validar campos "outros" se necessário
+    if (!validateOtherFields(data)) {
+      toast.error('Por favor, preencha o campo "Qual?" quando selecionar a opção "Outros"')
+      return
+    }
+    
     setLoading(true)
     try {
       // Filtrar apenas perguntas que têm resposta válida
@@ -186,6 +231,31 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                 question_id: question.id,
                 value: `${cepValue}|${cepBairro}`,
                 file_url: fileUrl || null,
+              }
+            }
+          }
+          
+          // Para perguntas com opção "outros", mesclar o valor
+          if ((question.field_type === 'radio' || question.field_type === 'select') && 
+              question.has_other_option && 
+              value) {
+            const selectedOption = String(value)
+            const isOtherOption = question.options?.some(opt => 
+              opt.toLowerCase().includes('outro') && opt === selectedOption
+            )
+            
+            if (isOtherOption) {
+              const otherValue = data[`${question.id}_other` as keyof FormData] as string
+              if (otherValue && otherValue.trim()) {
+                // Combinar a opção selecionada com o valor especificado
+                return {
+                  question_id: question.id,
+                  value: `${selectedOption}: ${otherValue.trim()}`,
+                  file_url: fileUrl || null,
+                }
+              } else if (question.required) {
+                // Se obrigatório e não preenchido, não enviar (a validação do form já deve ter bloqueado)
+                return null
               }
             }
           }
@@ -316,7 +386,20 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
               {question.text.replace(/<[^>]+>/g, '')}
             </Label>
             <Select
-              onValueChange={(value) => setValue(fieldId as keyof FormData, value as any)}
+              onValueChange={(value) => {
+                setValue(fieldId as keyof FormData, value as any)
+                // Verificar se a opção selecionada contém "outros" (case insensitive)
+                const hasOtherKeyword = question.has_other_option && 
+                  question.options?.some(opt => 
+                    opt.toLowerCase().includes('outro') && opt === value
+                  )
+                // Se não for "outros", limpar o valor
+                if (!hasOtherKeyword) {
+                  setOtherOptionValues(prev => ({ ...prev, [fieldId]: '' }))
+                  setValue(`${fieldId}_other` as keyof FormData, '' as any)
+                }
+              }}
+              value={watch(fieldId as keyof FormData) as string}
               required={question.required}
             >
               <SelectTrigger id={fieldId} className="min-h-[48px] text-base sm:text-sm touch-manipulation">
@@ -330,6 +413,33 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                 ))}
               </SelectContent>
             </Select>
+            {/* Mostrar campo de texto se "outros" estiver selecionado */}
+            {question.has_other_option && question.options?.some(opt => 
+              opt.toLowerCase().includes('outro') && watch(fieldId as keyof FormData) === opt
+            ) && (
+              <div className="space-y-2 mt-3">
+                <Label htmlFor={`${fieldId}_other`} className="text-sm font-medium">
+                  {question.other_option_label || 'Qual?'}
+                </Label>
+                <Input
+                  id={`${fieldId}_other`}
+                  value={otherOptionValues[fieldId] || ''}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setOtherOptionValues(prev => ({ ...prev, [fieldId]: value }))
+                    setValue(`${fieldId}_other` as keyof FormData, value as any)
+                  }}
+                  placeholder={question.other_option_label || 'Especifique...'}
+                  className="min-h-[48px] text-base"
+                  required={question.required}
+                />
+                {errors[`${fieldId}_other`] && (
+                  <p className="text-sm text-red-500">
+                    {(errors[`${fieldId}_other`] as any)?.message as string}
+                  </p>
+                )}
+              </div>
+            )}
             {error && (
               <p className="text-sm text-red-500">{error.message as string}</p>
             )}
@@ -347,22 +457,65 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
               {question.text.replace(/<[^>]+>/g, '')}
             </Label>
             <RadioGroup
-              onValueChange={(value) => setValue(fieldId as keyof FormData, value as any)}
+              onValueChange={(value) => {
+                setValue(fieldId as keyof FormData, value as any)
+                // Verificar se a opção selecionada contém "outros" (case insensitive)
+                const hasOtherKeyword = question.has_other_option && 
+                  question.options?.some(opt => 
+                    opt.toLowerCase().includes('outro') && opt === value
+                  )
+                // Se não for "outros", limpar o valor
+                if (!hasOtherKeyword) {
+                  setOtherOptionValues(prev => ({ ...prev, [fieldId]: '' }))
+                  setValue(`${fieldId}_other` as keyof FormData, '' as any)
+                }
+              }}
+              value={watch(fieldId as keyof FormData) as string}
               required={question.required}
               className="space-y-2"
             >
-              {question.options?.map((option, idx) => (
-                <label
-                  key={idx}
-                  htmlFor={`${fieldId}-${idx}`}
-                  className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer touch-manipulation min-h-[48px] active:bg-muted"
-                >
-                  <RadioGroupItem value={option} id={`${fieldId}-${idx}`} className="h-5 w-5" />
-                  <Label htmlFor={`${fieldId}-${idx}`} className="font-normal cursor-pointer text-base sm:text-sm flex-1">
-                    {option}
-                  </Label>
-                </label>
-              ))}
+              {question.options?.map((option, idx) => {
+                const isOtherOption = question.has_other_option && 
+                  option.toLowerCase().includes('outro')
+                return (
+                  <div key={idx} className="space-y-2">
+                    <label
+                      htmlFor={`${fieldId}-${idx}`}
+                      className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer touch-manipulation min-h-[48px] active:bg-muted"
+                    >
+                      <RadioGroupItem value={option} id={`${fieldId}-${idx}`} className="h-5 w-5" />
+                      <Label htmlFor={`${fieldId}-${idx}`} className="font-normal cursor-pointer text-base sm:text-sm flex-1">
+                        {option}
+                      </Label>
+                    </label>
+                    {/* Mostrar campo de texto se "outros" estiver selecionado */}
+                    {isOtherOption && watch(fieldId as keyof FormData) === option && (
+                      <div className="ml-8 space-y-2">
+                        <Label htmlFor={`${fieldId}_other`} className="text-sm font-medium">
+                          {question.other_option_label || 'Qual?'}
+                        </Label>
+                        <Input
+                          id={`${fieldId}_other`}
+                          value={otherOptionValues[fieldId] || ''}
+                          onChange={(e) => {
+                            const value = e.target.value
+                            setOtherOptionValues(prev => ({ ...prev, [fieldId]: value }))
+                            setValue(`${fieldId}_other` as keyof FormData, value as any)
+                          }}
+                          placeholder={question.other_option_label || 'Especifique...'}
+                          className="min-h-[48px] text-base"
+                          required={question.required}
+                        />
+                        {errors[`${fieldId}_other`] && (
+                          <p className="text-sm text-red-500">
+                            {(errors[`${fieldId}_other`] as any)?.message as string}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </RadioGroup>
             {error && (
               <p className="text-sm text-red-500">{error.message as string}</p>
