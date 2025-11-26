@@ -20,6 +20,7 @@ import type { Question } from '@/lib/supabase/types'
 interface DynamicFormProps {
   questions: Question[]
   previewMode?: boolean
+  onSuccess?: () => void
 }
 
 // Componente para renderizar HTML formatado de forma segura
@@ -46,11 +47,13 @@ function FormattedText({ html }: { html: string }) {
   return <span>{html}</span>
 }
 
-export function DynamicForm({ questions, previewMode = false }: DynamicFormProps) {
+export function DynamicForm({ questions, previewMode = false, onSuccess }: DynamicFormProps) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState<Record<string, boolean>>({})
   const [fileUrls, setFileUrls] = useState<Record<string, string>>({})
   const [cepCityValid, setCepCityValid] = useState<boolean | null>(null)
+  const [submitted, setSubmitted] = useState(false)
+  const [cepBairro, setCepBairro] = useState<string>('') // Armazenar bairro do CEP
 
   // Criar schema Zod dinamicamente
   const createSchema = () => {
@@ -153,14 +156,55 @@ export function DynamicForm({ questions, previewMode = false }: DynamicFormProps
     
     setLoading(true)
     try {
-      const answers = questions.map((question) => {
-        const value = data[question.id as keyof FormData]
-        return {
-          question_id: question.id,
-          value: value !== undefined ? String(value) : null,
-          file_url: question.field_type === 'image' ? fileUrls[question.id] || null : null,
-        }
-      })
+      // Filtrar apenas perguntas que têm resposta válida
+      const answers = questions
+        .map((question) => {
+          const value = data[question.id as keyof FormData]
+          const fileUrl = question.field_type === 'image' ? fileUrls[question.id] : null
+          
+          // Se não tem valor nem arquivo, não incluir na resposta
+          if (value === undefined || value === null || value === '') {
+            if (!fileUrl) return null
+          }
+          
+          // Para perguntas de CEP, incluir o bairro no valor se disponível
+          if (question.field_type === 'cep' && cepBairro) {
+            const cepValue = value !== undefined && value !== null && value !== '' 
+              ? String(value) 
+              : null
+            
+            // Verificar se há uma pergunta de bairro separada
+            const bairroQuestion = questions.find(q => 
+              (q.field_type === 'text' || q.field_type === 'number') && 
+              q.text.toLowerCase().includes('bairro')
+            )
+            
+            // Se não há pergunta de bairro separada, salvar bairro junto com CEP no formato "CEP|BAIRRO"
+            // Isso permite que a API processe e separe depois
+            if (!bairroQuestion && cepValue) {
+              return {
+                question_id: question.id,
+                value: `${cepValue}|${cepBairro}`,
+                file_url: fileUrl || null,
+              }
+            }
+          }
+          
+          return {
+            question_id: question.id,
+            value: value !== undefined && value !== null && value !== '' 
+              ? String(value) 
+              : null,
+            file_url: fileUrl || null,
+          }
+        })
+        .filter((answer) => answer !== null && (answer.value !== null || answer.file_url !== null))
+
+      if (answers.length === 0) {
+        toast.error('Por favor, preencha pelo menos uma pergunta')
+        setLoading(false)
+        return
+      }
 
       const response = await fetch('/api/submissions', {
         method: 'POST',
@@ -168,18 +212,17 @@ export function DynamicForm({ questions, previewMode = false }: DynamicFormProps
         body: JSON.stringify({ answers }),
       })
 
-      if (!response.ok) throw new Error('Erro ao enviar formulário')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
+        console.error('Erro na resposta:', errorData)
+        throw new Error(errorData.error || 'Erro ao enviar formulário')
+      }
 
-      toast.success('Formulário enviado com sucesso!')
-      
-      // Reset form
-      questions.forEach((q) => {
-        setValue(q.id as keyof FormData, undefined as any)
-      })
-      setValue('consent', false)
-      setFileUrls({})
-    } catch (error) {
-      toast.error('Erro ao enviar formulário. Tente novamente.')
+      // Mostrar mensagem de agradecimento
+      setSubmitted(true)
+    } catch (error: any) {
+      console.error('Erro ao enviar formulário:', error)
+      toast.error(error.message || 'Erro ao enviar formulário. Tente novamente.')
     } finally {
       setLoading(false)
     }
@@ -486,6 +529,7 @@ export function DynamicForm({ questions, previewMode = false }: DynamicFormProps
             error={error}
             questions={questions}
             onCityValidationChange={setCepCityValid}
+            onBairroChange={setCepBairro}
           />
         )
 
@@ -503,6 +547,60 @@ export function DynamicForm({ questions, previewMode = false }: DynamicFormProps
   const showOtherQuestions = cepCityValid === true
 
   const isCepInvalid = cepCityValid === false
+
+  // Se o formulário foi enviado com sucesso, mostrar mensagem de agradecimento
+  if (submitted) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4 text-center space-y-6">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+          <svg
+            className="w-12 h-12 sm:w-16 sm:h-16 text-primary"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+          Obrigado pela sua participação! 🎉
+        </h2>
+        <div className="max-w-md space-y-4">
+          <p className="text-base sm:text-lg text-foreground leading-relaxed">
+            Seu cadastro foi enviado com sucesso! Sua voz é importante para dar visibilidade à comunidade LGBTS de São Roque.
+          </p>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Agradecemos por fazer parte deste mapeamento e por contribuir para a construção de uma sociedade mais inclusiva e representativa.
+          </p>
+        </div>
+        <Button
+          onClick={() => {
+            // Reset form
+            questions.forEach((q) => {
+              setValue(q.id as keyof FormData, undefined as any)
+            })
+            setValue('consent', false)
+            setFileUrls({})
+            setCepCityValid(null)
+            setSubmitted(false)
+            // Fechar dialog e voltar para home
+            if (onSuccess) {
+              onSuccess()
+            }
+          }}
+          size="lg"
+          className="mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base sm:text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 min-h-[56px] touch-manipulation"
+        >
+          Voltar para o início
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-12 sm:pb-6 mb-4 sm:mb-0">
@@ -629,9 +727,10 @@ interface CepFieldProps {
   error: any
   questions: Question[]
   onCityValidationChange?: (isValid: boolean | null) => void
+  onBairroChange?: (bairro: string) => void
 }
 
-function CepField({ question, fieldId, register, setValue, watch, error, questions, onCityValidationChange }: CepFieldProps) {
+function CepField({ question, fieldId, register, setValue, watch, error, questions, onCityValidationChange, onBairroChange }: CepFieldProps) {
   const [loadingCep, setLoadingCep] = useState(false)
   const [lastSearchedCep, setLastSearchedCep] = useState('')
   const [addressData, setAddressData] = useState<{
@@ -656,6 +755,9 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
       if (onCityValidationChange) {
         onCityValidationChange(null)
       }
+      if (onBairroChange) {
+        onBairroChange('')
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cepValue])
@@ -672,6 +774,9 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
         setIsValidCity(null)
         if (onCityValidationChange) {
           onCityValidationChange(null)
+        }
+        if (onBairroChange) {
+          onBairroChange('')
         }
         setLoadingCep(false)
         return
@@ -727,6 +832,11 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
       // Sempre atualizar o estado, mesmo se alguns campos estiverem vazios
       setAddressData(addressInfo)
       
+      // Notificar o componente pai sobre o bairro
+      if (onBairroChange && addressInfo.bairro) {
+        onBairroChange(addressInfo.bairro)
+      }
+      
       // Debug
       console.log('CEP encontrado:', addressInfo)
       console.log('Dados da API ViaCEP:', data)
@@ -781,6 +891,9 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
       setIsValidCity(null)
       if (onCityValidationChange) {
         onCityValidationChange(null)
+      }
+      if (onBairroChange) {
+        onBairroChange('')
       }
     } finally {
       setLoadingCep(false)

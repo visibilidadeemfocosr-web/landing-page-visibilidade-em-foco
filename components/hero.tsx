@@ -9,6 +9,7 @@ import Image from "next/image"
 
 export function Hero() {
   const [mounted, setMounted] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -77,7 +78,7 @@ export function Hero() {
           {/* Call to Action */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
             {mounted ? (
-              <Dialog>
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
                   <Button 
                     size="lg" 
@@ -94,7 +95,7 @@ export function Hero() {
                     </DialogDescription>
                   </DialogHeader>
                   <div className="flex-1 overflow-y-auto px-4 sm:px-0 mt-4 pb-12 sm:pb-4 pb-safe">
-                    <RegistrationFormLoader />
+                    <RegistrationFormLoader onSuccess={() => setDialogOpen(false)} />
                   </div>
                 </DialogContent>
               </Dialog>

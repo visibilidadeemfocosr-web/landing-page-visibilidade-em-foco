@@ -5,7 +5,11 @@ import { DynamicForm } from './dynamic-form'
 import { Loader2 } from 'lucide-react'
 import type { Question } from '@/lib/supabase/types'
 
-export function RegistrationFormLoader() {
+interface RegistrationFormLoaderProps {
+  onSuccess?: () => void
+}
+
+export function RegistrationFormLoader({ onSuccess }: RegistrationFormLoaderProps) {
   const [questions, setQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -52,6 +56,6 @@ export function RegistrationFormLoader() {
     )
   }
 
-  return <DynamicForm questions={questions} />
+  return <DynamicForm questions={questions} onSuccess={onSuccess} />
 }
 
