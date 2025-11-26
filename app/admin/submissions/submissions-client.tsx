@@ -5,6 +5,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Download } from 'lucide-react'
 
+// Componente para renderizar HTML formatado de forma segura
+function FormattedText({ html }: { html: string }) {
+  if (!html) return null
+  
+  // Verificar se contém tags HTML
+  const hasHtml = /<[^>]+>/g.test(html)
+  
+  if (hasHtml) {
+    // Limpar e sanitizar o HTML básico (apenas permitir tags seguras)
+    const sanitizedHtml = html
+      .replace(/<script[^>]*>.*?<\/script>/gi, '') // Remover scripts
+      .replace(/<style[^>]*>.*?<\/style>/gi, '') // Remover estilos inline
+    
+    return (
+      <span 
+        dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+        className="[&_strong]:font-bold [&_em]:italic [&_i]:italic [&_p]:mb-0 [&_p]:inline [&_p_strong]:font-bold [&_p_em]:italic [&_p]:leading-normal [&_p]:m-0 [&_p]:p-0"
+      />
+    )
+  }
+  
+  return <span>{html}</span>
+}
+
 interface Submission {
   id: string
   created_at: string
@@ -41,13 +65,20 @@ export default function AdminSubmissionsClient() {
     }
   }
 
+  // Função para remover tags HTML do texto
+  const stripHtml = (html: string) => {
+    if (!html) return ''
+    return html.replace(/<[^>]+>/g, '').trim()
+  }
+
   const exportToCSV = () => {
     if (submissions.length === 0) return
 
     const allQuestions = new Set<string>()
     submissions.forEach(sub => {
       sub.answers.forEach(ans => {
-        allQuestions.add(ans.questions.text)
+        // Remover tags HTML dos títulos das perguntas para o CSV
+        allQuestions.add(stripHtml(ans.questions.text))
       })
     })
 
@@ -60,7 +91,10 @@ export default function AdminSubmissionsClient() {
       }
       
       sub.answers.forEach(ans => {
-        row[ans.questions.text] = ans.file_url || ans.value || ''
+        // Usar texto sem HTML para a chave e também limpar o valor se necessário
+        const questionText = stripHtml(ans.questions.text)
+        const answerValue = ans.file_url || ans.value || ''
+        row[questionText] = answerValue
       })
       
       return row
@@ -126,7 +160,7 @@ export default function AdminSubmissionsClient() {
                 {submission.answers.map((answer) => (
                   <div key={answer.id} className="border-l-2 border-primary pl-4">
                     <p className="font-semibold text-sm text-muted-foreground mb-1">
-                      {answer.questions.text}
+                      <FormattedText html={answer.questions.text} />
                     </p>
                     {answer.questions.field_type === 'image' && answer.file_url ? (
                       <img
