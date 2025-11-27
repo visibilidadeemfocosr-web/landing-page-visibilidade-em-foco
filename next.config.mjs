@@ -14,9 +14,6 @@ const nextConfig = {
       },
     ],
   },
-  // Configuração Turbopack vazia para silenciar o erro
-  // O webpack será usado automaticamente quando necessário
-  turbopack: {},
   // Configuração webpack para módulos nativos (canvas, chartjs-node-canvas)
   webpack: (config, { isServer }) => {
     if (isServer) {
