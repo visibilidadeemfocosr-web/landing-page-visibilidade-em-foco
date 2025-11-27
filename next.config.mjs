@@ -14,12 +14,10 @@ const nextConfig = {
       },
     ],
   },
-  // Desabilitar Turbopack para evitar problemas com módulos nativos
-  // A Vercel usará webpack automaticamente quando Turbopack estiver desabilitado
-  experimental: {
-    turbo: undefined, // Desabilitar Turbopack
-  },
-  // Manter webpack para compatibilidade, mas será ignorado quando usar Turbopack
+  // Configuração Turbopack vazia para silenciar o erro
+  // O webpack será usado automaticamente quando necessário
+  turbopack: {},
+  // Configuração webpack para módulos nativos (canvas, chartjs-node-canvas)
   webpack: (config, { isServer }) => {
     if (isServer) {
       // Externalizar módulos nativos para evitar problemas com bundling
