@@ -14,8 +14,11 @@ const nextConfig = {
       },
     ],
   },
+  // Desabilitar Turbopack para usar webpack (necessário para módulos nativos)
+  experimental: {
+    turbo: false,
+  },
   // Configuração webpack para módulos nativos (canvas, chartjs-node-canvas)
-  // O Next.js 16 detecta automaticamente a presença de webpack config e usa webpack
   webpack: (config, { isServer }) => {
     if (isServer) {
       // Externalizar módulos nativos para evitar problemas com bundling
