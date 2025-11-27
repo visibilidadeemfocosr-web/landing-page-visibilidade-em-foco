@@ -33,6 +33,12 @@ export function ArtistsShowcase() {
       description: "Cineastas, videomakers, fotógrafos e produtores audiovisuais",
       color: "from-slate-800/20 to-gray-700/15",
       imageUrl: "/audiovisual-filmmaker.jpg"
+    },
+    {
+      title: "Arte Circense",
+      description: "Artistas circenses, malabaristas, acrobatas, palhaços, contorcionistas e performers aéreos",
+      color: "from-slate-800/20 to-gray-700/15",
+      imageUrl: "/circus-artist.jpg" // Adicione a imagem na pasta public com este nome
     }
   ]
 
@@ -60,22 +66,49 @@ export function ArtistsShowcase() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 gap-8 max-w-7xl mx-auto">
           {artistTypes.map((type, index) => (
             <div 
               key={index}
               className="group relative bg-white/10 backdrop-blur-md rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-white/20"
             >
               <div className="relative h-64 overflow-hidden">
-                {/* Renderizar imagem primeiro */}
-                <Image 
-                  src={type.imageUrl || "/placeholder.svg"}
-                  alt={type.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-cover group-hover:scale-110 transition-transform duration-700 z-0"
-                  unoptimized
-                />
+                {/* Renderizar imagem - verificar se existe ou é null */}
+                {type.imageUrl ? (
+                  <Image 
+                    src={type.imageUrl}
+                    alt={type.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover group-hover:scale-110 transition-transform duration-700 z-0"
+                    unoptimized
+                    onError={(e) => {
+                      // Se a imagem não carregar, mostrar placeholder
+                      const target = e.target as HTMLImageElement
+                      target.style.display = 'none'
+                      const container = target.parentElement
+                      if (container) {
+                        const fallback = container.querySelector('.img-placeholder') as HTMLElement
+                        if (fallback) fallback.style.display = 'flex'
+                      }
+                    }}
+                  />
+                ) : (
+                  // Placeholder quando imageUrl é null
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-600/60 via-orange-500/60 to-red-600/60 z-0 flex items-center justify-center img-placeholder">
+                    <div className="text-center text-white/80">
+                      <div className="text-4xl mb-2 opacity-70">🎪</div>
+                      <div className="text-xs px-4 opacity-60">Aguardando imagem</div>
+                    </div>
+                  </div>
+                )}
+                {/* Placeholder escondido que aparece se imagem falhar ao carregar */}
+                <div className="img-placeholder absolute inset-0 bg-gradient-to-br from-amber-600/60 via-orange-500/60 to-red-600/60 z-0 hidden items-center justify-center">
+                  <div className="text-center text-white/80">
+                    <div className="text-4xl mb-2 opacity-70">🎪</div>
+                    <div className="text-xs px-4 opacity-60">Imagem não encontrada</div>
+                  </div>
+                </div>
                 {/* Gradient overlay por cima */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${type.color} z-10`} />
               </div>
