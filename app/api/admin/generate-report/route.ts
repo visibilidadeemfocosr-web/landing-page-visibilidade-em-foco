@@ -1464,13 +1464,14 @@ export async function GET() {
           console.log(`Criando ImageRun: ${widthEmu}x${heightEmu} EMU (${child.width}x${child.height}px)`)
           
           // Criar ImageRun com sintaxe correta da biblioteca docx
+          // O ImageRun espera um Buffer ou Uint8Array
           const imageRun = new ImageRun({
-            data: imageBuffer,
+            data: imageBuffer as Buffer,
             transformation: {
               width: widthEmu,
               height: heightEmu,
             },
-          })
+          } as any)
           
           processedChildren.push(
             new Paragraph({
