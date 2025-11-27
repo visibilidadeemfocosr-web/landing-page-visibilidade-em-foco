@@ -371,11 +371,9 @@ export async function GET() {
         // Garantir que o retorno seja um Buffer válido do Node.js
         if (Buffer.isBuffer(imageBuffer)) {
           return imageBuffer
-        } else if (imageBuffer instanceof Uint8Array) {
-          return Buffer.from(imageBuffer)
         } else {
-          // Converter para Buffer se necessário
-          return Buffer.from(imageBuffer as any)
+          // Converter para Buffer se necessário (pode ser Uint8Array ou outro tipo)
+          return Buffer.from(imageBuffer as ArrayLike<number>)
         }
       } catch (error) {
         console.error('[generateChartImage] ERRO:', error)
