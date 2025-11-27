@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle, ShadingType, TableProperties, ImageRun, Media } from 'docx'
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle, ShadingType, ImageRun, Media } from 'docx'
 import { format } from 'date-fns'
 // chartjs-node-canvas será importado dinamicamente
 
@@ -535,9 +535,6 @@ export async function GET() {
           insideHorizontal: { style: BorderStyle.SINGLE, size: 200, color: 'E5E7EB' },
           insideVertical: { style: BorderStyle.SINGLE, size: 200, color: 'E5E7EB' },
         },
-        properties: new TableProperties({
-          alignment: AlignmentType.CENTER,
-        }),
       })
     }
 
