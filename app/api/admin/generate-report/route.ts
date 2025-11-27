@@ -539,7 +539,8 @@ export async function GET() {
     }
 
     // Criar documento
-    const children: (Paragraph | Table)[] = []
+    // Usar any[] temporariamente para permitir objetos de imagem que serão processados depois
+    const children: any[] = []
 
     // CAPA
     children.push(
