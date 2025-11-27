@@ -14,10 +14,10 @@ const nextConfig = {
       },
     ],
   },
-  // Configuração para Turbopack (Next.js 16+)
-  turbopack: {
-    // Turbopack não precisa de configuração especial para módulos nativos
-    // Eles são carregados dinamicamente em runtime
+  // Desabilitar Turbopack para evitar problemas com módulos nativos
+  // A Vercel usará webpack automaticamente quando Turbopack estiver desabilitado
+  experimental: {
+    turbo: undefined, // Desabilitar Turbopack
   },
   // Manter webpack para compatibilidade, mas será ignorado quando usar Turbopack
   webpack: (config, { isServer }) => {
