@@ -75,7 +75,12 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
           fieldSchema = z.enum(['sim', 'nao', 'prefiro-nao-responder'])
           break
         case 'checkbox':
-          fieldSchema = z.boolean()
+          // Checkbox agora aceita array de strings (múltiplas seleções)
+          if (question.required) {
+            fieldSchema = z.array(z.string()).min(1, 'Selecione pelo menos uma opção')
+          } else {
+            fieldSchema = z.array(z.string()).optional()
+          }
           break
         case 'scale':
           fieldSchema = z.number().min(question.min_value || 1).max(question.max_value || 5)
@@ -110,6 +115,17 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   const schema = createSchema()
   type FormData = z.infer<typeof schema>
 
+  // Criar defaultValues dinamicamente para checkbox (arrays vazios)
+  const defaultValues: Record<string, any> = {
+    consent: false,
+  }
+  
+  questions.forEach((question) => {
+    if (question.field_type === 'checkbox') {
+      defaultValues[question.id] = []
+    }
+  })
+
   const {
     register,
     handleSubmit,
@@ -119,9 +135,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
     trigger,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      consent: false,
-    },
+    defaultValues,
   })
 
   // Função para validar campos "outros" dinamicamente
@@ -143,6 +157,33 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             isValid = false
             fieldsToValidate.push(`${question.id}_other`)
           }
+        }
+      }
+      
+      // Validar campos "outros" para checkbox também
+      if (question.field_type === 'checkbox' && question.has_other_option) {
+        const selectedValues = data[question.id as keyof FormData] as string[] || []
+        const hasOtherOption = selectedValues.some(val => 
+          question.options?.some(opt => 
+            opt.toLowerCase().includes('outro') && opt === val
+          )
+        )
+        
+        if (hasOtherOption) {
+          // Verificar se cada opção "outros" selecionada tem valor preenchido
+          selectedValues.forEach(selectedValue => {
+            const isOtherOption = question.options?.some(opt => 
+              opt.toLowerCase().includes('outro') && opt === selectedValue
+            )
+            
+            if (isOtherOption) {
+              const otherValue = otherOptionValues[`${question.id}_${selectedValue}`]
+              if (!otherValue || !otherValue.trim()) {
+                isValid = false
+                fieldsToValidate.push(`${question.id}_${selectedValue}_other`)
+              }
+            }
+          })
         }
       }
     })
@@ -232,6 +273,41 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                 value: `${cepValue}|${cepBairro}`,
                 file_url: fileUrl || null,
               }
+            }
+          }
+          
+          // Para perguntas checkbox, converter array para string separada por vírgula
+          if (question.field_type === 'checkbox') {
+            const checkboxArray = value as string[] || []
+            if (checkboxArray.length === 0) {
+              return question.required ? null : {
+                question_id: question.id,
+                value: null,
+                file_url: fileUrl || null,
+              }
+            }
+            
+            // Processar opções "outros" para checkbox
+            const processedValues = checkboxArray.map(selectedOption => {
+              const isOtherOption = question.has_other_option && 
+                question.options?.some(opt => 
+                  opt.toLowerCase().includes('outro') && opt === selectedOption
+                )
+              
+              if (isOtherOption) {
+                const otherValue = otherOptionValues[`${question.id}_${selectedOption}`]
+                if (otherValue && otherValue.trim()) {
+                  return `${selectedOption}: ${otherValue.trim()}`
+                }
+                return selectedOption
+              }
+              return selectedOption
+            })
+            
+            return {
+              question_id: question.id,
+              value: processedValues.join(', '),
+              file_url: fileUrl || null,
             }
           }
           
@@ -524,24 +600,77 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
         )
 
       case 'checkbox':
+        // Checkbox com múltiplas opções (similar ao radio mas permite múltiplas seleções)
+        const checkboxValues = watch(fieldId as keyof FormData) as string[] || []
+        
         return (
-          <div key={fieldId} className="space-y-2">
-            <label
-              htmlFor={fieldId}
-              className="flex items-start space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer touch-manipulation min-h-[48px] active:bg-muted"
-            >
-              <Checkbox
-                id={fieldId}
-                {...register(fieldId as keyof FormData)}
-                className="h-5 w-5 mt-0.5"
-              />
-              <Label htmlFor={fieldId} className="font-normal cursor-pointer text-base sm:text-sm flex-1">
-                <FormattedText html={question.text} />
-                {question.required && <span className="text-red-500 ml-1">*</span>}
-              </Label>
-            </label>
+          <div key={fieldId} className="space-y-4">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
+              <FormattedText html={question.text} />
+              {question.required && <span className="text-red-500 ml-1">*</span>}
+            </div>
+            <Label htmlFor={fieldId} className="sr-only">
+              {question.text.replace(/<[^>]+>/g, '')}
+            </Label>
+            <div className="space-y-2">
+              {question.options?.map((option, idx) => {
+                const optionId = `${fieldId}-${idx}`
+                const isChecked = checkboxValues.includes(option)
+                
+                return (
+                  <div key={optionId} className="space-y-2">
+                    <label
+                      htmlFor={optionId}
+                      className="flex items-start space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer touch-manipulation min-h-[48px] active:bg-muted"
+                    >
+                      <Checkbox
+                        id={optionId}
+                        checked={isChecked}
+                        onCheckedChange={(checked) => {
+                          const currentValues = checkboxValues || []
+                          let newValues: string[]
+                          
+                          if (checked) {
+                            // Adicionar opção selecionada
+                            newValues = [...currentValues, option]
+                          } else {
+                            // Remover opção desmarcada
+                            newValues = currentValues.filter(v => v !== option)
+                          }
+                          
+                          setValue(fieldId as keyof FormData, newValues as any)
+                        }}
+                        className="h-5 w-5 mt-0.5"
+                      />
+                      <Label htmlFor={optionId} className="font-normal cursor-pointer text-base sm:text-sm flex-1">
+                        {option}
+                      </Label>
+                    </label>
+                    {/* Mostrar campo "outros" se esta opção for selecionada e tiver has_other_option */}
+                    {isChecked && question.has_other_option && option.toLowerCase().includes('outro') && (
+                      <div className="space-y-2 ml-8 mt-2">
+                        <Label htmlFor={`${optionId}_other`} className="text-sm font-medium">
+                          {question.other_option_label || 'Qual?'}
+                        </Label>
+                        <Input
+                          id={`${optionId}_other`}
+                          value={otherOptionValues[`${fieldId}_${option}`] || ''}
+                          onChange={(e) => {
+                            const value = e.target.value
+                            setOtherOptionValues(prev => ({ ...prev, [`${fieldId}_${option}`]: value }))
+                          }}
+                          placeholder={question.other_option_label || 'Especifique...'}
+                          className="min-h-[48px] text-base"
+                          required={question.required}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
             {error && (
-              <p className="text-sm text-red-500 ml-11">{error.message as string}</p>
+              <p className="text-sm text-red-500">{error.message as string}</p>
             )}
           </div>
         )

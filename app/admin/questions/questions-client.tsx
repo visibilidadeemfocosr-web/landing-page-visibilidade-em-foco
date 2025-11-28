@@ -62,8 +62,9 @@ function FormattedQuestionText({ html }: { html: string }) {
   return <span>{html}</span>
 }
 
+
 // Componente SortableItem para cada pergunta
-function SortableQuestionItem({ question, onEdit, onDelete }: { question: Question; onEdit: (q: Question) => void; onDelete: (id: string) => void }) {
+function SortableQuestionItem({ question, onEdit, onDelete, sequentialNumber }: { question: Question; onEdit: (q: Question) => void; onDelete: (id: string) => void; sequentialNumber: number }) {
   const {
     attributes,
     listeners,
@@ -95,7 +96,7 @@ function SortableQuestionItem({ question, onEdit, onDelete }: { question: Questi
           >
             <GripVertical className="h-5 w-5 text-muted-foreground" />
           </button>
-          <span className="text-sm text-muted-foreground">#{question.order}</span>
+          <span className="text-sm text-muted-foreground">#{sequentialNumber}</span>
           <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded">
             {translateFieldType(question.field_type)}
           </span>
@@ -287,9 +288,116 @@ export default function AdminQuestionsClient() {
     try {
       const url = '/api/admin/questions'
       const method = editingQuestion ? 'PUT' : 'POST'
+      
+      // Normalizar seção (vazio vira null)
+      const newSection = formData.section?.trim() || null
+      const normalizedSection = newSection === '' ? null : newSection
+      
+      // Verificar se o bloco mudou ao editar
+      const oldSection = editingQuestion ? (editingQuestion.section || null) : null
+      const sectionChanged = editingQuestion && oldSection !== normalizedSection
+      
+      if (sectionChanged && editingQuestion) {
+        // Se o bloco mudou, precisamos recalcular as ordens
+        const sourceSection = oldSection || 'Sem seção'
+        const targetSection = normalizedSection || 'Sem seção'
+        
+        // Perguntas da seção de origem (sem a que está sendo movida)
+        const sourceQuestions = questions
+          .filter(q => {
+            const qSection = q.section || 'Sem seção'
+            return qSection === sourceSection && q.id !== editingQuestion.id
+          })
+          .sort((a, b) => a.order - b.order)
+        
+        // Perguntas da seção de destino (incluindo a que está sendo movida)
+        const targetQuestions = questions
+          .filter(q => {
+            const qSection = q.section || 'Sem seção'
+            return qSection === targetSection && q.id !== editingQuestion.id
+          })
+          .sort((a, b) => a.order - b.order)
+        
+        // Adicionar a pergunta sendo editada no final do bloco de destino
+        targetQuestions.push({ ...editingQuestion, section: normalizedSection })
+        
+        try {
+          // Recalcular ordens da seção de origem
+          if (sourceQuestions.length > 0) {
+            const sourceMinOrder = Math.min(...sourceQuestions.map(q => q.order))
+            const sourceUpdatePromises = sourceQuestions.map((question, index) => {
+              const newOrder = sourceMinOrder + index
+              return fetch('/api/admin/questions', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  id: question.id,
+                  text: question.text,
+                  field_type: question.field_type,
+                  required: question.required,
+                  order: newOrder,
+                  section: question.section || null,
+                  options: question.options || [],
+                  min_value: question.min_value || null,
+                  max_value: question.max_value || null,
+                  placeholder: question.placeholder || null,
+                  has_other_option: question.has_other_option || false,
+                  other_option_label: question.other_option_label || null,
+                  active: question.active,
+                }),
+              })
+            })
+            await Promise.all(sourceUpdatePromises)
+          }
+          
+          // Recalcular ordens da seção de destino
+          if (targetQuestions.length > 0) {
+            const targetMinOrder = targetQuestions.length > 1
+              ? Math.min(...targetQuestions.filter(q => q.id !== editingQuestion.id).map(q => q.order))
+              : 0
+            
+            const targetUpdatePromises = targetQuestions.map((question, index) => {
+              const newOrder = targetMinOrder + index
+              const isEditedQuestion = question.id === editingQuestion.id
+              
+              return fetch('/api/admin/questions', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  id: question.id,
+                  text: isEditedQuestion ? formData.text : question.text,
+                  field_type: isEditedQuestion ? formData.field_type : question.field_type,
+                  required: isEditedQuestion ? formData.required : question.required,
+                  order: newOrder,
+                  section: normalizedSection,
+                  options: isEditedQuestion ? formData.options : question.options || [],
+                  min_value: isEditedQuestion ? formData.min_value : question.min_value || null,
+                  max_value: isEditedQuestion ? formData.max_value : question.max_value || null,
+                  placeholder: isEditedQuestion ? formData.placeholder : question.placeholder || null,
+                  has_other_option: isEditedQuestion ? formData.has_other_option : question.has_other_option || false,
+                  other_option_label: isEditedQuestion ? formData.other_option_label : question.other_option_label || null,
+                  active: isEditedQuestion ? formData.active : question.active,
+                }),
+              })
+            })
+            await Promise.all(targetUpdatePromises)
+          }
+          
+          toast.success('Pergunta movida para outro bloco e atualizada!')
+          setDialogOpen(false)
+          setDialogSection(null)
+          setEditingQuestion(null)
+          loadQuestions()
+          return
+        } catch (error: any) {
+          throw new Error('Erro ao mover pergunta entre blocos: ' + (error.message || 'Erro desconhecido'))
+        }
+      }
+      
+      // Caso normal: sem mudança de bloco
       const body = editingQuestion 
-        ? { id: editingQuestion.id, ...formData }
-        : { ...formData, section: dialogSection || formData.section }
+        ? { id: editingQuestion.id, ...formData, section: normalizedSection }
+        : { ...formData, section: dialogSection || normalizedSection }
 
       const response = await fetch(url, {
         method,
@@ -434,27 +542,72 @@ export default function AdminQuestionsClient() {
     })
   )
 
-  const handleDragEnd = async (event: DragEndEvent, sectionQuestions: Question[], section: string) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
 
     if (!over || active.id === over.id) {
       return
     }
 
-    const oldIndex = sectionQuestions.findIndex((q) => q.id === active.id)
-    const newIndex = sectionQuestions.findIndex((q) => q.id === over.id)
-
-    if (oldIndex === -1 || newIndex === -1) {
+    // Encontrar a pergunta que está sendo arrastada
+    const draggedQuestion = questions.find(q => q.id === active.id)
+    if (!draggedQuestion) {
       return
     }
 
-    // Reordenar localmente
-    const reorderedQuestions = arrayMove(sectionQuestions, oldIndex, newIndex)
+    // Determinar a seção de origem
+    const sourceSection = draggedQuestion.section || 'Sem seção'
 
-    // Calcular a ordem baseada na ordem mínima da seção
-    const minOrder = Math.min(...sectionQuestions.map(q => q.order))
+    // Verificar se está tentando arrastar para outra seção
+    let targetSection: string | null = null
     
-    // Atualizar a ordem no banco de dados
+    // Verificar se o over é uma seção ou uma pergunta
+    if (typeof over.id === 'string' && over.id.startsWith('section-')) {
+      // Arrastou para uma área de seção
+      const sectionId = over.id.replace('section-', '').replace('-end', '')
+      targetSection = sectionId
+    } else {
+      // Arrastou para outra pergunta
+      const targetQuestion = questions.find(q => q.id === over.id)
+      if (targetQuestion) {
+        targetSection = targetQuestion.section || 'Sem seção'
+      }
+    }
+
+    // Se está tentando arrastar para outro bloco, bloquear e mostrar mensagem
+    if (targetSection !== null && targetSection !== sourceSection) {
+      toast.info('Para mover perguntas entre blocos, edite a pergunta e altere o bloco no campo "Bloco/Seção"')
+      return
+    }
+
+    // Apenas permitir reordenar dentro do mesmo bloco
+    const sourceQuestions = questions
+      .filter(q => (q.section || 'Sem seção') === sourceSection)
+      .sort((a, b) => a.order - b.order)
+
+    // Determinar a posição de destino
+    let targetIndex: number
+    
+    if (typeof over.id === 'string' && over.id.startsWith('section-')) {
+      // Se arrastou para uma área de seção, colocar no final
+      targetIndex = sourceQuestions.length
+    } else {
+      // Arrastou para outra pergunta no mesmo bloco
+      targetIndex = sourceQuestions.findIndex(q => q.id === over.id)
+      if (targetIndex === -1) {
+        return
+      }
+    }
+
+    // Reordenar dentro do mesmo bloco
+    const oldIndex = sourceQuestions.findIndex(q => q.id === active.id)
+    if (oldIndex === -1 || oldIndex === targetIndex) {
+      return
+    }
+
+    const reorderedQuestions = arrayMove(sourceQuestions, oldIndex, targetIndex)
+    const minOrder = Math.min(...sourceQuestions.map(q => q.order))
+
     try {
       const updatePromises = reorderedQuestions.map((question, index) => {
         const newOrder = minOrder + index
@@ -472,6 +625,8 @@ export default function AdminQuestionsClient() {
             min_value: question.min_value || null,
             max_value: question.max_value || null,
             placeholder: question.placeholder || null,
+            has_other_option: question.has_other_option || false,
+            other_option_label: question.other_option_label || null,
             active: question.active,
           }),
         })
@@ -670,17 +825,35 @@ export default function AdminQuestionsClient() {
               )}
               
               {editingQuestion && (
-                <div>
+                <div className="w-full">
                   <Label>Bloco/Seção</Label>
-                  <Input
-                    value={formData.section}
-                    onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                    placeholder="Ex: Dados Pessoais, Endereço, etc."
-                    className="mt-1.5"
-                    disabled
-                  />
+                  <Select
+                    value={formData.section || 'Sem seção'}
+                    onValueChange={(value) => setFormData({ ...formData, section: value === 'Sem seção' ? '' : value })}
+                  >
+                    <SelectTrigger className="mt-1.5 w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Sem seção">Sem seção</SelectItem>
+                      {(() => {
+                        // Obter todas as seções únicas das perguntas
+                        const sections = new Set<string>()
+                        questions.forEach(q => {
+                          if (q.section) {
+                            sections.add(q.section)
+                          }
+                        })
+                        return Array.from(sections).sort().map((section) => (
+                          <SelectItem key={section} value={section}>
+                            {section}
+                          </SelectItem>
+                        ))
+                      })()}
+                    </SelectContent>
+                  </Select>
                   <p className="text-xs text-muted-foreground mt-1.5">
-                    O bloco/seção não pode ser alterado durante a edição. Para alterar, mova a pergunta para outro bloco.
+                    Selecione o bloco/seção para esta pergunta. Ao alterar, a ordem será ajustada automaticamente.
                   </p>
                 </div>
               )}
@@ -794,7 +967,7 @@ export default function AdminQuestionsClient() {
             </div>
 
             {/* Seção: Opções Condicionais */}
-            {(formData.field_type === 'select' || formData.field_type === 'radio') && (
+            {(formData.field_type === 'select' || formData.field_type === 'radio' || formData.field_type === 'checkbox') && (
               <div className="space-y-4 mb-6">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="h-px flex-1 bg-border"></div>
@@ -991,6 +1164,15 @@ export default function AdminQuestionsClient() {
 
       <div className="space-y-6">
         {(() => {
+          // Ordenar todas as perguntas por ordem para calcular numeração sequencial global
+          const sortedQuestions = [...questions].sort((a, b) => a.order - b.order)
+          
+          // Criar mapa de ID da pergunta para número sequencial
+          const questionSequentialMap = new Map<string, number>()
+          sortedQuestions.forEach((question, index) => {
+            questionSequentialMap.set(question.id, index + 1)
+          })
+          
           // Agrupar perguntas por seção
           const grouped = questions.reduce((acc, question) => {
             const section = question.section || 'Sem seção'
@@ -1028,85 +1210,86 @@ export default function AdminQuestionsClient() {
             const sectionQuestions = grouped[section].sort((a, b) => a.order - b.order)
             
             return (
-              <Card key={section} className="border-2">
-                <CardHeader className="pb-4">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1">
-                      {editingSection === section ? (
-                        <div className="flex items-center gap-2 mb-2">
-                          <Input
-                            value={editingSectionName}
-                            onChange={(e) => setEditingSectionName(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault()
-                                handleSaveSection(section, editingSectionName)
-                              } else if (e.key === 'Escape') {
-                                handleCancelEditSection()
-                              }
-                            }}
-                            className="text-xl sm:text-2xl font-bold text-primary"
-                            autoFocus
-                            placeholder="Nome do bloco"
-                          />
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => handleSaveSection(section, editingSectionName)}
-                            className="min-h-[44px] min-w-[44px]"
-                          >
-                            <Check className="h-4 w-4 text-green-600" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={handleCancelEditSection}
-                            className="min-h-[44px] min-w-[44px]"
-                          >
-                            <X className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-xl sm:text-2xl font-bold text-primary">
-                            {section}
-                          </h3>
-                          {section !== 'Sem seção' && (
+              <DndContext
+                key={section}
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <Card className="border-2">
+                  <CardHeader className="pb-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="flex-1">
+                        {editingSection === section ? (
+                          <div className="flex items-center gap-2 mb-2">
+                            <Input
+                              value={editingSectionName}
+                              onChange={(e) => setEditingSectionName(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault()
+                                  handleSaveSection(section, editingSectionName)
+                                } else if (e.key === 'Escape') {
+                                  handleCancelEditSection()
+                                }
+                              }}
+                              className="text-xl sm:text-2xl font-bold text-primary"
+                              autoFocus
+                              placeholder="Nome do bloco"
+                            />
                             <Button
-                              variant="ghost"
                               size="icon"
-                              onClick={() => handleEditSection(section)}
-                              className="h-8 w-8 min-h-[32px] min-w-[32px] opacity-60 hover:opacity-100"
-                              title="Editar nome do bloco"
+                              variant="outline"
+                              onClick={() => handleSaveSection(section, editingSectionName)}
+                              className="min-h-[44px] min-w-[44px]"
                             >
-                              <Edit className="h-4 w-4" />
+                              <Check className="h-4 w-4 text-green-600" />
                             </Button>
-                          )}
-                        </div>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={handleCancelEditSection}
+                              className="min-h-[44px] min-w-[44px]"
+                            >
+                              <X className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-xl sm:text-2xl font-bold text-primary">
+                              {section}
+                            </h3>
+                            {section !== 'Sem seção' && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditSection(section)}
+                                className="h-8 w-8 min-h-[32px] min-w-[32px] opacity-60 hover:opacity-100"
+                                title="Editar nome do bloco"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                        <p className="text-sm text-muted-foreground">
+                          {sectionQuestions.length} {sectionQuestions.length === 1 ? 'pergunta' : 'perguntas'}
+                        </p>
+                      </div>
+                      {section !== 'Sem seção' && !editingSection && (
+                        <Button
+                          onClick={() => openNewQuestionDialog(section)}
+                          disabled={dialogOpeningRef.current || dialogOpen}
+                          size="sm"
+                          className="min-h-[44px] touch-manipulation shrink-0"
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          Nova Pergunta
+                        </Button>
                       )}
-                      <p className="text-sm text-muted-foreground">
-                        {sectionQuestions.length} {sectionQuestions.length === 1 ? 'pergunta' : 'perguntas'}
-                      </p>
                     </div>
-                    {section !== 'Sem seção' && !editingSection && (
-                      <Button
-                        onClick={() => openNewQuestionDialog(section)}
-                        disabled={dialogOpeningRef.current || dialogOpen}
-                        size="sm"
-                        className="min-h-[44px] touch-manipulation shrink-0"
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Nova Pergunta
-                      </Button>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={(event) => handleDragEnd(event, sectionQuestions, section)}
-                  >
+                  </CardHeader>
+                  <CardContent>
                     <SortableContext
                       items={sectionQuestions.map(q => q.id)}
                       strategy={verticalListSortingStrategy}
@@ -1118,25 +1301,26 @@ export default function AdminQuestionsClient() {
                             question={question}
                             onEdit={handleEdit}
                             onDelete={handleDeleteClick}
+                            sequentialNumber={questionSequentialMap.get(question.id) || question.order}
                           />
                         ))}
                       </div>
                     </SortableContext>
-                  </DndContext>
-                  
-                  {section === 'Sem seção' && (
-                    <Button
-                      variant="outline"
-                      onClick={() => openNewQuestionDialog(null)}
-                      disabled={dialogOpeningRef.current || dialogOpen}
-                      className="w-full min-h-[48px] touch-manipulation border-dashed mt-3"
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Adicionar Pergunta sem Seção
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+                    
+                    {section === 'Sem seção' && (
+                      <Button
+                        variant="outline"
+                        onClick={() => openNewQuestionDialog(null)}
+                        disabled={dialogOpeningRef.current || dialogOpen}
+                        className="w-full min-h-[48px] touch-manipulation border-dashed mt-3"
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Adicionar Pergunta sem Seção
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              </DndContext>
             )
           })
         })()}
