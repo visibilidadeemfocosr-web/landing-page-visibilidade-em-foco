@@ -289,12 +289,12 @@ export default function AdminQuestionsClient() {
       const url = '/api/admin/questions'
       const method = editingQuestion ? 'PUT' : 'POST'
       
-      // Normalizar seção (vazio vira null)
-      const newSection = formData.section?.trim() || null
-      const normalizedSection = newSection === '' ? null : newSection
+      // Normalizar seção (vazio vira undefined)
+      const newSection = formData.section?.trim() || undefined
+      const normalizedSection = newSection === '' ? undefined : newSection
       
       // Verificar se o bloco mudou ao editar
-      const oldSection = editingQuestion ? (editingQuestion.section || null) : null
+      const oldSection = editingQuestion ? (editingQuestion.section || undefined) : undefined
       const sectionChanged = editingQuestion && oldSection !== normalizedSection
       
       if (sectionChanged && editingQuestion) {
@@ -319,7 +319,7 @@ export default function AdminQuestionsClient() {
           .sort((a, b) => a.order - b.order)
         
         // Adicionar a pergunta sendo editada no final do bloco de destino
-        targetQuestions.push({ ...editingQuestion, section: normalizedSection })
+        targetQuestions.push({ ...editingQuestion, section: normalizedSection || undefined })
         
         try {
           // Recalcular ordens da seção de origem
@@ -336,7 +336,7 @@ export default function AdminQuestionsClient() {
                   field_type: question.field_type,
                   required: question.required,
                   order: newOrder,
-                  section: question.section || null,
+                  section: question.section || undefined,
                   options: question.options || [],
                   min_value: question.min_value || null,
                   max_value: question.max_value || null,
@@ -369,7 +369,7 @@ export default function AdminQuestionsClient() {
                   field_type: isEditedQuestion ? formData.field_type : question.field_type,
                   required: isEditedQuestion ? formData.required : question.required,
                   order: newOrder,
-                  section: normalizedSection,
+                  section: normalizedSection || undefined,
                   options: isEditedQuestion ? formData.options : question.options || [],
                   min_value: isEditedQuestion ? formData.min_value : question.min_value || null,
                   max_value: isEditedQuestion ? formData.max_value : question.max_value || null,
@@ -396,8 +396,8 @@ export default function AdminQuestionsClient() {
       
       // Caso normal: sem mudança de bloco
       const body = editingQuestion 
-        ? { id: editingQuestion.id, ...formData, section: normalizedSection }
-        : { ...formData, section: dialogSection || normalizedSection }
+        ? { id: editingQuestion.id, ...formData, section: normalizedSection || undefined }
+        : { ...formData, section: dialogSection || normalizedSection || undefined }
 
       const response = await fetch(url, {
         method,
