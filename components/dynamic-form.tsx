@@ -37,14 +37,15 @@ function FormattedText({ html }: { html: string }) {
       .replace(/<style[^>]*>.*?<\/style>/gi, '') // Remover estilos inline
     
     return (
-      <span 
+      <div 
         dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
-        className="inline [&_strong]:font-bold [&_em]:italic [&_i]:italic [&_p]:mb-0 [&_p]:inline [&_p_strong]:font-bold [&_p_em]:italic [&_p]:leading-normal [&_p]:m-0 [&_p]:p-0"
+        className="[&_strong]:font-bold [&_em]:italic [&_i]:italic [&_p]:block [&_p]:mb-2 [&_p]:last:mb-0 [&_p_strong]:font-bold [&_p_em]:italic [&_br]:block"
       />
     )
   }
   
-  return <span>{html}</span>
+  // Para texto sem HTML, preservar quebras de linha
+  return <div className="whitespace-pre-line">{html}</div>
 }
 
 export function DynamicForm({ questions, previewMode = false, onSuccess }: DynamicFormProps) {
@@ -55,6 +56,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   const [submitted, setSubmitted] = useState(false)
   const [cepBairro, setCepBairro] = useState<string>('') // Armazenar bairro do CEP
   const [otherOptionValues, setOtherOptionValues] = useState<Record<string, string>>({}) // Armazenar valores de "outros"
+  const [currentBlockIndex, setCurrentBlockIndex] = useState(0) // Controlar qual bloco está sendo exibido
 
   // Criar schema Zod dinamicamente
   const createSchema = () => {
@@ -915,86 +917,219 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       )}
 
       {/* Mostrar outras perguntas apenas se CEP for explicitamente válido (true) */}
-      {showOtherQuestions && otherQuestions.length > 0 && (
-        <div className="space-y-6 sm:space-y-8">
-          {(() => {
-            // Agrupar perguntas por seção
-            const grouped = otherQuestions.reduce((acc, question) => {
-              const section = question.section || 'Geral'
-              if (!acc[section]) {
-                acc[section] = []
+      {showOtherQuestions && otherQuestions.length > 0 && (() => {
+        // Agrupar perguntas por seção
+        const grouped = otherQuestions.reduce((acc, question) => {
+          const section = question.section || 'Geral'
+          if (!acc[section]) {
+            acc[section] = []
+          }
+          acc[section].push(question)
+          return acc
+        }, {} as Record<string, Question[]>)
+
+        // Ordenar perguntas dentro de cada seção e ordenar seções
+        const sortedSections = Object.keys(grouped).sort((a, b) => {
+          if (a === 'Geral') return 1
+          if (b === 'Geral') return -1
+          return a.localeCompare(b)
+        })
+
+        const totalBlocks = sortedSections.length
+        const currentBlock = sortedSections[currentBlockIndex]
+        const isLastBlock = currentBlockIndex === totalBlocks - 1
+
+        // Função para validar se todas as perguntas obrigatórias do bloco foram respondidas
+        const validateCurrentBlock = async (): Promise<boolean> => {
+          const blockQuestions = grouped[currentBlock] || []
+          const requiredQuestions = blockQuestions.filter(q => q.required)
+          
+          // Validar cada pergunta obrigatória do bloco
+          let allValid = true
+          for (const question of requiredQuestions) {
+            const fieldId = question.id
+            const value = watch(fieldId as keyof FormData)
+            
+            // Verificar se o campo está vazio baseado no tipo
+            let isEmpty = false
+            if (value === undefined || value === null || value === '') {
+              isEmpty = true
+            } else if (Array.isArray(value) && value.length === 0) {
+              isEmpty = true
+            } else if (typeof value === 'number' && isNaN(value)) {
+              isEmpty = true
+            }
+            
+            if (isEmpty) {
+              // Tentar trigger do react-hook-form para mostrar erro
+              const isValid = await trigger(fieldId as keyof FormData)
+              if (!isValid) {
+                allValid = false
               }
-              acc[section].push(question)
-              return acc
-            }, {} as Record<string, Question[]>)
+            }
+          }
+          
+          return allValid
+        }
 
-            // Ordenar perguntas dentro de cada seção e ordenar seções
-            const sortedSections = Object.keys(grouped).sort((a, b) => {
-              if (a === 'Geral') return 1
-              if (b === 'Geral') return -1
-              return a.localeCompare(b)
-            })
+        // Função para avançar para o próximo bloco
+        const handleContinue = async () => {
+          const isValid = await validateCurrentBlock()
+          if (isValid && !isLastBlock) {
+            setCurrentBlockIndex(prev => prev + 1)
+            // Scroll para o topo do formulário após um pequeno delay para garantir que o DOM foi atualizado
+            // Funciona tanto no desktop quanto no mobile
+            setTimeout(() => {
+              // Procurar pelo container scrollável do Dialog (onde está o formulário)
+              // O Dialog tem uma estrutura: DialogContent > div.overflow-y-auto > formulário
+              const dialogContent = document.querySelector('[data-slot="dialog-content"]')
+              let scrollableContainer: Element | null = null
+              
+              if (dialogContent) {
+                // Procurar pelo div com overflow-y-auto dentro do DialogContent
+                scrollableContainer = Array.from(dialogContent.querySelectorAll('div')).find(
+                  div => div.classList.contains('overflow-y-auto')
+                ) || null
+              }
+              
+              // Se não encontrou, procurar em toda a página
+              if (!scrollableContainer) {
+                scrollableContainer = document.querySelector('.overflow-y-auto')
+              }
+              
+              if (scrollableContainer) {
+                // Fazer scroll do container, não da página
+                scrollableContainer.scrollTo({ top: 0, behavior: 'smooth' })
+              } else {
+                // Fallback: tentar scroll para o elemento do formulário
+                const formElement = document.querySelector('form')
+                if (formElement) {
+                  formElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }
+              }
+            }, 150)
+          }
+        }
 
-            return sortedSections.map((section) => (
-              <div key={section} className="space-y-6 sm:space-y-8">
-                {section !== 'Geral' && (
-                  <div className="border-b-2 border-primary/30 pb-3 -mx-2 sm:-mx-0">
-                    <h3 className="text-xl sm:text-2xl font-bold text-primary">{section}</h3>
-                  </div>
-                )}
-                {grouped[section]
-                  .sort((a, b) => a.order - b.order)
-                  .map((question) => (
-                    <div key={question.id} className="pb-2 sm:pb-3">
-                      {renderField(question)}
-                    </div>
-                  ))}
+        return (
+          <div className="space-y-6 sm:space-y-8">
+            {/* Indicador de progresso */}
+            {totalBlocks > 1 && (
+              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-muted/30 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs sm:text-sm font-medium text-muted-foreground">
+                    Bloco {currentBlockIndex + 1} de {totalBlocks}
+                  </span>
+                  <span className="text-xs sm:text-sm font-medium text-primary">
+                    {Math.round(((currentBlockIndex + 1) / totalBlocks) * 100)}%
+                  </span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2 sm:h-2.5">
+                  <div 
+                    className="bg-primary h-2 sm:h-2.5 rounded-full transition-all duration-300"
+                    style={{ width: `${((currentBlockIndex + 1) / totalBlocks) * 100}%` }}
+                  />
+                </div>
               </div>
-            ))
-          })()}
-        </div>
-      )}
+            )}
 
-      {/* Mostrar consentimento e botão apenas se CEP for válido */}
-      {showOtherQuestions && (
-        <>
-          {previewMode && (
-            <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
-              <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
-                📋 Modo Preview: Este é apenas uma visualização. O formulário não será enviado.
-              </p>
+            {/* Mostrar apenas o bloco atual */}
+            <div key={currentBlock} className="space-y-6 sm:space-y-8">
+              {currentBlock !== 'Geral' && (
+                <div className="border-b-2 border-primary/30 pb-3 -mx-2 sm:-mx-0">
+                  <h3 className="text-xl sm:text-2xl font-bold text-primary">{currentBlock}</h3>
+                </div>
+              )}
+              {grouped[currentBlock]
+                .sort((a, b) => a.order - b.order)
+                .map((question) => (
+                  <div key={question.id} className="pb-2 sm:pb-3">
+                    {renderField(question)}
+                  </div>
+                ))}
             </div>
-          )}
-          <div className="flex items-start gap-3 py-4 bg-muted/30 p-4 sm:p-6 rounded-lg touch-manipulation">
-            <Checkbox
-              id="consent"
-              checked={watch('consent')}
-              onCheckedChange={(checked) => setValue('consent', checked as boolean)}
-              className="h-5 w-5 mt-0.5 flex-shrink-0"
-            />
-            <label htmlFor="consent" className="text-sm sm:text-base leading-relaxed cursor-pointer flex-1">
-              Eu concordo com o uso das minhas informações para o projeto Visibilidade em Foco e estou ciente dos meus direitos de privacidade conforme a LGPD. *
-            </label>
+
+            {/* Botão Continuar (exceto no último bloco) */}
+            {!isLastBlock && (
+              <div className="pt-4 pb-safe sm:pb-0">
+                <Button
+                  type="button"
+                  onClick={handleContinue}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-5 sm:py-6 text-base sm:text-lg font-semibold min-h-[56px] sm:min-h-[60px] touch-manipulation active:scale-[0.98] shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  Continuar
+                </Button>
+              </div>
+            )}
           </div>
-      {errors.consent?.message && (
-        <p className="text-sm text-red-500 ml-11">
-          {String(errors.consent.message)}
-        </p>
-      )}
+        )
+      })()}
 
-      <Button
-        type="submit"
-        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
-        disabled={loading || !watch('consent') || isCepInvalid || previewMode}
-      >
-            {previewMode ? 'Preview - Envio Desabilitado' : loading ? 'Enviando...' : 'Enviar Cadastro'}
-          </Button>
+      {/* Mostrar consentimento e botão apenas se CEP for válido e no último bloco */}
+      {showOtherQuestions && (() => {
+        // Agrupar perguntas por seção para determinar se é o último bloco
+        const grouped = otherQuestions.reduce((acc, question) => {
+          const section = question.section || 'Geral'
+          if (!acc[section]) {
+            acc[section] = []
+          }
+          acc[section].push(question)
+          return acc
+        }, {} as Record<string, Question[]>)
 
-          <p className="text-xs text-center text-muted-foreground pb-safe sm:pb-0">
-            * Campos obrigatórios
-          </p>
-        </>
-      )}
+        const sortedSections = Object.keys(grouped).sort((a, b) => {
+          if (a === 'Geral') return 1
+          if (b === 'Geral') return -1
+          return a.localeCompare(b)
+        })
+
+        const isLastBlock = currentBlockIndex === sortedSections.length - 1
+
+        // Só mostrar consentimento e botão de envio no último bloco
+        if (!isLastBlock) {
+          return null
+        }
+
+        return (
+          <>
+            {previewMode && (
+              <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                  📋 Modo Preview: Este é apenas uma visualização. O formulário não será enviado.
+                </p>
+              </div>
+            )}
+            <div className="flex items-start gap-3 py-4 bg-muted/30 p-4 sm:p-6 rounded-lg touch-manipulation">
+              <Checkbox
+                id="consent"
+                checked={watch('consent')}
+                onCheckedChange={(checked) => setValue('consent', checked as boolean)}
+                className="h-5 w-5 mt-0.5 flex-shrink-0"
+              />
+              <label htmlFor="consent" className="text-sm sm:text-base leading-relaxed cursor-pointer flex-1">
+                Eu concordo com o uso das minhas informações para o projeto Visibilidade em Foco e estou ciente dos meus direitos de privacidade conforme a LGPD. *
+              </label>
+            </div>
+            {errors.consent?.message && (
+              <p className="text-sm text-red-500 ml-11">
+                {String(errors.consent.message)}
+              </p>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
+              disabled={loading || !watch('consent') || isCepInvalid || previewMode}
+            >
+              {previewMode ? 'Preview - Envio Desabilitado' : loading ? 'Enviando...' : 'Enviar Cadastro'}
+            </Button>
+
+            <p className="text-xs text-center text-muted-foreground pb-safe sm:pb-0">
+              * Campos obrigatórios
+            </p>
+          </>
+        )
+      })()}
     </form>
   )
 }
@@ -1315,14 +1450,7 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
               {addressData.cidade && (
                 <div className="space-y-1.5">
                   <Label className="text-xs sm:text-sm text-muted-foreground font-medium">
-                    {cidadeQuestion ? (
-                      <>
-                        <FormattedText html={cidadeQuestion.text} />
-                        {cidadeQuestion.required && <span className="text-red-500 ml-1">*</span>}
-                      </>
-                    ) : (
-                      'Cidade'
-                    )}
+                    Cidade
                   </Label>
                   <Input
                     {...(cidadeQuestion ? register(cidadeQuestion.id as keyof FormData) : {})}

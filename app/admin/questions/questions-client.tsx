@@ -52,14 +52,15 @@ function FormattedQuestionText({ html }: { html: string }) {
   
   if (hasHtml) {
     return (
-      <span 
+      <div 
         dangerouslySetInnerHTML={{ __html: html }}
-        className="[&_strong]:font-bold [&_em]:italic [&_i]:italic [&_p]:mb-0 [&_p]:inline [&_p_strong]:font-bold [&_p_em]:italic"
+        className="[&_strong]:font-bold [&_em]:italic [&_i]:italic [&_p]:block [&_p]:mb-2 [&_p]:last:mb-0 [&_p_strong]:font-bold [&_p_em]:italic [&_br]:block"
       />
     )
   }
   
-  return <span>{html}</span>
+  // Para texto sem HTML, preservar quebras de linha
+  return <div className="whitespace-pre-line">{html}</div>
 }
 
 
@@ -111,9 +112,9 @@ function SortableQuestionItem({ question, onEdit, onDelete, sequentialNumber }: 
             </span>
           )}
         </div>
-        <p className="font-medium text-base">
+        <div className="font-medium text-base">
           <FormattedQuestionText html={question.text} />
-        </p>
+        </div>
       </div>
       <div className="flex gap-2 ml-4">
         <Button
@@ -140,6 +141,13 @@ function SortableQuestionItem({ question, onEdit, onDelete, sequentialNumber }: 
 // Componente de Editor Rico
 function RichTextEditor({ value, onChange }: { value: string; onChange: (html: string) => void }) {
   const [mounted, setMounted] = useState(false)
+  const [isBoldActive, setIsBoldActive] = useState(false)
+  const [isItalicActive, setIsItalicActive] = useState(false)
+
+  // Função helper para remover tags <strong> do HTML
+  const removeStrongTags = (html: string): string => {
+    return html.replace(/<strong[^>]*>/gi, '').replace(/<\/strong>/gi, '')
+  }
 
   useEffect(() => {
     setMounted(true)
@@ -150,7 +158,28 @@ function RichTextEditor({ value, onChange }: { value: string; onChange: (html: s
     content: value || '',
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML())
+      let html = editor.getHTML()
+      const isBold = editor.isActive('bold')
+      
+      // SEMPRE limpar tags strong se o editor não detecta bold
+      // Isso garante que o HTML esteja sempre sincronizado com as marks do ProseMirror
+      if (!isBold && html.includes('<strong>')) {
+        html = removeStrongTags(html)
+        // Não atualizar o conteúdo aqui para evitar loops infinitos
+        // O onChange será chamado com o HTML limpo
+      }
+      
+      // SEMPRE chamar onChange com HTML (limpo se necessário)
+      onChange(html)
+      
+      // Atualizar estado dos botões
+      setIsBoldActive(isBold)
+      setIsItalicActive(editor.isActive('italic'))
+    },
+    onSelectionUpdate: ({ editor }) => {
+      // Atualizar estado dos botões quando a seleção muda
+      setIsBoldActive(editor.isActive('bold'))
+      setIsItalicActive(editor.isActive('italic'))
     },
     editorProps: {
       attributes: {
@@ -161,7 +190,11 @@ function RichTextEditor({ value, onChange }: { value: string; onChange: (html: s
 
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
+      // Carregar o conteúdo como está (sem limpar automaticamente)
       editor.commands.setContent(value || '')
+      // Atualizar estado após carregar conteúdo
+      setIsBoldActive(editor.isActive('bold'))
+      setIsItalicActive(editor.isActive('italic'))
     }
   }, [value, editor])
 
@@ -179,21 +212,72 @@ function RichTextEditor({ value, onChange }: { value: string; onChange: (html: s
       <div className="flex items-center gap-1 p-2 border-b bg-muted/50">
         <Button
           type="button"
-          variant={editor.isActive('bold') ? 'default' : 'ghost'}
+          variant={isBoldActive ? 'default' : 'ghost'}
           size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            
+            const wasBold = editor.isActive('bold')
+            
+            if (wasBold) {
+              // Usar a API do ProseMirror para remover marks de bold
+              // Primeiro, remover a mark de bold usando unsetMark
+              editor.chain().focus().unsetMark('bold').run()
+              
+              // Aguardar um frame para o ProseMirror processar
+              requestAnimationFrame(() => {
+                // Obter HTML após remover a mark
+                let html = editor.getHTML()
+                
+                // Se ainda há tags <strong>, remover manualmente
+                if (html.includes('<strong>')) {
+                  html = removeStrongTags(html)
+                  const { from, to } = editor.state.selection
+                  editor.commands.setContent(html, false)
+                  setTimeout(() => {
+                    editor.commands.setTextSelection({ from, to })
+                    editor.commands.focus()
+                  }, 0)
+                }
+                
+                // Chamar onChange com HTML limpo
+                onChange(html)
+                
+                // Atualizar estado
+                setIsBoldActive(false)
+              })
+            } else {
+              // Aplicar negrito usando a API do ProseMirror
+              editor.chain().focus().setMark('bold').run()
+              setIsBoldActive(true)
+            }
+          }}
           className="h-8 w-8 p-0"
-          title="Negrito (Ctrl+B)"
+          title="Negrito (Ctrl+B) - Selecione o texto e clique para aplicar/remover"
         >
           <BoldIcon className="h-4 w-4" />
         </Button>
         <Button
           type="button"
-          variant={editor.isActive('italic') ? 'default' : 'ghost'}
+          variant={isItalicActive ? 'default' : 'ghost'}
           size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
+          onMouseDown={(e) => {
+            // Prevenir que o botão remova o foco do editor
+            e.preventDefault()
+            // Verificar estado atual
+            const wasItalic = editor.isActive('italic')
+            // Se está em itálico, remover explicitamente
+            if (wasItalic) {
+              // Remover itálico mantendo outras formatações
+              editor.chain().focus().unsetMark('italic', { extendEmptyMarkRange: false }).run()
+            } else {
+              // Aplicar itálico
+              editor.chain().focus().setMark('italic').run()
+            }
+          }}
           className="h-8 w-8 p-0"
-          title="Itálico (Ctrl+I)"
+          title="Itálico (Ctrl+I) - Selecione o texto e clique para aplicar/remover"
         >
           <ItalicIcon className="h-4 w-4" />
         </Button>
@@ -929,11 +1013,20 @@ export default function AdminQuestionsClient() {
                 <div className="mt-1.5">
                   <RichTextEditor
                     value={formData.text}
-                    onChange={(html) => setFormData({ ...formData, text: html })}
+                    onChange={(html) => {
+                      // Garantir que o HTML esteja limpo antes de salvar
+                      let cleanHtml = html
+                      // Se o editor não está em modo bold, remover todas as tags <strong>
+                      if (cleanHtml.includes('<strong>')) {
+                        // Verificar se realmente deve ter negrito (isso será verificado pelo editor)
+                        // Por enquanto, vamos confiar no editor, mas podemos adicionar lógica aqui se necessário
+                      }
+                      setFormData({ ...formData, text: cleanHtml })
+                    }}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1.5">
-                  Use os botões acima para formatar o texto (negrito, itálico)
+                  Selecione o texto e use os botões acima para aplicar ou remover formatação (negrito, itálico)
                 </p>
               </div>
 
