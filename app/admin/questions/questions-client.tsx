@@ -774,17 +774,28 @@ export default function AdminQuestionsClient() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={(open) => {
-        setDialogOpen(open)
-        // Resetar estado de submissão quando o diálogo fecha
-        if (!open) {
+        // Só permitir fechar se não estiver submetendo
+        // O fechamento por clique fora será prevenido pelo onInteractOutside
+        if (open === false && !submittingRef.current) {
+          setDialogOpen(false)
+          // Resetar estado de submissão quando o diálogo fecha
           submittingRef.current = false
           setSubmitting(false)
           dialogOpeningRef.current = false
           setDialogSection(null)
           setEditingQuestion(null)
+        } else if (open === true) {
+          // Permitir abrir normalmente
+          setDialogOpen(true)
         }
       }}>
-        <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[95vh] overflow-y-auto p-0">
+        <DialogContent 
+          className="max-w-[95vw] sm:max-w-3xl max-h-[95vh] overflow-y-auto p-0"
+          onInteractOutside={(e) => {
+            // Prevenir fechamento ao clicar fora da modal
+            e.preventDefault()
+          }}
+        >
           <DialogHeader className="px-6 pt-6 pb-4 border-b">
             <DialogTitle className="text-2xl">
               {editingQuestion ? 'Editar Pergunta' : dialogSection ? `Nova Pergunta - ${dialogSection}` : 'Nova Pergunta'}
