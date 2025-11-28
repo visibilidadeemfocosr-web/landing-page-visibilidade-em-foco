@@ -15,9 +15,7 @@ const nextConfig = {
     ],
   },
   // Desabilitar Turbopack para usar webpack (necessário para módulos nativos)
-  experimental: {
-    turbo: false,
-  },
+  // Nota: turbo: false não é uma opção válida em experimental, removido
   // Configuração webpack para módulos nativos (canvas, chartjs-node-canvas)
   webpack: (config, { isServer }) => {
     if (isServer) {

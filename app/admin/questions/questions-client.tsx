@@ -234,7 +234,7 @@ function RichTextEditor({ value, onChange }: { value: string; onChange: (html: s
                 if (html.includes('<strong>')) {
                   html = removeStrongTags(html)
                   const { from, to } = editor.state.selection
-                  editor.commands.setContent(html, false)
+                  editor.commands.setContent(html, { emitUpdate: false })
                   setTimeout(() => {
                     editor.commands.setTextSelection({ from, to })
                     editor.commands.focus()
