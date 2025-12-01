@@ -379,13 +379,27 @@ export default function AdminQuestionsClient() {
   const [questionToDelete, setQuestionToDelete] = useState<string | null>(null)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [sectionOrder, setSectionOrder] = useState<Record<string, number>>({}) // Ordem customizada das seções
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    text: string
+    field_type: FieldType
+    required: boolean
+    order: number
+    section: string
+    options: string[]
+    min_value: number
+    max_value: number
+    placeholder: string
+    has_other_option: boolean
+    other_option_label: string
+    max_length: number | undefined
+    active: boolean
+  }>({
     text: '',
-    field_type: 'text' as FieldType,
+    field_type: 'text',
     required: false,
     order: 0,
     section: '',
-    options: [] as string[],
+    options: [],
     min_value: 1,
     max_value: 5,
     placeholder: '',
@@ -679,7 +693,7 @@ export default function AdminQuestionsClient() {
       placeholder: question.placeholder || '',
       has_other_option: question.has_other_option || false,
       other_option_label: question.other_option_label || 'Qual?',
-      max_length: question.max_length || undefined,
+      max_length: question.max_length ?? undefined,
       active: question.active,
     })
     setDialogOpen(true)
@@ -1520,7 +1534,7 @@ export default function AdminQuestionsClient() {
                           <DndContext
                             sensors={sensors}
                             collisionDetection={closestCenter}
-                            onDragEnd={(event) => handleDragEnd(event, sectionQuestions, section)}
+                            onDragEnd={handleDragEnd}
                           >
                             <Card className="border-2">
                               <CardHeader className="pb-4">
