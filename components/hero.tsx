@@ -94,7 +94,7 @@ export function Hero() {
                       Preencha o formulário abaixo para fazer parte do mapeamento Visibilidade em Foco. Seus dados serão tratados com total segurança e privacidade.
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="flex-1 overflow-y-auto px-4 sm:px-0 mt-4 pb-12 sm:pb-4 pb-safe">
+                  <div id="form-scroll-container" className="flex-1 overflow-y-auto px-4 sm:px-0 mt-4 pb-12 sm:pb-4 pb-safe">
                     <RegistrationFormLoader onSuccess={() => setDialogOpen(false)} />
                   </div>
                 </DialogContent>

@@ -37,15 +37,14 @@ function FormattedText({ html }: { html: string }) {
       .replace(/<style[^>]*>.*?<\/style>/gi, '') // Remover estilos inline
     
     return (
-      <div 
+      <span 
         dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
-        className="[&_strong]:font-bold [&_em]:italic [&_i]:italic [&_p]:block [&_p]:mb-2 [&_p]:last:mb-0 [&_p_strong]:font-bold [&_p_em]:italic [&_br]:block"
+        className="inline [&_strong]:font-bold [&_em]:italic [&_i]:italic [&_p]:mb-0 [&_p]:inline [&_p_strong]:font-bold [&_p_em]:italic [&_p]:leading-normal [&_p]:m-0 [&_p]:p-0"
       />
     )
   }
   
-  // Para texto sem HTML, preservar quebras de linha
-  return <div className="whitespace-pre-line">{html}</div>
+  return <span>{html}</span>
 }
 
 export function DynamicForm({ questions, previewMode = false, onSuccess }: DynamicFormProps) {
@@ -56,7 +55,8 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   const [submitted, setSubmitted] = useState(false)
   const [cepBairro, setCepBairro] = useState<string>('') // Armazenar bairro do CEP
   const [otherOptionValues, setOtherOptionValues] = useState<Record<string, string>>({}) // Armazenar valores de "outros"
-  const [currentBlockIndex, setCurrentBlockIndex] = useState(0) // Controlar qual bloco está sendo exibido
+  const [currentBlockIndex, setCurrentBlockIndex] = useState(0) // Índice do bloco atual na navegação
+  const [redeSocialAnswer, setRedeSocialAnswer] = useState<string | null>(null) // Resposta da pergunta sobre rede social
 
   // Criar schema Zod dinamicamente
   const createSchema = () => {
@@ -68,33 +68,80 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       switch (question.field_type) {
         case 'text':
         case 'textarea':
-          fieldSchema = question.required ? z.string().min(1, 'Campo obrigatório') : z.string().optional()
+          // Verificar se é um campo de e-mail
+          const isEmailField = question.text.toLowerCase().includes('email') || 
+                               question.text.toLowerCase().includes('e-mail') ||
+                               question.placeholder?.toLowerCase().includes('email') ||
+                               question.placeholder?.toLowerCase().includes('e-mail')
+          
+          if (isEmailField) {
+            // Validação de e-mail
+            if (question.required) {
+              fieldSchema = z.string()
+                .min(1, 'Esta pergunta é obrigatória')
+                .email('Por favor, informe um e-mail válido')
+            } else {
+              // Se não for obrigatório, permitir vazio ou e-mail válido
+              fieldSchema = z.union([
+                z.string().email('Por favor, informe um e-mail válido'),
+                z.literal('')
+              ]).optional()
+            }
+          } else {
+            fieldSchema = question.required ? z.string().min(1, 'Esta pergunta é obrigatória') : z.string().optional()
+          }
           break
         case 'number':
-          fieldSchema = question.required ? z.number() : z.number().optional()
+          fieldSchema = question.required 
+            ? z.number({ required_error: 'Esta pergunta é obrigatória', invalid_type_error: 'Por favor, informe um número válido' })
+            : z.number().optional()
           break
         case 'yesno':
-          fieldSchema = z.enum(['sim', 'nao', 'prefiro-nao-responder'])
+          fieldSchema = question.required
+            ? z.enum(['sim', 'nao'], {
+                required_error: 'Esta pergunta é obrigatória',
+                invalid_type_error: 'Por favor, selecione uma opção'
+              })
+            : z.enum(['sim', 'nao'], {
+                invalid_type_error: 'Por favor, selecione uma opção'
+              }).optional()
           break
         case 'checkbox':
-          // Checkbox agora aceita array de strings (múltiplas seleções)
-          if (question.required) {
-            fieldSchema = z.array(z.string()).min(1, 'Selecione pelo menos uma opção')
+          // Se tem opções, é múltipla seleção (array de strings)
+          // Se não tem opções, é checkbox simples (boolean)
+          if (question.options && question.options.length > 0) {
+            fieldSchema = question.required
+              ? z.array(z.string()).min(1, 'Esta pergunta é obrigatória')
+              : z.array(z.string()).optional()
           } else {
-            fieldSchema = z.array(z.string()).optional()
+            fieldSchema = z.boolean({
+              required_error: 'Esta pergunta é obrigatória',
+              invalid_type_error: 'Por favor, selecione uma opção'
+            })
           }
           break
         case 'scale':
-          fieldSchema = z.number().min(question.min_value || 1).max(question.max_value || 5)
+          fieldSchema = z.number({
+            required_error: 'Esta pergunta é obrigatória',
+            invalid_type_error: 'Por favor, selecione um valor'
+          }).min(question.min_value || 1, 'Valor mínimo não atingido').max(question.max_value || 5, 'Valor máximo excedido')
           break
         case 'image':
-          fieldSchema = question.required ? z.string().min(1, 'Imagem obrigatória') : z.string().optional()
+          fieldSchema = question.required ? z.string().min(1, 'Esta pergunta é obrigatória') : z.string().optional()
           break
         case 'cep':
-          fieldSchema = question.required ? z.string().min(8, 'CEP inválido').max(9, 'CEP inválido') : z.string().optional()
+          fieldSchema = question.required 
+            ? z.string().min(8, 'CEP inválido').max(9, 'CEP inválido')
+            : z.string().optional()
+          break
+        case 'select':
+        case 'radio':
+          fieldSchema = question.required 
+            ? z.string({ required_error: 'Esta pergunta é obrigatória', invalid_type_error: 'Por favor, selecione uma opção' }).min(1, 'Esta pergunta é obrigatória')
+            : z.string().optional()
           break
         default:
-          fieldSchema = question.required ? z.string().min(1, 'Campo obrigatório') : z.string().optional()
+          fieldSchema = question.required ? z.string().min(1, 'Esta pergunta é obrigatória') : z.string().optional()
       }
 
       schemaFields[question.id] = fieldSchema
@@ -117,28 +164,45 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   const schema = createSchema()
   type FormData = z.infer<typeof schema>
 
-  // Criar defaultValues dinamicamente para checkbox (arrays vazios)
-  const defaultValues: Record<string, any> = {
-    consent: false,
-  }
-  
-  questions.forEach((question) => {
-    if (question.field_type === 'checkbox') {
-      defaultValues[question.id] = []
-    }
-  })
-
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    clearErrors,
     formState: { errors },
     trigger,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues,
+    defaultValues: {
+      consent: false,
+      // Inicializar checkboxes com opções como arrays vazios
+      ...questions
+        .filter(q => q.field_type === 'checkbox' && q.options && q.options.length > 0)
+        .reduce((acc, q) => {
+          acc[q.id as keyof FormData] = [] as any
+          return acc
+        }, {} as Partial<FormData>),
+    },
   })
+
+  // Sincronizar estado da pergunta sobre rede social quando o formulário carregar
+  useEffect(() => {
+    const redeSocialQuestion = questions.find(q => {
+      const sectionLower = q.section?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') || ''
+      const questionTextLower = q.text.toLowerCase()
+      return (sectionLower.includes('divulgacao') || sectionLower.includes('divulga')) && 
+             questionTextLower.includes('rede social') && 
+             questionTextLower.includes('lgbtqia+')
+    })
+    
+    if (redeSocialQuestion) {
+      const currentValue = watch(redeSocialQuestion.id as keyof FormData) as string
+      if (currentValue) {
+        setRedeSocialAnswer(currentValue)
+      }
+    }
+  }, [questions, watch])
 
   // Função para validar campos "outros" dinamicamente
   const validateOtherFields = (data: FormData): boolean => {
@@ -159,33 +223,6 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             isValid = false
             fieldsToValidate.push(`${question.id}_other`)
           }
-        }
-      }
-      
-      // Validar campos "outros" para checkbox também
-      if (question.field_type === 'checkbox' && question.has_other_option) {
-        const selectedValues = data[question.id as keyof FormData] as string[] || []
-        const hasOtherOption = selectedValues.some(val => 
-          question.options?.some(opt => 
-            opt.toLowerCase().includes('outro') && opt === val
-          )
-        )
-        
-        if (hasOtherOption) {
-          // Verificar se cada opção "outros" selecionada tem valor preenchido
-          selectedValues.forEach(selectedValue => {
-            const isOtherOption = question.options?.some(opt => 
-              opt.toLowerCase().includes('outro') && opt === selectedValue
-            )
-            
-            if (isOtherOption) {
-              const otherValue = otherOptionValues[`${question.id}_${selectedValue}`]
-              if (!otherValue || !otherValue.trim()) {
-                isValid = false
-                fieldsToValidate.push(`${question.id}_${selectedValue}_other`)
-              }
-            }
-          })
         }
       }
     })
@@ -242,6 +279,24 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       return
     }
     
+    // Validar pergunta sobre rede social: se resposta for "Não", não permitir finalizar
+    const redeSocialQuestion = questions.find(q => {
+      const sectionLower = q.section?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') || ''
+      const questionTextLower = q.text.toLowerCase()
+      return (sectionLower.includes('divulgacao') || sectionLower.includes('divulga')) && 
+             questionTextLower.includes('rede social') && 
+             questionTextLower.includes('lgbtqia+')
+    })
+    
+    if (redeSocialQuestion) {
+      const redeSocialValue = data[redeSocialQuestion.id as keyof FormData] as string
+      if (redeSocialValue === 'nao') {
+        toast.error('Para finalizar o cadastro, é necessário aceitar fazer parte da rede social de artistas LGBTQIA+ de São Roque')
+        setLoading(false)
+        return
+      }
+    }
+    
     setLoading(true)
     try {
       // Filtrar apenas perguntas que têm resposta válida
@@ -249,6 +304,20 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
         .map((question) => {
           const value = data[question.id as keyof FormData]
           const fileUrl = question.field_type === 'image' ? fileUrls[question.id] : null
+          
+          // Para checkbox com múltiplas opções, converter array em string separada por vírgula
+          if (question.field_type === 'checkbox' && question.options && question.options.length > 0) {
+            const checkboxValues = value as string[] | undefined
+            if (!checkboxValues || checkboxValues.length === 0) {
+              if (question.required) return null
+              return null
+            }
+            return {
+              question_id: question.id,
+              value: checkboxValues.join(', '),
+              file_url: fileUrl || null,
+            }
+          }
           
           // Se não tem valor nem arquivo, não incluir na resposta
           if (value === undefined || value === null || value === '') {
@@ -275,41 +344,6 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                 value: `${cepValue}|${cepBairro}`,
                 file_url: fileUrl || null,
               }
-            }
-          }
-          
-          // Para perguntas checkbox, converter array para string separada por vírgula
-          if (question.field_type === 'checkbox') {
-            const checkboxArray = value as string[] || []
-            if (checkboxArray.length === 0) {
-              return question.required ? null : {
-                question_id: question.id,
-                value: null,
-                file_url: fileUrl || null,
-              }
-            }
-            
-            // Processar opções "outros" para checkbox
-            const processedValues = checkboxArray.map(selectedOption => {
-              const isOtherOption = question.has_other_option && 
-                question.options?.some(opt => 
-                  opt.toLowerCase().includes('outro') && opt === selectedOption
-                )
-              
-              if (isOtherOption) {
-                const otherValue = otherOptionValues[`${question.id}_${selectedOption}`]
-                if (otherValue && otherValue.trim()) {
-                  return `${selectedOption}: ${otherValue.trim()}`
-                }
-                return selectedOption
-              }
-              return selectedOption
-            })
-            
-            return {
-              question_id: question.id,
-              value: processedValues.join(', '),
-              file_url: fileUrl || null,
             }
           }
           
@@ -382,6 +416,12 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
 
     switch (question.field_type) {
       case 'text':
+        // Verificar se é um campo de e-mail
+        const isEmailInput = question.text.toLowerCase().includes('email') || 
+                             question.text.toLowerCase().includes('e-mail') ||
+                             question.placeholder?.toLowerCase().includes('email') ||
+                             question.placeholder?.toLowerCase().includes('e-mail')
+        
         return (
           <div key={fieldId} className="space-y-3">
             <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed">
@@ -393,11 +433,11 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             </Label>
             <Input
               id={fieldId}
+              type={isEmailInput ? 'email' : 'text'}
               {...register(fieldId as keyof FormData)}
               placeholder={question.placeholder || ''}
-              required={question.required}
               className="min-h-[48px] text-base sm:text-sm touch-manipulation"
-              autoComplete="off"
+              autoComplete={isEmailInput ? 'email' : 'off'}
             />
             {error && (
               <p className="text-sm text-red-500">{error.message as string}</p>
@@ -419,7 +459,6 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
               id={fieldId}
               {...register(fieldId as keyof FormData)}
               placeholder={question.placeholder || ''}
-              required={question.required}
               className="min-h-32 text-base sm:text-sm touch-manipulation resize-y"
             />
             {error && (
@@ -444,7 +483,6 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
               inputMode="numeric"
               {...register(fieldId as keyof FormData, { valueAsNumber: true })}
               placeholder={question.placeholder || ''}
-              required={question.required}
               className="min-h-[48px] text-base sm:text-sm touch-manipulation"
             />
             {error && (
@@ -466,6 +504,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             <Select
               onValueChange={(value) => {
                 setValue(fieldId as keyof FormData, value as any)
+                clearErrors(fieldId as keyof FormData)
                 // Verificar se a opção selecionada contém "outros" (case insensitive)
                 const hasOtherKeyword = question.has_other_option && 
                   question.options?.some(opt => 
@@ -478,7 +517,6 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                 }
               }}
               value={watch(fieldId as keyof FormData) as string}
-              required={question.required}
             >
               <SelectTrigger id={fieldId} className="min-h-[48px] text-base sm:text-sm touch-manipulation">
                 <SelectValue placeholder={question.placeholder || 'Selecione...'} />
@@ -507,10 +545,9 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                     setOtherOptionValues(prev => ({ ...prev, [fieldId]: value }))
                     setValue(`${fieldId}_other` as keyof FormData, value as any)
                   }}
-                  placeholder={question.other_option_label || 'Especifique...'}
-                  className="min-h-[48px] text-base"
-                  required={question.required}
-                />
+                          placeholder={question.other_option_label || 'Especifique...'}
+                          className="min-h-[48px] text-base"
+                        />
                 {errors[`${fieldId}_other`] && (
                   <p className="text-sm text-red-500">
                     {(errors[`${fieldId}_other`] as any)?.message as string}
@@ -537,6 +574,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             <RadioGroup
               onValueChange={(value) => {
                 setValue(fieldId as keyof FormData, value as any)
+                clearErrors(fieldId as keyof FormData)
                 // Verificar se a opção selecionada contém "outros" (case insensitive)
                 const hasOtherKeyword = question.has_other_option && 
                   question.options?.some(opt => 
@@ -549,7 +587,6 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                 }
               }}
               value={watch(fieldId as keyof FormData) as string}
-              required={question.required}
               className="space-y-2"
             >
               {question.options?.map((option, idx) => {
@@ -582,7 +619,6 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                           }}
                           placeholder={question.other_option_label || 'Especifique...'}
                           className="min-h-[48px] text-base"
-                          required={question.required}
                         />
                         {errors[`${fieldId}_other`] && (
                           <p className="text-sm text-red-500">
@@ -602,8 +638,91 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
         )
 
       case 'checkbox':
-        // Checkbox com múltiplas opções (similar ao radio mas permite múltiplas seleções)
-        const checkboxValues = watch(fieldId as keyof FormData) as string[] || []
+        // Se tem opções, renderizar múltiplos checkboxes
+        if (question.options && question.options.length > 0) {
+          const selectedValues = (watch(fieldId as keyof FormData) as string[]) || []
+          
+          return (
+            <div key={fieldId} className="space-y-4">
+              <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
+                <FormattedText html={question.text} />
+                {question.required && <span className="text-red-500 ml-1">*</span>}
+              </div>
+              <Label htmlFor={fieldId} className="sr-only">
+                {question.text.replace(/<[^>]+>/g, '')}
+              </Label>
+              <div className="space-y-2">
+                {question.options.map((option, idx) => {
+                  const optionId = `${fieldId}-${idx}`
+                  const isChecked = selectedValues.includes(option)
+                  
+                  return (
+                    <label
+                      key={idx}
+                      htmlFor={optionId}
+                      className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer touch-manipulation min-h-[48px] active:bg-muted"
+                    >
+                      <Checkbox
+                        id={optionId}
+                        checked={isChecked}
+                        onCheckedChange={(checked) => {
+                          const currentValues = selectedValues || []
+                          let newValues: string[]
+                          
+                          if (checked) {
+                            newValues = [...currentValues, option]
+                          } else {
+                            newValues = currentValues.filter(v => v !== option)
+                          }
+                          
+                          setValue(fieldId as keyof FormData, newValues as any)
+                          clearErrors(fieldId as keyof FormData)
+                        }}
+                        className="h-5 w-5"
+                      />
+                      <Label htmlFor={optionId} className="font-normal cursor-pointer text-base sm:text-sm flex-1">
+                        {option}
+                      </Label>
+                    </label>
+                  )
+                })}
+              </div>
+              {error && (
+                <p className="text-sm text-red-500">{error.message as string}</p>
+              )}
+            </div>
+          )
+        }
+        
+        // Se não tem opções, renderizar checkbox simples (sim/não)
+        return (
+          <div key={fieldId} className="space-y-2">
+            <label
+              htmlFor={fieldId}
+              className="flex items-start space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer touch-manipulation min-h-[48px] active:bg-muted"
+            >
+              <Checkbox
+                id={fieldId}
+                {...register(fieldId as keyof FormData)}
+                className="h-5 w-5 mt-0.5"
+              />
+              <Label htmlFor={fieldId} className="font-normal cursor-pointer text-base sm:text-sm flex-1">
+                <FormattedText html={question.text} />
+                {question.required && <span className="text-red-500 ml-1">*</span>}
+              </Label>
+            </label>
+            {error && (
+              <p className="text-sm text-red-500 ml-11">{error.message as string}</p>
+            )}
+          </div>
+        )
+
+      case 'yesno':
+        // Verificar se é a pergunta sobre rede social
+        const sectionLower = question.section?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') || ''
+        const questionTextLower = question.text.toLowerCase()
+        const isRedeSocialQuestion = (sectionLower.includes('divulgacao') || sectionLower.includes('divulga')) && 
+          questionTextLower.includes('rede social') && questionTextLower.includes('lgbtqia+')
         
         return (
           <div key={fieldId} className="space-y-4">
@@ -614,88 +733,21 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             <Label htmlFor={fieldId} className="sr-only">
               {question.text.replace(/<[^>]+>/g, '')}
             </Label>
-            <div className="space-y-2">
-              {question.options?.map((option, idx) => {
-                const optionId = `${fieldId}-${idx}`
-                const isChecked = checkboxValues.includes(option)
-                
-                return (
-                  <div key={optionId} className="space-y-2">
-                    <label
-                      htmlFor={optionId}
-                      className="flex items-start space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer touch-manipulation min-h-[48px] active:bg-muted"
-                    >
-                      <Checkbox
-                        id={optionId}
-                        checked={isChecked}
-                        onCheckedChange={(checked) => {
-                          const currentValues = checkboxValues || []
-                          let newValues: string[]
-                          
-                          if (checked) {
-                            // Adicionar opção selecionada
-                            newValues = [...currentValues, option]
-                          } else {
-                            // Remover opção desmarcada
-                            newValues = currentValues.filter(v => v !== option)
-                          }
-                          
-                          setValue(fieldId as keyof FormData, newValues as any)
-                        }}
-                        className="h-5 w-5 mt-0.5"
-                      />
-                      <Label htmlFor={optionId} className="font-normal cursor-pointer text-base sm:text-sm flex-1">
-                        {option}
-                      </Label>
-                    </label>
-                    {/* Mostrar campo "outros" se esta opção for selecionada e tiver has_other_option */}
-                    {isChecked && question.has_other_option && option.toLowerCase().includes('outro') && (
-                      <div className="space-y-2 ml-8 mt-2">
-                        <Label htmlFor={`${optionId}_other`} className="text-sm font-medium">
-                          {question.other_option_label || 'Qual?'}
-                        </Label>
-                        <Input
-                          id={`${optionId}_other`}
-                          value={otherOptionValues[`${fieldId}_${option}`] || ''}
-                          onChange={(e) => {
-                            const value = e.target.value
-                            setOtherOptionValues(prev => ({ ...prev, [`${fieldId}_${option}`]: value }))
-                          }}
-                          placeholder={question.other_option_label || 'Especifique...'}
-                          className="min-h-[48px] text-base"
-                          required={question.required}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-            {error && (
-              <p className="text-sm text-red-500">{error.message as string}</p>
-            )}
-          </div>
-        )
-
-      case 'yesno':
-        return (
-          <div key={fieldId} className="space-y-4">
-            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
-              <FormattedText html={question.text} />
-              {question.required && <span className="text-red-500 ml-1">*</span>}
-            </div>
-            <Label htmlFor={fieldId} className="sr-only">
-              {question.text.replace(/<[^>]+>/g, '')}
-            </Label>
             <RadioGroup
-              onValueChange={(value) => setValue(fieldId as keyof FormData, value as any)}
-              required={question.required}
+              onValueChange={(value) => {
+                setValue(fieldId as keyof FormData, value as any)
+                clearErrors(fieldId as keyof FormData)
+                // Se for a pergunta sobre rede social, atualizar o estado
+                if (isRedeSocialQuestion) {
+                  setRedeSocialAnswer(value)
+                }
+              }}
+              value={watch(fieldId as keyof FormData) as string}
               className="space-y-2"
             >
               {[
                 { value: 'sim', label: 'Sim' },
                 { value: 'nao', label: 'Não' },
-                { value: 'prefiro-nao-responder', label: 'Prefiro não responder' },
               ].map((opt) => (
                 <label
                   key={opt.value}
@@ -832,6 +884,30 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
 
   const isCepInvalid = cepCityValid === false
 
+  // Verificar se estamos no último bloco (para mostrar consentimento e envio só no final)
+  let isOnLastBlock = true
+  if (showOtherQuestions && otherQuestions.length > 0) {
+    const sectionOrderFromQuestions: string[] = []
+    const seenSections = new Set<string>()
+
+    for (const question of otherQuestions) {
+      const section = question.section || 'Sem seção'
+      if (!seenSections.has(section)) {
+        sectionOrderFromQuestions.push(section)
+        seenSections.add(section)
+      }
+    }
+
+    const semSecaoIndex = sectionOrderFromQuestions.indexOf('Sem seção')
+    if (semSecaoIndex !== -1 && semSecaoIndex !== sectionOrderFromQuestions.length - 1) {
+      sectionOrderFromQuestions.splice(semSecaoIndex, 1)
+      sectionOrderFromQuestions.push('Sem seção')
+    }
+
+    const totalBlocks = sectionOrderFromQuestions.length
+    isOnLastBlock = currentBlockIndex >= totalBlocks - 1
+  }
+
   // Se o formulário foi enviado com sucesso, mostrar mensagem de agradecimento
   if (submitted) {
     return (
@@ -887,15 +963,15 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-12 sm:pb-6 mb-4 sm:mb-0">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6 pb-12 sm:pb-6 mb-4 sm:mb-0">
       <Alert className="text-left">
         <AlertDescription className="text-xs sm:text-sm leading-relaxed">
           <strong>Privacidade e Proteção de Dados:</strong> Seus dados serão utilizados exclusivamente para o projeto Visibilidade em Foco e não serão compartilhados com terceiros sem seu consentimento. Você pode solicitar a remoção das suas informações a qualquer momento.
         </AlertDescription>
       </Alert>
 
-      {/* Sempre mostrar a pergunta CEP primeiro */}
-      {cepQuestion && (
+      {/* Mostrar a pergunta CEP apenas quando ainda não avançou para os outros blocos */}
+      {cepQuestion && !showOtherQuestions && (
         <div className="space-y-6 sm:space-y-8">
           {renderField(cepQuestion)}
         </div>
@@ -920,7 +996,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       {showOtherQuestions && otherQuestions.length > 0 && (() => {
         // Agrupar perguntas por seção
         const grouped = otherQuestions.reduce((acc, question) => {
-          const section = question.section || 'Geral'
+          const section = question.section || 'Sem seção'
           if (!acc[section]) {
             acc[section] = []
           }
@@ -928,208 +1004,251 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
           return acc
         }, {} as Record<string, Question[]>)
 
-        // Ordenar perguntas dentro de cada seção e ordenar seções
-        const sortedSections = Object.keys(grouped).sort((a, b) => {
-          if (a === 'Geral') return 1
-          if (b === 'Geral') return -1
-          return a.localeCompare(b)
-        })
-
-        const totalBlocks = sortedSections.length
-        const currentBlock = sortedSections[currentBlockIndex]
-        const isLastBlock = currentBlockIndex === totalBlocks - 1
-
-        // Função para validar se todas as perguntas obrigatórias do bloco foram respondidas
-        const validateCurrentBlock = async (): Promise<boolean> => {
-          const blockQuestions = grouped[currentBlock] || []
-          const requiredQuestions = blockQuestions.filter(q => q.required)
-          
-          // Validar cada pergunta obrigatória do bloco
-          let allValid = true
-          for (const question of requiredQuestions) {
-            const fieldId = question.id
-            const value = watch(fieldId as keyof FormData)
-            
-            // Verificar se o campo está vazio baseado no tipo
-            let isEmpty = false
-            if (value === undefined || value === null || value === '') {
-              isEmpty = true
-            } else if (Array.isArray(value) && value.length === 0) {
-              isEmpty = true
-            } else if (typeof value === 'number' && isNaN(value)) {
-              isEmpty = true
-            }
-            
-            if (isEmpty) {
-              // Tentar trigger do react-hook-form para mostrar erro
-              const isValid = await trigger(fieldId as keyof FormData)
-              if (!isValid) {
-                allValid = false
-              }
-            }
-          }
-          
-          return allValid
-        }
-
-        // Função para avançar para o próximo bloco
-        const handleContinue = async () => {
-          const isValid = await validateCurrentBlock()
-          if (isValid && !isLastBlock) {
-            setCurrentBlockIndex(prev => prev + 1)
-            // Scroll para o topo do formulário após um pequeno delay para garantir que o DOM foi atualizado
-            // Funciona tanto no desktop quanto no mobile
-            setTimeout(() => {
-              // Procurar pelo container scrollável do Dialog (onde está o formulário)
-              // O Dialog tem uma estrutura: DialogContent > div.overflow-y-auto > formulário
-              const dialogContent = document.querySelector('[data-slot="dialog-content"]')
-              let scrollableContainer: Element | null = null
-              
-              if (dialogContent) {
-                // Procurar pelo div com overflow-y-auto dentro do DialogContent
-                scrollableContainer = Array.from(dialogContent.querySelectorAll('div')).find(
-                  div => div.classList.contains('overflow-y-auto')
-                ) || null
-              }
-              
-              // Se não encontrou, procurar em toda a página
-              if (!scrollableContainer) {
-                scrollableContainer = document.querySelector('.overflow-y-auto')
-              }
-              
-              if (scrollableContainer) {
-                // Fazer scroll do container, não da página
-                scrollableContainer.scrollTo({ top: 0, behavior: 'smooth' })
-              } else {
-                // Fallback: tentar scroll para o elemento do formulário
-                const formElement = document.querySelector('form')
-                if (formElement) {
-                  formElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }
-              }
-            }, 150)
+        // Obter a ordem das seções diretamente do array de perguntas (já ordenado pela API)
+        // A API já retorna as perguntas ordenadas por seção, então precisamos preservar essa ordem
+        // IMPORTANTE: A ordem das seções é determinada pela primeira ocorrência de cada seção no array ordenado
+        const sectionOrderFromQuestions: string[] = []
+        const seenSections = new Set<string>()
+        
+        // Iterar sobre as perguntas na ordem que vêm da API (já ordenadas)
+        // Isso garante que a ordem das seções seja preservada conforme definido no admin
+        for (const question of otherQuestions) {
+          const section = question.section || 'Sem seção'
+          if (!seenSections.has(section)) {
+            sectionOrderFromQuestions.push(section)
+            seenSections.add(section)
           }
         }
+        
+        // Mover "Sem seção" para o final se existir (mas preservar a ordem das outras)
+        const semSecaoIndex = sectionOrderFromQuestions.indexOf('Sem seção')
+        if (semSecaoIndex !== -1 && semSecaoIndex !== sectionOrderFromQuestions.length - 1) {
+          sectionOrderFromQuestions.splice(semSecaoIndex, 1)
+          sectionOrderFromQuestions.push('Sem seção')
+        }
+        
+        // Debug: log da ordem das seções no componente
+        console.log('🔍 DynamicForm - Seções na ordem extraída:', sectionOrderFromQuestions)
+        console.log('🔍 DynamicForm - Todas as seções nas perguntas:', Object.keys(grouped))
+        console.log('🔍 DynamicForm - Primeiras 5 perguntas:', otherQuestions.slice(0, 5).map(q => ({ 
+          section: q.section, 
+          order: q.order 
+        })))
+
+        const totalBlocks = sectionOrderFromQuestions.length;
+        const currentBlock = sectionOrderFromQuestions[currentBlockIndex];
+        const isLastBlock = currentBlockIndex === totalBlocks - 1;
 
         return (
           <div className="space-y-6 sm:space-y-8">
-            {/* Indicador de progresso */}
-            {totalBlocks > 1 && (
-              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-muted/30 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs sm:text-sm font-medium text-muted-foreground">
-                    Bloco {currentBlockIndex + 1} de {totalBlocks}
-                  </span>
-                  <span className="text-xs sm:text-sm font-medium text-primary">
-                    {Math.round(((currentBlockIndex + 1) / totalBlocks) * 100)}%
-                  </span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2 sm:h-2.5">
-                  <div 
-                    className="bg-primary h-2 sm:h-2.5 rounded-full transition-all duration-300"
-                    style={{ width: `${((currentBlockIndex + 1) / totalBlocks) * 100}%` }}
-                  />
+            {sectionOrderFromQuestions.map((section) => (
+              <div
+                key={section}
+                id={`section-${section.replace(/\s+/g, '-').toLowerCase()}`}
+                className={`space-y-6 sm:space-y-8 ${section === currentBlock ? 'block' : 'hidden'}`}
+              >
+                {section !== 'Sem seção' && (
+                  <div className="border-b-2 border-primary/30 pb-3 -mx-2 sm:-mx-0">
+                    <h3 className="text-xl sm:text-2xl font-bold text-primary">{section}</h3>
+                  </div>
+                )}
+                {(() => {
+                  // Para o bloco "Divulgação", aplicar lógica condicional
+                  const sectionLower = section.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                  const isDivulgacaoSection = sectionLower.includes('divulgacao') || sectionLower.includes('divulga')
+                  
+                  if (isDivulgacaoSection) {
+                    // Encontrar a pergunta sobre rede social
+                    const redeSocialQuestion = grouped[section]
+                      .sort((a, b) => a.order - b.order)
+                      .find(q => {
+                        const questionText = q.text.toLowerCase()
+                        return questionText.includes('rede social') && questionText.includes('lgbtqia+')
+                      })
+                    
+                    // Separar a pergunta sobre rede social das outras
+                    const otherDivulgacaoQuestions = grouped[section]
+                      .sort((a, b) => a.order - b.order)
+                      .filter(q => {
+                        const questionText = q.text.toLowerCase()
+                        return !(questionText.includes('rede social') && questionText.includes('lgbtqia+'))
+                      })
+                    
+                    // Obter a resposta atual da pergunta sobre rede social usando watch para garantir reatividade
+                    const watchedRedeSocialValue = redeSocialQuestion 
+                      ? watch(redeSocialQuestion.id as keyof FormData)
+                      : undefined
+                    const currentRedeSocialAnswer = watchedRedeSocialValue as string | undefined
+                    
+                    return (
+                      <>
+                        {/* Sempre mostrar a pergunta sobre rede social */}
+                        {redeSocialQuestion && (
+                          <div className="pb-2 sm:pb-3">
+                            {renderField(redeSocialQuestion)}
+                          </div>
+                        )}
+                        
+                        {/* Mostrar outras perguntas APENAS se a resposta for explicitamente "sim" */}
+                        {currentRedeSocialAnswer === 'sim' && otherDivulgacaoQuestions.map((question) => (
+                          <div key={question.id} className="pb-2 sm:pb-3">
+                            {renderField(question)}
+                          </div>
+                        ))}
+                        
+                        {/* Mostrar mensagem se a resposta for "Não" ou se não houver resposta ainda */}
+                        {(currentRedeSocialAnswer === 'nao' || (!currentRedeSocialAnswer && redeSocialQuestion)) && (
+                          <Alert variant="default" className="bg-primary/5 border-primary/20 mt-4">
+                            <AlertDescription className="text-base text-center py-4">
+                              <p className="font-semibold text-primary mb-2">Atenção</p>
+                              <p className="text-foreground">
+                                {currentRedeSocialAnswer === 'nao' 
+                                  ? 'Para finalizar o cadastro, é necessário aceitar fazer parte da rede social de artistas LGBTQIA+ de São Roque.'
+                                  : 'Selecione "Sim" para continuar com o cadastro e preencher os demais campos.'}
+                              </p>
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                      </>
+                    )
+                  }
+                  
+                  // Para outros blocos, renderizar normalmente
+                  return grouped[section]
+                    .sort((a, b) => a.order - b.order)
+                    .map((question) => (
+                      <div key={question.id} className="pb-2 sm:pb-3">
+                        {renderField(question)}
+                      </div>
+                    ))
+                })()}
+              </div>
+            ))}
+            
+            {/* Botão Continuar e Indicador de Progresso */}
+            {/* Mostrar apenas se não for o último bloco (no último bloco, mostrar apenas o botão "Enviar Cadastro") */}
+            {totalBlocks > 1 && !isLastBlock && (
+              <div className="sticky bottom-0 bg-background border-t pt-4 pb-safe sm:pb-4 mt-8">
+                <div className="flex flex-col gap-4">
+                  {/* Indicador de Progresso */}
+                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+                    <span>Bloco {currentBlockIndex + 1} de {totalBlocks}</span>
+                    <span>{sectionOrderFromQuestions[currentBlockIndex]}</span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div
+                      className="bg-primary h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${((currentBlockIndex + 1) / totalBlocks) * 100}%` }}
+                    />
+                  </div>
+                  
+                  {/* Botão Continuar */}
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      // Validar campos do bloco atual antes de continuar
+                      const currentBlockQuestions = grouped[currentBlock] || []
+                      const fieldsToValidate = currentBlockQuestions
+                        .filter(q => q.required)
+                        .map(q => q.id)
+                      
+                      trigger(fieldsToValidate as any).then((isValid) => {
+                        if (isValid) {
+                          // Avançar para o próximo bloco
+                          setCurrentBlockIndex(prev => prev + 1)
+                          
+                          // Scroll para o topo do formulário após um pequeno delay
+                          setTimeout(() => {
+                            // Tentar encontrar o container de scroll do formulário
+                            const formContainer = document.getElementById('form-scroll-container')
+                            if (formContainer) {
+                              formContainer.scrollTo({ top: 0, behavior: 'smooth' })
+                            } else {
+                              // Fallback: procurar por qualquer elemento scrollável próximo
+                              const scrollableParent = document.querySelector('[class*="overflow-y-auto"]')
+                              if (scrollableParent) {
+                                scrollableParent.scrollTo({ top: 0, behavior: 'smooth' })
+                              } else {
+                                // Último fallback: scroll da window
+                                window.scrollTo({ top: 0, behavior: 'smooth' })
+                              }
+                            }
+                          }, 150)
+                        } else {
+                          toast.error('Por favor, preencha todos os campos obrigatórios deste bloco')
+                        }
+                      })
+                    }}
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
+                  >
+                    Continuar
+                  </Button>
                 </div>
               </div>
             )}
-
-            {/* Mostrar apenas o bloco atual */}
-            <div key={currentBlock} className="space-y-6 sm:space-y-8">
-              {currentBlock !== 'Geral' && (
-                <div className="border-b-2 border-primary/30 pb-3 -mx-2 sm:-mx-0">
-                  <h3 className="text-xl sm:text-2xl font-bold text-primary">{currentBlock}</h3>
-                </div>
-              )}
-              {grouped[currentBlock]
-                .sort((a, b) => a.order - b.order)
-                .map((question) => (
-                  <div key={question.id} className="pb-2 sm:pb-3">
-                    {renderField(question)}
+            
+            {/* Indicador de Progresso no último bloco (sem botão Continuar) */}
+            {totalBlocks > 1 && isLastBlock && (
+              <div className="sticky bottom-0 bg-background border-t pt-4 pb-safe sm:pb-4 mt-8">
+                <div className="flex flex-col gap-4">
+                  {/* Indicador de Progresso */}
+                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+                    <span>Bloco {currentBlockIndex + 1} de {totalBlocks}</span>
+                    <span>{sectionOrderFromQuestions[currentBlockIndex]}</span>
                   </div>
-                ))}
-            </div>
-
-            {/* Botão Continuar (exceto no último bloco) */}
-            {!isLastBlock && (
-              <div className="pt-4 pb-safe sm:pb-0">
-                <Button
-                  type="button"
-                  onClick={handleContinue}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-5 sm:py-6 text-base sm:text-lg font-semibold min-h-[56px] sm:min-h-[60px] touch-manipulation active:scale-[0.98] shadow-lg hover:shadow-xl transition-all duration-200"
-                >
-                  Continuar
-                </Button>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div
+                      className="bg-primary h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${((currentBlockIndex + 1) / totalBlocks) * 100}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             )}
           </div>
-        )
+        );
       })()}
 
-      {/* Mostrar consentimento e botão apenas se CEP for válido e no último bloco */}
-      {showOtherQuestions && (() => {
-        // Agrupar perguntas por seção para determinar se é o último bloco
-        const grouped = otherQuestions.reduce((acc, question) => {
-          const section = question.section || 'Geral'
-          if (!acc[section]) {
-            acc[section] = []
-          }
-          acc[section].push(question)
-          return acc
-        }, {} as Record<string, Question[]>)
-
-        const sortedSections = Object.keys(grouped).sort((a, b) => {
-          if (a === 'Geral') return 1
-          if (b === 'Geral') return -1
-          return a.localeCompare(b)
-        })
-
-        const isLastBlock = currentBlockIndex === sortedSections.length - 1
-
-        // Só mostrar consentimento e botão de envio no último bloco
-        if (!isLastBlock) {
-          return null
-        }
-
-        return (
-          <>
-            {previewMode && (
-              <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
-                  📋 Modo Preview: Este é apenas uma visualização. O formulário não será enviado.
-                </p>
-              </div>
-            )}
-            <div className="flex items-start gap-3 py-4 bg-muted/30 p-4 sm:p-6 rounded-lg touch-manipulation">
-              <Checkbox
-                id="consent"
-                checked={watch('consent')}
-                onCheckedChange={(checked) => setValue('consent', checked as boolean)}
-                className="h-5 w-5 mt-0.5 flex-shrink-0"
-              />
-              <label htmlFor="consent" className="text-sm sm:text-base leading-relaxed cursor-pointer flex-1">
-                Eu concordo com o uso das minhas informações para o projeto Visibilidade em Foco e estou ciente dos meus direitos de privacidade conforme a LGPD. *
-              </label>
-            </div>
-            {errors.consent?.message && (
-              <p className="text-sm text-red-500 ml-11">
-                {String(errors.consent.message)}
+      {/* Mostrar consentimento e botão apenas se CEP for válido E se estiver no último bloco */}
+      {showOtherQuestions && isOnLastBlock && (
+        <>
+          {previewMode && (
+            <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                📋 Modo Preview: Este é apenas uma visualização. O formulário não será enviado.
               </p>
-            )}
+            </div>
+          )}
+          <div className="flex items-start gap-3 py-4 bg-muted/30 p-4 sm:p-6 rounded-lg touch-manipulation">
+            <Checkbox
+              id="consent"
+              checked={watch('consent')}
+              onCheckedChange={(checked) => setValue('consent', checked as boolean)}
+              className="h-5 w-5 mt-0.5 flex-shrink-0"
+            />
+            <label htmlFor="consent" className="text-sm sm:text-base leading-relaxed cursor-pointer flex-1">
+              Eu concordo com o uso das minhas informações para o projeto Visibilidade em Foco e estou ciente dos meus direitos de privacidade conforme a LGPD. *
+            </label>
+          </div>
+      {errors.consent?.message && (
+        <p className="text-sm text-red-500 ml-11">
+          {String(errors.consent.message)}
+        </p>
+      )}
 
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
-              disabled={loading || !watch('consent') || isCepInvalid || previewMode}
-            >
-              {previewMode ? 'Preview - Envio Desabilitado' : loading ? 'Enviando...' : 'Enviar Cadastro'}
-            </Button>
+      <Button
+        type="submit"
+        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
+        disabled={loading || !watch('consent') || isCepInvalid || previewMode}
+      >
+            {previewMode ? 'Preview - Envio Desabilitado' : loading ? 'Enviando...' : 'Enviar Cadastro'}
+          </Button>
 
-            <p className="text-xs text-center text-muted-foreground pb-safe sm:pb-0">
-              * Campos obrigatórios
-            </p>
-          </>
-        )
-      })()}
+          <p className="text-xs text-center text-muted-foreground pb-safe sm:pb-0">
+            * Campos obrigatórios
+          </p>
+        </>
+      )}
     </form>
   )
 }
@@ -1372,7 +1491,6 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
             value={cepValue}
             onChange={handleCepChange}
             placeholder={question.placeholder || '00000-000'}
-            required={question.required}
             maxLength={9}
             className="min-h-[48px] text-base sm:text-sm touch-manipulation pl-10"
             autoComplete="postal-code"
