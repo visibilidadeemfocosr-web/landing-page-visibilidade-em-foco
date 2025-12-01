@@ -113,20 +113,20 @@ export async function GET() {
 
       // Se não houver redes sociais editadas, buscar das respostas originais
       if (!instagram && !facebook && !linkedin) {
-        if (socialMediaAnswer?.value) {
-          // Formato: "Instagram: @user | Facebook: link | LinkedIn: link"
-          const parts = socialMediaAnswer.value.split('|')
-          parts.forEach(part => {
-            const trimmed = part.trim()
-            if (trimmed.toLowerCase().includes('instagram:')) {
-              instagram = trimmed.replace(/instagram:/i, '').trim()
-            } else if (trimmed.toLowerCase().includes('facebook:')) {
-              facebook = trimmed.replace(/facebook:/i, '').trim()
-            } else if (trimmed.toLowerCase().includes('linkedin:')) {
-              linkedin = trimmed.replace(/linkedin:/i, '').trim()
-            }
-          })
-        }
+      if (socialMediaAnswer?.value) {
+        // Formato: "Instagram: @user | Facebook: link | LinkedIn: link"
+        const parts = socialMediaAnswer.value.split('|')
+        parts.forEach((part: string) => {
+          const trimmed = part.trim()
+          if (trimmed.toLowerCase().includes('instagram:')) {
+            instagram = trimmed.replace(/instagram:/i, '').trim()
+          } else if (trimmed.toLowerCase().includes('facebook:')) {
+            facebook = trimmed.replace(/facebook:/i, '').trim()
+          } else if (trimmed.toLowerCase().includes('linkedin:')) {
+            linkedin = trimmed.replace(/linkedin:/i, '').trim()
+          }
+        })
+      }
       }
 
       artistsMap.set(submissionId, {
