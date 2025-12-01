@@ -44,6 +44,7 @@ const translateFieldType = (type: string): string => {
     scale: 'Escala',
     image: 'Upload de Imagem',
     cep: 'CEP',
+    social_media: 'Redes Sociais',
   }
   return translations[type] || type
 }
@@ -349,6 +350,67 @@ export default function AdminStatsClient() {
                     <p>Nenhuma resposta registrada ainda para esta pergunta.</p>
                   </div>
                 )}
+
+                {/* Análise por Opção Individual (apenas para Checkbox) */}
+                {question.field_type === 'checkbox' && question.individual_options && Object.keys(question.individual_options).length > 0 && (() => {
+                  const individualOptions = question.individual_options
+                  const totalSelections = Object.values(individualOptions).reduce((sum: number, count: any) => sum + count, 0)
+                  
+                  // Calcular percentuais
+                  const individualPercentages = Object.entries(individualOptions).map(([option, count]) => ({
+                    option,
+                    count: count as number,
+                    percentage: totalSelections > 0 ? ((count as number / totalSelections) * 100) : 0
+                  })).sort((a, b) => b.count - a.count)
+                  
+                  return (
+                    <div className="bg-gradient-to-br from-primary/5 to-purple-500/5 p-6 rounded-xl border border-primary/10 mt-6">
+                      <h4 className="text-lg font-semibold mb-2 text-center">Análise por Opção Individual</h4>
+                      <p className="text-sm text-muted-foreground text-center mb-6">
+                        Total de seleções: <span className="font-semibold text-primary">{totalSelections}</span>
+                      </p>
+                      <div className="border rounded-lg overflow-hidden bg-background shadow-sm">
+                        <Table>
+                          <TableHeader className="bg-primary/5">
+                            <TableRow>
+                              <TableHead className="font-semibold">Opção</TableHead>
+                              <TableHead className="text-right font-semibold">Seleções</TableHead>
+                              <TableHead className="text-right font-semibold">Percentual</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {individualPercentages.map((item, index) => (
+                              <TableRow 
+                                key={item.option}
+                                className={index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}
+                              >
+                                <TableCell className="font-medium">
+                                  {item.option}
+                                </TableCell>
+                                <TableCell className="text-right font-semibold text-primary">
+                                  {item.count}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <div className="w-24 bg-muted rounded-full h-2.5 overflow-hidden">
+                                      <div 
+                                        className="h-full bg-gradient-to-r from-primary to-purple-500 rounded-full transition-all duration-500"
+                                        style={{ width: `${item.percentage}%` }}
+                                      />
+                                    </div>
+                                    <span className="font-bold text-primary min-w-[60px]">
+                                      {item.percentage.toFixed(1)}%
+                                    </span>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  )
+                })()}
 
                 {/* Gráfico de Distribuição por Bairro (apenas para CEP) */}
                 {question.field_type === 'cep' && hasData && (() => {

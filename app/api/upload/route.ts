@@ -14,6 +14,24 @@ export async function POST(request: Request) {
       )
     }
 
+    // Validar tipo de arquivo (MIME type)
+    const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    if (!allowedMimeTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: 'Tipo de arquivo não permitido. Apenas imagens (JPEG, PNG, GIF, WebP) são aceitas.' },
+        { status: 400 }
+      )
+    }
+
+    // Validar tamanho do arquivo (5MB)
+    const maxSize = 5 * 1024 * 1024 // 5MB em bytes
+    if (file.size > maxSize) {
+      return NextResponse.json(
+        { error: 'Arquivo muito grande. O tamanho máximo permitido é 5MB.' },
+        { status: 400 }
+      )
+    }
+
     // Gerar nome único para o arquivo
     const fileExt = file.name.split('.').pop()
     const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`

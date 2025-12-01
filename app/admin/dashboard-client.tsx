@@ -17,6 +17,7 @@ const translateFieldType = (type: string): string => {
     scale: 'Escala',
     image: 'Upload de Imagem',
     cep: 'CEP',
+    social_media: 'Redes Sociais',
   }
   return translations[type] || type
 }

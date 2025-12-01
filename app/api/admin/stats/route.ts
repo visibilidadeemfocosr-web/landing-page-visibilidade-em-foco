@@ -33,11 +33,13 @@ export async function GET() {
       .select('*', { count: 'exact', head: true })
       .eq('active', true)
 
-    // Estatísticas por tipo de campo
+    // Estatísticas por tipo de campo - ordenar pela mesma ordem definida no admin
     const { data: questions } = await adminClient
       .from('questions')
-      .select('id, field_type, text')
+      .select('id, field_type, text, order, section')
       .eq('active', true)
+      .order('section', { ascending: true, nullsFirst: false })
+      .order('order', { ascending: true })
 
     // Estatísticas por resposta (para campos específicos)
     const { data: allAnswers } = await adminClient
@@ -150,12 +152,52 @@ export async function GET() {
         }
       }
       
+      // Para checkbox, processar de forma especial (desagregar opções)
+      if (q.field_type === 'checkbox') {
+        const uniqueValues = getUniqueValues(questionAnswers, q.field_type)
+        
+        // Desagregar opções individuais de checkbox
+        const individualOptions: Record<string, number> = {}
+        questionAnswers.forEach((a: any) => {
+          const value = String(a.value || '').trim()
+          if (value) {
+            // Separar por vírgula e processar cada opção
+            const options = value.split(',').map((opt: string) => opt.trim()).filter(Boolean)
+            options.forEach((option: string) => {
+              // Se a opção tem formato "Outros: texto", manter como está
+              // Caso contrário, contar a opção individual
+              if (option.includes(':')) {
+                // Opção "Outros" com texto personalizado - contar como "Outros"
+                const optionName = option.split(':')[0].trim()
+                individualOptions[optionName] = (individualOptions[optionName] || 0) + 1
+              } else {
+                // Opção normal - contar diretamente
+                individualOptions[option] = (individualOptions[option] || 0) + 1
+              }
+            })
+          }
+        })
+        
+        return {
+          question_id: q.id,
+          question_text: q.text,
+          field_type: q.field_type,
+          order: q.order,
+          section: q.section,
+          total_answers: questionAnswers.length,
+          unique_values: uniqueValues, // Respostas completas concatenadas
+          individual_options: individualOptions, // Opções individuais desagregadas
+        }
+      }
+      
       const uniqueValues = getUniqueValues(questionAnswers, q.field_type)
       
       return {
         question_id: q.id,
         question_text: q.text,
         field_type: q.field_type,
+        order: q.order,
+        section: q.section,
         total_answers: questionAnswers.length,
         unique_values: uniqueValues,
       }

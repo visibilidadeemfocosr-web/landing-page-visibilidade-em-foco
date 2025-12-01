@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Edit, Trash2, GripVertical, Check, X, Bold as BoldIcon, Italic as ItalicIcon, Eye } from 'lucide-react'
+import { Plus, Edit, Trash2, GripVertical, Check, X, Bold as BoldIcon, Italic as ItalicIcon, Eye, GripHorizontal } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Question, FieldType } from '@/lib/supabase/types'
 import { DynamicForm } from '@/components/dynamic-form'
@@ -63,6 +63,57 @@ function FormattedQuestionText({ html }: { html: string }) {
   return <div className="whitespace-pre-line">{html}</div>
 }
 
+
+// Componente SortableSection para blocos arrastáveis
+function SortableSectionItem({ 
+  section, 
+  children,
+  renderDragHandle,
+}: { 
+  section: string
+  children: (dragHandle: React.ReactNode) => React.ReactNode
+  renderDragHandle?: boolean
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: `section-${section}` })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  const dragHandle = renderDragHandle && section !== 'Sem seção' ? (
+    <SectionDragHandle attributes={attributes} listeners={listeners} />
+  ) : null
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      {children(dragHandle)}
+    </div>
+  )
+}
+
+// Componente para o botão de arrastar bloco
+function SectionDragHandle({ attributes, listeners }: { attributes: any; listeners: any }) {
+  return (
+    <button
+      {...attributes}
+      {...listeners}
+      className="cursor-grab active:cursor-grabbing touch-none p-1 hover:bg-muted rounded transition-colors"
+      type="button"
+      title="Arrastar bloco para reorganizar"
+    >
+      <GripHorizontal className="h-5 w-5 text-muted-foreground" />
+    </button>
+  )
+}
 
 // Componente SortableItem para cada pergunta
 function SortableQuestionItem({ question, onEdit, onDelete, sequentialNumber }: { question: Question; onEdit: (q: Question) => void; onDelete: (id: string) => void; sequentialNumber: number }) {
@@ -306,6 +357,7 @@ const translateFieldType = (type: FieldType): string => {
     scale: 'Escala',
     image: 'Upload de Imagem',
     cep: 'CEP',
+    social_media: 'Redes Sociais',
   }
   return translations[type] || type
 }
@@ -326,6 +378,7 @@ export default function AdminQuestionsClient() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [questionToDelete, setQuestionToDelete] = useState<string | null>(null)
   const [previewOpen, setPreviewOpen] = useState(false)
+  const [sectionOrder, setSectionOrder] = useState<Record<string, number>>({}) // Ordem customizada das seções
   const [formData, setFormData] = useState({
     text: '',
     field_type: 'text' as FieldType,
@@ -338,11 +391,13 @@ export default function AdminQuestionsClient() {
     placeholder: '',
     has_other_option: false,
     other_option_label: 'Qual?',
+    max_length: undefined,
     active: true,
   })
 
   useEffect(() => {
     loadQuestions()
+    loadSectionOrder()
   }, [])
 
   const loadQuestions = async () => {
@@ -355,6 +410,74 @@ export default function AdminQuestionsClient() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const loadSectionOrder = async () => {
+    try {
+      const response = await fetch('/api/admin/sections')
+      const data = await response.json()
+      // Criar um mapa de nome da seção para ordem
+      const orderMap: Record<string, number> = {}
+      data.forEach((section: { name: string; order: number }) => {
+        orderMap[section.name] = section.order
+      })
+      setSectionOrder(orderMap)
+    } catch (error) {
+      // Se não houver seções salvas, não faz nada (usará ordem alfabética)
+      console.log('Ordem de seções não carregada, usando ordem padrão')
+    }
+  }
+
+  const saveSectionOrder = async (sections: string[]) => {
+    try {
+      const sectionsData = sections.map((name, index) => ({
+        name,
+        order: index,
+      }))
+      
+      const response = await fetch('/api/admin/sections', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sections: sectionsData }),
+      })
+      
+      if (!response.ok) {
+        throw new Error('Erro ao salvar ordem dos blocos')
+      }
+      
+      // Atualizar estado local
+      const newOrderMap: Record<string, number> = {}
+      sectionsData.forEach((section) => {
+        newOrderMap[section.name] = section.order
+      })
+      setSectionOrder(newOrderMap)
+      
+      toast.success('Ordem dos blocos atualizada!')
+    } catch (error: any) {
+      toast.error('Erro ao salvar ordem dos blocos')
+      console.error(error)
+    }
+  }
+
+  const handleSectionDragEnd = async (event: DragEndEvent, allSections: string[]) => {
+    const { active, over } = event
+    
+    if (!over || active.id === over.id) {
+      return
+    }
+    
+    const activeId = String(active.id).replace('section-', '')
+    const overId = String(over.id).replace('section-', '')
+    
+    const oldIndex = allSections.indexOf(activeId)
+    const newIndex = allSections.indexOf(overId)
+    
+    if (oldIndex === -1 || newIndex === -1) {
+      return
+    }
+    
+    const newSectionsOrder = arrayMove(allSections, oldIndex, newIndex)
+    await saveSectionOrder(newSectionsOrder)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -556,6 +679,7 @@ export default function AdminQuestionsClient() {
       placeholder: question.placeholder || '',
       has_other_option: question.has_other_option || false,
       other_option_label: question.other_option_label || 'Qual?',
+      max_length: question.max_length || undefined,
       active: question.active,
     })
     setDialogOpen(true)
@@ -605,6 +729,34 @@ export default function AdminQuestionsClient() {
       )
 
       await Promise.all(updatePromises)
+      // Atualizar nome da seção na tabela sections se necessário
+      if (oldSectionName !== newSectionName.trim()) {
+        try {
+          // Buscar ordem atual da seção antiga
+          const oldOrder = sectionOrder[oldSectionName] ?? Object.keys(sectionOrder).length
+          
+          // Criar nova entrada ou atualizar existente
+          const sectionsData = [
+            ...Object.keys(sectionOrder)
+              .filter(name => name !== oldSectionName)
+              .map(name => ({ name, order: sectionOrder[name] })),
+            { name: newSectionName.trim(), order: oldOrder }
+          ]
+          
+          await fetch('/api/admin/sections', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sections: sectionsData }),
+          })
+          
+          // Recarregar ordem das seções
+          loadSectionOrder()
+        } catch (error) {
+          console.error('Erro ao atualizar ordem das seções:', error)
+          // Não bloquear a operação principal se isso falhar
+        }
+      }
+      
       toast.success('Nome do bloco atualizado!')
       setEditingSection(null)
       loadQuestions()
@@ -711,6 +863,7 @@ export default function AdminQuestionsClient() {
             placeholder: question.placeholder || null,
             has_other_option: question.has_other_option || false,
             other_option_label: question.other_option_label || null,
+            max_length: question.max_length || null,
             active: question.active,
           }),
         })
@@ -741,6 +894,7 @@ export default function AdminQuestionsClient() {
       section: '',
       has_other_option: false,
       other_option_label: 'Qual?',
+      max_length: undefined,
       active: true,
     })
   }
@@ -767,6 +921,7 @@ export default function AdminQuestionsClient() {
       section: sectionName || '',
       has_other_option: false,
       other_option_label: 'Qual?',
+      max_length: undefined,
       active: true,
     })
     setDialogOpen(true)
@@ -1051,6 +1206,7 @@ export default function AdminQuestionsClient() {
                       <SelectItem value="scale">Escala (1-5)</SelectItem>
                       <SelectItem value="image">Upload de Imagem</SelectItem>
                       <SelectItem value="cep">CEP (com busca automática)</SelectItem>
+                      <SelectItem value="social_media">Redes Sociais</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1067,6 +1223,25 @@ export default function AdminQuestionsClient() {
                     Texto de ajuda dentro do campo
                   </p>
                 </div>
+
+                {/* Limite de Caracteres (apenas para text e textarea) */}
+                {(formData.field_type === 'text' || formData.field_type === 'textarea') && (
+                  <div>
+                    <Label htmlFor="max_length">Limite de Caracteres (opcional)</Label>
+                    <Input
+                      id="max_length"
+                      type="number"
+                      min="1"
+                      value={formData.max_length || ''}
+                      onChange={(e) => setFormData({ ...formData, max_length: e.target.value ? Number(e.target.value) : undefined })}
+                      placeholder="Ex: 500 (deixe vazio para sem limite)"
+                      className="mt-1.5 w-full"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1.5">
+                      Limite máximo de caracteres permitidos. Deixe vazio para permitir qualquer quantidade.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1287,10 +1462,25 @@ export default function AdminQuestionsClient() {
             return acc
           }, {} as Record<string, Question[]>)
 
-          // Ordenar seções (Sem seção por último)
+          // Ordenar seções usando ordem customizada ou alfabética
           const sortedSections = Object.keys(grouped).sort((a, b) => {
+            // "Sem seção" sempre por último
             if (a === 'Sem seção') return 1
             if (b === 'Sem seção') return -1
+            
+            // Se ambas têm ordem customizada, usar essa ordem
+            const orderA = sectionOrder[a]
+            const orderB = sectionOrder[b]
+            
+            if (orderA !== undefined && orderB !== undefined) {
+              return orderA - orderB
+            }
+            
+            // Se apenas uma tem ordem customizada, ela vem primeiro
+            if (orderA !== undefined) return -1
+            if (orderB !== undefined) return 1
+            
+            // Caso contrário, ordenar alfabeticamente
             return a.localeCompare(b)
           })
 
@@ -1310,76 +1500,92 @@ export default function AdminQuestionsClient() {
             )
           }
 
-          return sortedSections.map((section) => {
-            const sectionQuestions = grouped[section].sort((a, b) => a.order - b.order)
-            
-            return (
-              <DndContext
-                key={section}
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
+          return (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={(event) => handleSectionDragEnd(event, sortedSections)}
+            >
+              <SortableContext
+                items={sortedSections.map(s => `section-${s}`)}
+                strategy={verticalListSortingStrategy}
               >
-                <Card className="border-2">
-                  <CardHeader className="pb-4">
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="flex-1">
-                        {editingSection === section ? (
-                          <div className="flex items-center gap-2 mb-2">
-                            <Input
-                              value={editingSectionName}
-                              onChange={(e) => setEditingSectionName(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.preventDefault()
-                                  handleSaveSection(section, editingSectionName)
-                                } else if (e.key === 'Escape') {
-                                  handleCancelEditSection()
-                                }
-                              }}
-                              className="text-xl sm:text-2xl font-bold text-primary"
-                              autoFocus
-                              placeholder="Nome do bloco"
-                            />
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={() => handleSaveSection(section, editingSectionName)}
-                              className="min-h-[44px] min-w-[44px]"
-                            >
-                              <Check className="h-4 w-4 text-green-600" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={handleCancelEditSection}
-                              className="min-h-[44px] min-w-[44px]"
-                            >
-                              <X className="h-4 w-4 text-red-600" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-xl sm:text-2xl font-bold text-primary">
-                              {section}
-                            </h3>
-                            {section !== 'Sem seção' && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleEditSection(section)}
-                                className="h-8 w-8 min-h-[32px] min-w-[32px] opacity-60 hover:opacity-100"
-                                title="Editar nome do bloco"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
-                        )}
-                        <p className="text-sm text-muted-foreground">
-                          {sectionQuestions.length} {sectionQuestions.length === 1 ? 'pergunta' : 'perguntas'}
-                        </p>
-                      </div>
+                <div className="space-y-6">
+                  {sortedSections.map((section) => {
+                    const sectionQuestions = grouped[section].sort((a, b) => a.order - b.order)
+                    
+                    return (
+                      <SortableSectionItem key={section} section={section} renderDragHandle={true}>
+                        {(dragHandle) => (
+                          <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={(event) => handleDragEnd(event, sectionQuestions, section)}
+                          >
+                            <Card className="border-2">
+                              <CardHeader className="pb-4">
+                                <div className="flex justify-between items-start gap-4">
+                                  <div className="flex-1 flex items-center gap-2">
+                                    {/* Botão de arrastar bloco */}
+                                    {dragHandle}
+                                    <div className="flex-1">
+                                      {editingSection === section ? (
+                                        <div className="flex items-center gap-2 mb-2">
+                                          <Input
+                                            value={editingSectionName}
+                                            onChange={(e) => setEditingSectionName(e.target.value)}
+                                            onKeyDown={(e) => {
+                                              if (e.key === 'Enter') {
+                                                e.preventDefault()
+                                                handleSaveSection(section, editingSectionName)
+                                              } else if (e.key === 'Escape') {
+                                                handleCancelEditSection()
+                                              }
+                                            }}
+                                            className="text-xl sm:text-2xl font-bold text-primary"
+                                            autoFocus
+                                            placeholder="Nome do bloco"
+                                          />
+                                          <Button
+                                            size="icon"
+                                            variant="outline"
+                                            onClick={() => handleSaveSection(section, editingSectionName)}
+                                            className="min-h-[44px] min-w-[44px]"
+                                          >
+                                            <Check className="h-4 w-4 text-green-600" />
+                                          </Button>
+                                          <Button
+                                            size="icon"
+                                            variant="outline"
+                                            onClick={handleCancelEditSection}
+                                            className="min-h-[44px] min-w-[44px]"
+                                          >
+                                            <X className="h-4 w-4 text-red-600" />
+                                          </Button>
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <h3 className="text-xl sm:text-2xl font-bold text-primary">
+                                            {section}
+                                          </h3>
+                                          {section !== 'Sem seção' && (
+                                            <Button
+                                              variant="ghost"
+                                              size="icon"
+                                              onClick={() => handleEditSection(section)}
+                                              className="h-8 w-8 min-h-[32px] min-w-[32px] opacity-60 hover:opacity-100"
+                                              title="Editar nome do bloco"
+                                            >
+                                              <Edit className="h-4 w-4" />
+                                            </Button>
+                                          )}
+                                        </div>
+                                      )}
+                                      <p className="text-sm text-muted-foreground">
+                                        {sectionQuestions.length} {sectionQuestions.length === 1 ? 'pergunta' : 'perguntas'}
+                                      </p>
+                                    </div>
+                                  </div>
                       {section !== 'Sem seção' && !editingSection && (
                         <Button
                           onClick={() => openNewQuestionDialog(section)}
@@ -1424,9 +1630,15 @@ export default function AdminQuestionsClient() {
                     )}
                   </CardContent>
                 </Card>
-              </DndContext>
-            )
-          })
+                          </DndContext>
+                        )}
+                      </SortableSectionItem>
+                    )
+                  })}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )
         })()}
       </div>
     </div>

@@ -134,6 +134,28 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             ? z.string().min(8, 'CEP inválido').max(9, 'CEP inválido')
             : z.string().optional()
           break
+        case 'social_media':
+          // Para redes sociais, criar um objeto com Instagram, Facebook e LinkedIn
+          // Cada campo é opcional, mas se a pergunta for obrigatória, pelo menos um deve ser preenchido
+          if (question.required) {
+            fieldSchema = z.object({
+              instagram: z.string().optional(),
+              facebook: z.string().optional(),
+              linkedin: z.string().optional()
+            }).refine((data) => {
+              // Pelo menos um campo deve ser preenchido
+              return data.instagram || data.facebook || data.linkedin
+            }, {
+              message: 'Informe pelo menos uma rede social'
+            })
+          } else {
+            fieldSchema = z.object({
+              instagram: z.string().optional(),
+              facebook: z.string().optional(),
+              linkedin: z.string().optional()
+            }).optional()
+          }
+          break
         case 'select':
         case 'radio':
           fieldSchema = question.required 
@@ -181,6 +203,13 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
         .filter(q => q.field_type === 'checkbox' && q.options && q.options.length > 0)
         .reduce((acc, q) => {
           acc[q.id as keyof FormData] = [] as any
+          return acc
+        }, {} as Partial<FormData>),
+      // Inicializar campos de redes sociais como objetos vazios
+      ...questions
+        .filter(q => q.field_type === 'social_media')
+        .reduce((acc, q) => {
+          acc[q.id as keyof FormData] = { instagram: '', facebook: '', linkedin: '' } as any
           return acc
         }, {} as Partial<FormData>),
     },
@@ -305,6 +334,31 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
           const value = data[question.id as keyof FormData]
           const fileUrl = question.field_type === 'image' ? fileUrls[question.id] : null
           
+          // Para redes sociais, converter objeto em string formatada
+          if (question.field_type === 'social_media') {
+            const socialMediaData = value as { instagram?: string; facebook?: string; linkedin?: string } | undefined
+            if (!socialMediaData) {
+              if (question.required) return null
+              return null
+            }
+            
+            const parts: string[] = []
+            if (socialMediaData.instagram) parts.push(`Instagram: ${socialMediaData.instagram}`)
+            if (socialMediaData.facebook) parts.push(`Facebook: ${socialMediaData.facebook}`)
+            if (socialMediaData.linkedin) parts.push(`LinkedIn: ${socialMediaData.linkedin}`)
+            
+            if (parts.length === 0) {
+              if (question.required) return null
+              return null
+            }
+            
+            return {
+              question_id: question.id,
+              value: parts.join(' | '),
+              file_url: fileUrl || null,
+            }
+          }
+          
           // Para checkbox com múltiplas opções, converter array em string separada por vírgula
           if (question.field_type === 'checkbox' && question.options && question.options.length > 0) {
             const checkboxValues = value as string[] | undefined
@@ -394,14 +448,20 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
         body: JSON.stringify({ answers }),
       })
 
+      const responseData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
-        console.error('Erro na resposta:', errorData)
-        throw new Error(errorData.error || 'Erro ao enviar formulário')
+        console.error('Erro na resposta:', responseData)
+        throw new Error(responseData.error || 'Erro ao enviar formulário')
       }
 
-      // Mostrar mensagem de agradecimento
-      setSubmitted(true)
+      // Verificar se a resposta indica sucesso
+      if (responseData.success !== false) {
+        // Mostrar mensagem de agradecimento
+        setSubmitted(true)
+      } else {
+        throw new Error(responseData.error || 'Erro ao enviar formulário')
+      }
     } catch (error: any) {
       console.error('Erro ao enviar formulário:', error)
       toast.error(error.message || 'Erro ao enviar formulário. Tente novamente.')
@@ -869,6 +929,96 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
           />
         )
 
+      case 'social_media':
+        const socialMediaValue = watch(fieldId as keyof FormData) as { instagram?: string; facebook?: string; linkedin?: string } | undefined || {}
+        
+        return (
+          <div key={fieldId} className="space-y-4">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
+              <FormattedText html={question.text} />
+              {question.required && <span className="text-red-500 ml-1">*</span>}
+              {question.required && (
+                <span className="ml-2 text-sm sm:text-base text-muted-foreground font-normal">
+                  (Informe pelo menos uma rede social)
+                </span>
+              )}
+            </div>
+            <div className="space-y-4">
+              {/* Instagram */}
+              <div className="space-y-2">
+                <Label htmlFor={`${fieldId}_instagram`} className="text-sm font-medium">
+                  Instagram
+                </Label>
+                <Input
+                  id={`${fieldId}_instagram`}
+                  type="text"
+                  placeholder="@seu_usuario ou link do perfil"
+                  value={socialMediaValue.instagram || ''}
+                  onChange={(e) => {
+                    const newValue = {
+                      ...socialMediaValue,
+                      instagram: e.target.value
+                    }
+                    setValue(fieldId as keyof FormData, newValue as any)
+                    clearErrors(fieldId as keyof FormData)
+                  }}
+                  className="min-h-[48px] text-base sm:text-sm touch-manipulation"
+                  autoComplete="off"
+                />
+              </div>
+
+              {/* Facebook */}
+              <div className="space-y-2">
+                <Label htmlFor={`${fieldId}_facebook`} className="text-sm font-medium">
+                  Facebook
+                </Label>
+                <Input
+                  id={`${fieldId}_facebook`}
+                  type="text"
+                  placeholder="Link do seu perfil do Facebook"
+                  value={socialMediaValue.facebook || ''}
+                  onChange={(e) => {
+                    const newValue = {
+                      ...socialMediaValue,
+                      facebook: e.target.value
+                    }
+                    setValue(fieldId as keyof FormData, newValue as any)
+                    clearErrors(fieldId as keyof FormData)
+                  }}
+                  className="min-h-[48px] text-base sm:text-sm touch-manipulation"
+                  autoComplete="off"
+                />
+              </div>
+
+              {/* LinkedIn */}
+              <div className="space-y-2">
+                <Label htmlFor={`${fieldId}_linkedin`} className="text-sm font-medium">
+                  LinkedIn
+                </Label>
+                <Input
+                  id={`${fieldId}_linkedin`}
+                  type="text"
+                  placeholder="Link do seu perfil do LinkedIn"
+                  value={socialMediaValue.linkedin || ''}
+                  onChange={(e) => {
+                    const newValue = {
+                      ...socialMediaValue,
+                      linkedin: e.target.value
+                    }
+                    setValue(fieldId as keyof FormData, newValue as any)
+                    clearErrors(fieldId as keyof FormData)
+                  }}
+                  className="min-h-[48px] text-base sm:text-sm touch-manipulation"
+                  autoComplete="off"
+                />
+              </div>
+            </div>
+            {error && (
+              <p className="text-sm text-red-500">{error.message as string}</p>
+            )}
+          </div>
+        )
+
       default:
         return null
     }
@@ -1066,12 +1216,18 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                         return questionText.includes('rede social') && questionText.includes('lgbtqia+')
                       })
                     
-                    // Separar a pergunta sobre rede social das outras
+                    // Separar a pergunta sobre rede social (yesno) das outras
+                    // A pergunta do tipo social_media deve aparecer junto com as outras quando a resposta for "sim"
                     const otherDivulgacaoQuestions = grouped[section]
                       .sort((a, b) => a.order - b.order)
                       .filter(q => {
                         const questionText = q.text.toLowerCase()
-                        return !(questionText.includes('rede social') && questionText.includes('lgbtqia+'))
+                        // Excluir APENAS a pergunta yesno sobre rede social
+                        // Incluir todas as outras, incluindo a pergunta social_media
+                        if (q.field_type === 'yesno' && questionText.includes('rede social') && questionText.includes('lgbtqia+')) {
+                          return false // Excluir a pergunta yesno
+                        }
+                        return true // Incluir todas as outras (incluindo social_media)
                       })
                     
                     // Obter a resposta atual da pergunta sobre rede social usando watch para garantir reatividade

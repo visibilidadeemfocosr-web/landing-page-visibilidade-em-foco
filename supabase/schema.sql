@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS questions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   text TEXT NOT NULL,
-  field_type TEXT NOT NULL CHECK (field_type IN ('text', 'textarea', 'number', 'select', 'radio', 'checkbox', 'yesno', 'scale', 'image', 'cep')),
+  field_type TEXT NOT NULL CHECK (field_type IN ('text', 'textarea', 'number', 'select', 'radio', 'checkbox', 'yesno', 'scale', 'image', 'cep', 'social_media')),
   required BOOLEAN DEFAULT false,
   "order" INTEGER NOT NULL DEFAULT 0,
   section TEXT, -- Bloco/Seção para agrupar perguntas (ex: "Dados Pessoais", "Endereço")

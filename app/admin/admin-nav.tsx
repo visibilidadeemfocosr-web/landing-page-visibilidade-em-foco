@@ -20,6 +20,7 @@ export default function AdminNav({ userEmail }: { userEmail?: string }) {
       <a href="/admin/questions" className="px-2 py-1 rounded hover:bg-muted touch-manipulation min-h-[36px] flex items-center">Perguntas</a>
       <a href="/admin/stats" className="px-2 py-1 rounded hover:bg-muted touch-manipulation min-h-[36px] flex items-center">Estatísticas</a>
       <a href="/admin/submissions" className="px-2 py-1 rounded hover:bg-muted touch-manipulation min-h-[36px] flex items-center">Submissões</a>
+      <a href="/admin/moderate" className="px-2 py-1 rounded hover:bg-muted touch-manipulation min-h-[36px] flex items-center">Moderação</a>
       {userEmail && (
         <>
           <span className="text-muted-foreground text-xs px-2">{userEmail}</span>

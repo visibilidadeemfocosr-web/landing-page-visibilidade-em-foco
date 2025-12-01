@@ -1,4 +1,4 @@
-export type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'radio' | 'checkbox' | 'yesno' | 'scale' | 'image' | 'cep'
+export type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'radio' | 'checkbox' | 'yesno' | 'scale' | 'image' | 'cep' | 'social_media'
 
 export interface Question {
   id: string
@@ -13,6 +13,7 @@ export interface Question {
   placeholder?: string
   has_other_option?: boolean // Se permite opção "outros"
   other_option_label?: string // Label do campo "outros" (ex: "Qual?")
+  max_length?: number // Limite máximo de caracteres para campos text e textarea
   created_at: string
   updated_at: string
   active: boolean
