@@ -1027,7 +1027,18 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
 
   // Separar pergunta CEP das outras
   const cepQuestion = questions.find(q => q.field_type === 'cep')
-  const otherQuestions = questions.filter(q => q.field_type !== 'cep')
+  
+  // Filtrar a pergunta "Você responde este formulário..." que está duplicada
+  const filterQuestion = questions.find(q => {
+    const questionText = q.text.toLowerCase()
+    return questionText.includes('você responde este formulário') || 
+           (questionText.includes('morador') && questionText.includes('são roque') && questionText.includes('lgbtqiapn'))
+  })
+  
+  const otherQuestions = questions.filter(q => 
+    q.field_type !== 'cep' && 
+    q.id !== filterQuestion?.id
+  )
 
   // Mostrar outras perguntas apenas se CEP for explicitamente válido (true)
   // Inicialmente (null) ou se inválido (false), mostrar apenas CEP
