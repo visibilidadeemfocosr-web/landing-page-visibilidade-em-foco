@@ -72,9 +72,8 @@ export async function createMediaContainer(
       // Carousel post
       params.append('media_type', 'CAROUSEL');
       params.append('caption', caption);
-      children.forEach(childId => {
-        params.append('children', childId);
-      });
+      // Instagram API espera children como array JSON
+      params.append('children', children.join(','));
     } else {
       // Single image post
       params.append('image_url', imageUrl);
