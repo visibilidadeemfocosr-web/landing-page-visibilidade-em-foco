@@ -25,54 +25,28 @@ export interface InstagramPublishResult {
  */
 export async function getInstagramAccountId(accessToken: string): Promise<string> {
   try {
-    // Primeiro, obtém o ID do usuário do Facebook
-    const userResponse = await fetch(
-      `${FACEBOOK_GRAPH_API}/me?access_token=${accessToken}`
+    // Para Instagram Graph API, usamos o endpoint do Instagram diretamente
+    const meResponse = await fetch(
+      `${INSTAGRAM_GRAPH_API}/me?fields=id,username&access_token=${accessToken}`
     );
     
-    if (!userResponse.ok) {
-      throw new Error('Erro ao obter ID do usuário');
+    if (!meResponse.ok) {
+      const errorData = await meResponse.json();
+      console.error('Erro na resposta da API:', errorData);
+      throw new Error(errorData.error?.message || 'Erro ao obter ID da conta do Instagram');
     }
     
-    const userData = await userResponse.json();
+    const meData = await meResponse.json();
     
-    // Obtém as páginas do Facebook do usuário
-    const pagesResponse = await fetch(
-      `${FACEBOOK_GRAPH_API}/${userData.id}/accounts?access_token=${accessToken}`
-    );
-    
-    if (!pagesResponse.ok) {
-      throw new Error('Erro ao obter páginas do Facebook');
+    if (!meData.id) {
+      throw new Error('ID da conta do Instagram não encontrado');
     }
     
-    const pagesData = await pagesResponse.json();
+    console.log('✅ Conta do Instagram encontrada:', meData.username, `(ID: ${meData.id})`);
     
-    if (!pagesData.data || pagesData.data.length === 0) {
-      throw new Error('Nenhuma página do Facebook encontrada');
-    }
-    
-    // Pega a primeira página
-    const pageId = pagesData.data[0].id;
-    const pageAccessToken = pagesData.data[0].access_token;
-    
-    // Obtém a conta do Instagram conectada à página
-    const igResponse = await fetch(
-      `${FACEBOOK_GRAPH_API}/${pageId}?fields=instagram_business_account&access_token=${pageAccessToken}`
-    );
-    
-    if (!igResponse.ok) {
-      throw new Error('Erro ao obter conta do Instagram');
-    }
-    
-    const igData = await igResponse.json();
-    
-    if (!igData.instagram_business_account) {
-      throw new Error('Nenhuma conta do Instagram Business conectada à página');
-    }
-    
-    return igData.instagram_business_account.id;
+    return meData.id;
   } catch (error) {
-    console.error('Erro ao obter ID da conta do Instagram:', error);
+    console.error('❌ Erro ao obter ID da conta do Instagram:', error);
     throw error;
   }
 }
@@ -108,7 +82,7 @@ export async function createMediaContainer(
     }
     
     const response = await fetch(
-      `${FACEBOOK_GRAPH_API}/${instagramAccountId}/media`,
+      `${INSTAGRAM_GRAPH_API}/${instagramAccountId}/media`,
       {
         method: 'POST',
         headers: {
@@ -148,7 +122,7 @@ export async function createCarouselChild(
     });
     
     const response = await fetch(
-      `${FACEBOOK_GRAPH_API}/${instagramAccountId}/media`,
+      `${INSTAGRAM_GRAPH_API}/${instagramAccountId}/media`,
       {
         method: 'POST',
         headers: {
@@ -186,7 +160,7 @@ export async function publishMedia(
     });
     
     const response = await fetch(
-      `${FACEBOOK_GRAPH_API}/${instagramAccountId}/media_publish`,
+      `${INSTAGRAM_GRAPH_API}/${instagramAccountId}/media_publish`,
       {
         method: 'POST',
         headers: {
@@ -205,7 +179,7 @@ export async function publishMedia(
     
     // Obtém o permalink do post publicado
     const mediaResponse = await fetch(
-      `${FACEBOOK_GRAPH_API}/${data.id}?fields=permalink&access_token=${accessToken}`
+      `${INSTAGRAM_GRAPH_API}/${data.id}?fields=permalink&access_token=${accessToken}`
     );
     
     if (mediaResponse.ok) {
