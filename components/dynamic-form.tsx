@@ -291,6 +291,8 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   }
 
   const onSubmit = async (data: FormData) => {
+    console.log('🚀 onSubmit chamado!', { previewMode, cepCityValid, dataKeys: Object.keys(data) })
+    
     // Em modo preview, não enviar dados
     if (previewMode) {
       toast.info('Este é apenas um preview. O formulário não será enviado.')
@@ -299,9 +301,12 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
     
     // Verificar se a cidade do CEP é válida (São Roque)
     if (cepCityValid === false) {
+      console.log('❌ CEP inválido')
       toast.error('Este mapeamento é exclusivo para a cidade de São Roque')
       return
     }
+    
+    console.log('✅ CEP válido, continuando...')
     
     // Validar campos "outros" se necessário
     if (!validateOtherFields(data)) {
