@@ -12,8 +12,8 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.01 264.05);
   
-  /* Rosa vibrante como cor primária */
-  --primary: oklch(0.58 0.24 342.53);
+  /* Laranja vibrante como cor primária */
+  --primary: oklch(0.65 0.18 45);
   --primary-foreground: oklch(1 0 0);
   
   /* Azul profundo como secundária */
@@ -31,7 +31,7 @@
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.90 0.01 264.05);
   --input: oklch(0.95 0.01 264.05);
-  --ring: oklch(0.58 0.24 342.53);
+  --ring: oklch(0.65 0.18 45);
   --radius: 0.75rem;
 }
 
@@ -42,8 +42,8 @@
   --card-foreground: oklch(0.98 0.002 106.42);
   --popover: oklch(0.15 0.01 264.05);
   --popover-foreground: oklch(0.98 0.002 106.42);
-  --primary: oklch(0.65 0.24 342.53);
-  --primary-foreground: oklch(0.15 0.01 264.05);
+  --primary: oklch(0.65 0.18 45);
+  --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.25 0.08 264.05);
   --secondary-foreground: oklch(0.98 0.002 106.42);
   --accent: oklch(0.75 0.15 85.87);
@@ -54,7 +54,7 @@
   --destructive-foreground: oklch(0.98 0.002 106.42);
   --border: oklch(0.25 0.01 264.05);
   --input: oklch(0.20 0.01 264.05);
-  --ring: oklch(0.65 0.24 342.53);
+  --ring: oklch(0.65 0.18 45);
 }
 
 @theme inline {
