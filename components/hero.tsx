@@ -16,63 +16,59 @@ export function Hero() {
   }, [])
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#1a4b8c] via-[#2d1b69] to-[#4a1942]">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-white via-gray-50 to-slate-50">
       <div className="absolute inset-0 overflow-hidden">
-        {/* Blob rosa superior esquerdo */}
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-gradient-to-br from-pink-500/30 to-purple-500/30 rounded-full blur-3xl animate-pulse" />
+        {/* Blobs decorativos sutis sobre fundo branco */}
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full blur-3xl animate-pulse" />
         
-        {/* Blob amarelo superior direito */}
-        <div className="absolute -top-20 right-20 w-80 h-80 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute -top-20 right-20 w-80 h-80 bg-gradient-to-br from-pink-200/25 to-rose-200/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         
-        {/* Blob roxo central */}
-        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-gradient-to-br from-purple-500/25 to-blue-500/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-gradient-to-br from-purple-200/28 to-indigo-200/28 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
         
-        {/* Blob verde inferior direito */}
-        <div className="absolute bottom-20 right-40 w-[500px] h-[500px] bg-gradient-to-br from-green-400/20 to-teal-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute bottom-20 right-40 w-[500px] h-[500px] bg-gradient-to-br from-cyan-200/20 to-blue-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
         
-        {/* Blob ciano inferior esquerdo */}
-        <div className="absolute -bottom-32 -left-20 w-[450px] h-[450px] bg-gradient-to-br from-cyan-400/25 to-blue-500/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute -bottom-32 -left-20 w-[450px] h-[450px] bg-gradient-to-br from-violet-200/25 to-purple-200/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
 
-        {/* Grid pattern sutil */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
+        {/* Grid pattern sutil para fundo claro */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:50px_50px]" />
       </div>
 
       <div className="absolute top-6 left-6 md:top-8 md:left-8 z-20">
         <div className="w-32 h-32 md:w-40 md:h-40">
           <Image 
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura_de_Tela_2025-11-14_a%CC%80s_20.28.13-removebg-preview-ZHLqMcqvj2fR23VIPIBhdOyvkeAAcx.png"
+            src="/logoN.png?v=2"
             alt="Visibilidade em Foco"
             width={160}
             height={160}
-            className="w-full h-full object-contain drop-shadow-lg"
+            className="w-full h-full object-contain drop-shadow-2xl"
+            unoptimized
           />
         </div>
       </div>
 
       <div className="relative z-10 container mx-auto px-6 py-20 text-center">
         <div className="max-w-5xl mx-auto space-y-8">
-          {/* Badge */}
-          <div className="inline-block">
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white text-sm font-medium uppercase tracking-wider border border-white/20">
-              São Roque • 2025/2026
-            </span>
-          </div>
-
           {/* Título principal */}
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-[0.95] tracking-tight text-balance drop-shadow-2xl">
-            VISIBILIDADE
-            <br />
-            <span className="text-primary drop-shadow-[0_0_30px_rgba(236,72,153,0.5)]">EM FOCO</span>
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-gray-900 leading-[0.95] tracking-tight text-balance drop-shadow-sm font-heading">
+            Mapeamento de Artistas{' '}
+            <span 
+              className="bg-clip-text text-transparent"
+              style={{
+                backgroundImage: 'linear-gradient(to right, #E40303 0%, #FF8C00 20%, #FFED00 40%, #008026 60%, #24408E 80%, #732982 100%)'
+              }}
+            >
+              LGBTQIAPN+
+            </span>
           </h1>
 
           {/* Subtítulo */}
-          <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed tracking-wide text-pretty font-medium drop-shadow-lg">
-            Mapeamento de Artistas LGBTS da Cidade de São Roque
+          <p className="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto leading-relaxed tracking-wide text-pretty font-bold font-heading">
+            do município de São Roque
           </p>
 
           {/* Descrição */}
-          <p className="text-base md:text-lg text-white/80 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
-            Um projeto que celebra, documenta e dá visibilidade à produção artística e cultural da comunidade LGBTS em São Roque! Participe do mapeamento, pesquisa aberta de <span className="font-bold text-primary">08/12/2025 até 08/02/2026</span>
+          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed font-heading">
+            Um projeto que celebra, documenta e dá visibilidade à produção artística e cultural da comunidade LGBTQIAPN+ no município de São Roque! Participe do mapeamento, pesquisa aberta de <span className="font-bold text-orange-500">08/12/2025 até 08/02/2026</span>
           </p>
 
           {/* Call to Action */}
@@ -82,7 +78,7 @@ export function Hero() {
                 <DialogTrigger asChild>
                   <Button 
                     size="lg" 
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 sm:px-12 py-6 text-base sm:text-lg font-semibold rounded-full shadow-2xl hover:shadow-primary/50 transition-all duration-300 active:scale-95 touch-manipulation min-h-[56px]"
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-8 sm:px-12 py-6 text-base sm:text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 active:scale-95 touch-manipulation min-h-[56px]"
                   >
                     PARTICIPE
                   </Button>
@@ -102,7 +98,7 @@ export function Hero() {
             ) : (
               <Button 
                 size="lg" 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 sm:px-12 py-6 text-base sm:text-lg font-semibold rounded-full shadow-2xl hover:shadow-primary/50 transition-all duration-300 active:scale-95 touch-manipulation min-h-[56px]"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-8 sm:px-12 py-6 text-base sm:text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 active:scale-95 touch-manipulation min-h-[56px]"
                 disabled
               >
                 PARTICIPE
@@ -111,7 +107,8 @@ export function Hero() {
 
             <Button 
               size="lg" 
-              className="bg-white/10 backdrop-blur-sm border-2 border-white text-white hover:bg-white hover:text-[#1a4b8c] px-8 sm:px-12 py-6 text-base sm:text-lg font-semibold rounded-full transition-all duration-300 active:scale-95 touch-manipulation min-h-[56px]"
+              variant="outline"
+              className="border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white px-8 sm:px-12 py-6 text-base sm:text-lg font-semibold rounded-full transition-all duration-300 active:scale-95 touch-manipulation min-h-[56px] shadow-lg bg-white"
               onClick={() => {
                 document.getElementById('sobre')?.scrollIntoView({ behavior: 'smooth' })
               }}

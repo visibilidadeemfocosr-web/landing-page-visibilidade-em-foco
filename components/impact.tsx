@@ -3,7 +3,7 @@ export function Impact() {
     {
       number: "01",
       title: "Reconhecimento",
-      description: "Valida a existência e o trabalho de artistas LGBTS, criando espaço de representatividade e pertencimento."
+      description: "Valida a existência e o trabalho de artistas LGBTQIAPN+, criando espaço de representatividade e pertencimento."
     },
     {
       number: "02",
@@ -28,7 +28,7 @@ export function Impact() {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
-            <span className="text-sm font-semibold uppercase tracking-wider text-primary">
+            <span className="text-sm font-semibold uppercase tracking-wider text-orange-500">
               Impacto Social
             </span>
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mt-4 mb-6 text-balance">
@@ -47,7 +47,7 @@ export function Impact() {
                 className="bg-card border border-border rounded-2xl p-8 hover:shadow-xl transition-shadow duration-300"
               >
                 <div className="flex items-start gap-6">
-                  <span className="text-5xl font-bold text-primary/20">
+                  <span className="text-5xl font-bold text-orange-500/20">
                     {impact.number}
                   </span>
                   <div className="flex-1">

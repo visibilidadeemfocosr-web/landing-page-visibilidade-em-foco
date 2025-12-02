@@ -8,24 +8,24 @@ export function About() {
         <div className="max-w-4xl mx-auto">
           {/* Tag de seção */}
           <div className="inline-block mb-6">
-            <span className="text-sm font-semibold uppercase tracking-wider text-primary">
+            <span className="text-sm font-semibold uppercase tracking-wider text-orange-500">
               Sobre o Projeto
             </span>
           </div>
 
           {/* Título */}
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8 text-balance leading-tight">
-            Por que mapear artistas LGBTS?
+            Por que mapear artistas LGBTQIAPN+?
           </h2>
 
           {/* Conteúdo */}
           <div className="space-y-6 text-lg leading-relaxed text-muted-foreground">
             <p className="text-pretty">
-              O projeto <strong className="text-foreground">Visibilidade em Foco</strong> nasce da urgência de reconhecer, documentar e celebrar a existência e a produção artística da comunidade LGBTS no interior de São Paulo.
+              O projeto <strong className="text-foreground">Visibilidade em Foco</strong> nasce da urgência de reconhecer, documentar e celebrar a existência e a produção artística da comunidade LGBTQIAPN+ no interior de São Paulo.
             </p>
 
             <p className="text-pretty">
-              Historicamente, artistas LGBTS enfrentam o apagamento de suas trajetórias e a invisibilização de suas obras. Em cidades do interior, essa realidade é ainda mais profunda, onde a falta de espaços de representação e o isolamento cultural dificultam o reconhecimento e a circulação de suas produções.
+              Historicamente, artistas LGBTQIAPN+ enfrentam o apagamento de suas trajetórias e a invisibilização de suas obras. Em cidades do interior, essa realidade é ainda mais profunda, onde a falta de espaços de representação e o isolamento cultural dificultam o reconhecimento e a circulação de suas produções.
             </p>
 
             <p className="text-pretty">
@@ -36,23 +36,23 @@ export function About() {
               <h3 className="text-2xl font-bold text-foreground mb-4">Objetivos do projeto</h3>
               <ul className="space-y-3 text-muted-foreground">
                 <li className="flex items-start gap-3">
-                  <span className="text-primary font-bold mt-1">•</span>
-                  <span>Dar visibilidade à produção artística LGBTS em São Roque</span>
+                  <span className="text-orange-500 font-bold mt-1">•</span>
+                  <span>Dar visibilidade à produção artística LGBTQIAPN+ em São Roque</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-primary font-bold mt-1">•</span>
+                  <span className="text-orange-500 font-bold mt-1">•</span>
                   <span>Criar um arquivo histórico e cultural da comunidade</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-primary font-bold mt-1">•</span>
+                  <span className="text-orange-500 font-bold mt-1">•</span>
                   <span>Fortalecer redes de apoio e colaboração entre artistas</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-primary font-bold mt-1">•</span>
+                  <span className="text-orange-500 font-bold mt-1">•</span>
                   <span>Promover políticas públicas de cultura e diversidade</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-primary font-bold mt-1">•</span>
+                  <span className="text-orange-500 font-bold mt-1">•</span>
                   <span>Combater o apagamento e a marginalização cultural</span>
                 </li>
               </ul>
