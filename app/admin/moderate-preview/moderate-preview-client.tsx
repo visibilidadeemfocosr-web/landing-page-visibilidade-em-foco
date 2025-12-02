@@ -162,45 +162,135 @@ export default function AdminModeratePreviewClient() {
     toast.success('Legenda copiada para a área de transferência!')
   }
 
-  // Função para publicar no Instagram (futura implementação)
+  // Função para publicar no Instagram
   const handlePublishToInstagram = async () => {
+    if (!submissionId) {
+      toast.error('ID da submissão não encontrado')
+      return
+    }
+
     setLoading(true)
+    
     try {
-      // 1. Baixar as duas imagens do carousel
-      toast.info('Preparando imagens para publicação...')
+      // 1. Gerar e fazer upload das duas imagens do carousel
+      toast.info('📸 Gerando imagens...')
       
-      // Aqui você precisará:
-      // - Fazer upload das duas imagens para um servidor público
-      // - Obter URLs públicas das imagens
-      // - Chamar a API /api/instagram/publish com as URLs e a legenda
+      // Gerar Post 1
+      const post1Response = await fetch('/api/admin/generate-post-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: previewData.name,
+          mainArtisticLanguage: previewData.mainArtisticLanguage,
+          otherArtisticLanguages: previewData.otherArtisticLanguages,
+          bio: previewData.bio,
+          photo: previewData.photo,
+          instagram: previewData.instagram,
+          facebook: previewData.facebook,
+          linkedin: previewData.linkedin,
+          postType: 'first',
+        }),
+      })
+
+      if (!post1Response.ok) {
+        throw new Error('Erro ao gerar Post 1')
+      }
+
+      const post1Data = await post1Response.json()
       
-      toast.info('Função em desenvolvimento. Use "Baixar Preview" por enquanto.')
+      toast.info('📸 Gerando Post 2...')
       
-      // Código de exemplo (comentado):
-      // const imageUrls = [
-      //   'https://seu-servidor.com/post1.png',
-      //   'https://seu-servidor.com/post2.png'
-      // ]
-      // const caption = generateInstagramCaption()
-      // 
-      // const response = await fetch('/api/instagram/publish', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     imageUrl: imageUrls,
-      //     caption: caption,
-      //     isCarousel: true
-      //   })
-      // })
-      //
-      // if (!response.ok) throw new Error('Erro ao publicar')
-      // const data = await response.json()
-      // toast.success('Post publicado no Instagram com sucesso!')
-      // if (data.data?.permalink) {
-      //   window.open(data.data.permalink, '_blank')
-      // }
+      // Gerar Post 2
+      const post2Response = await fetch('/api/admin/generate-post-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: previewData.name,
+          mainArtisticLanguage: previewData.mainArtisticLanguage,
+          otherArtisticLanguages: previewData.otherArtisticLanguages,
+          bio: previewData.bio,
+          photo: previewData.photo,
+          instagram: previewData.instagram,
+          facebook: previewData.facebook,
+          linkedin: previewData.linkedin,
+          postType: 'second',
+        }),
+      })
+
+      if (!post2Response.ok) {
+        throw new Error('Erro ao gerar Post 2')
+      }
+
+      const post2Data = await post2Response.json()
+      
+      toast.info('☁️ Fazendo upload para o Supabase...')
+      
+      // 2. Fazer upload das imagens para o Supabase Storage
+      const uploadResponse = await fetch('/api/admin/upload-instagram-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post1Image: post1Data.image,
+          post2Image: post2Data.image,
+          artistName: previewData.name,
+        }),
+      })
+
+      if (!uploadResponse.ok) {
+        throw new Error('Erro ao fazer upload das imagens')
+      }
+
+      const uploadData = await uploadResponse.json()
+      const imageUrls = [uploadData.post1Url, uploadData.post2Url]
+      
+      toast.info('📱 Publicando no Instagram...')
+      
+      // 3. Publicar no Instagram
+      const caption = generateInstagramCaption()
+      
+      const publishResponse = await fetch('/api/instagram/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: imageUrls,
+          caption: caption,
+          isCarousel: true,
+        }),
+      })
+
+      if (!publishResponse.ok) {
+        const errorData = await publishResponse.json()
+        throw new Error(errorData.details || 'Erro ao publicar no Instagram')
+      }
+
+      const publishData = await publishResponse.json()
+      
+      // 4. Atualizar status na moderação
+      const moderateResponse = await fetch('/api/admin/moderate', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          submission_id: submissionId,
+          status: 'published',
+          instagram_post_id: publishData.data.id,
+        }),
+      })
+
+      if (!moderateResponse.ok) {
+        console.warn('Erro ao atualizar status na moderação')
+      }
+
+      toast.success('✅ Post publicado no Instagram com sucesso!')
+      
+      // 5. Abrir o post no Instagram
+      if (publishData.data?.permalink) {
+        setTimeout(() => {
+          window.open(publishData.data.permalink, '_blank')
+        }, 1000)
+      }
     } catch (error: any) {
-      toast.error('Erro ao publicar: ' + error.message)
+      console.error('Erro ao publicar no Instagram:', error)
+      toast.error('❌ Erro ao publicar: ' + error.message)
     } finally {
       setLoading(false)
     }
@@ -1383,18 +1473,18 @@ export default function AdminModeratePreviewClient() {
                 Baixa a imagem do post atual (Post {activePost === 'first' ? '1' : '2'}) em formato PNG 1080x1080px
               </p>
               
-              {/* Botão de publicar no Instagram - desabilitado por enquanto */}
+              {/* Botão de publicar no Instagram */}
               <Button 
                 className="w-full" 
                 variant="default"
                 onClick={handlePublishToInstagram}
-                disabled={true}
+                disabled={loading || !submissionId}
               >
                 <Instagram className="w-4 h-4 mr-2" />
-                Publicar no Instagram (Em breve)
+                {loading ? 'Publicando...' : 'Publicar no Instagram'}
               </Button>
               <p className="text-xs text-muted-foreground text-center">
-                ⚠️ Função em desenvolvimento. Por enquanto, use "Baixar Preview" e publique manualmente.
+                📱 Publica automaticamente o carousel (2 posts) no Instagram
               </p>
             </div>
           </CardContent>
