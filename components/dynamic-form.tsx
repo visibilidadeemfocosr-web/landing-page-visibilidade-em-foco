@@ -873,7 +873,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             <Label htmlFor={fieldId} className="sr-only">
               {question.text.replace(/<[^>]+>/g, '')}
             </Label>
-            <div className="border-2 border-dashed border-border rounded-lg p-6 sm:p-8 text-center hover:border-primary/50 transition-colors touch-manipulation">
+            <div className="border-2 border-dashed border-border rounded-lg p-6 sm:p-8 text-center hover:border-orange-500/50 transition-colors touch-manipulation">
               <input
                 type="file"
                 id={fieldId}
@@ -1062,9 +1062,9 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   if (submitted) {
     return (
       <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4 text-center space-y-6">
-        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-orange-500/10 rounded-full flex items-center justify-center mb-4">
           <svg
-            className="w-12 h-12 sm:w-16 sm:h-16 text-primary"
+            className="w-12 h-12 sm:w-16 sm:h-16 text-orange-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -1104,7 +1104,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             }
           }}
           size="lg"
-          className="mt-6 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base sm:text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 min-h-[56px] touch-manipulation"
+          className="mt-6 bg-orange-500 hover:bg-orange-600 text-white px-8 py-6 text-base sm:text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 min-h-[56px] touch-manipulation"
         >
           Voltar para o início
         </Button>
@@ -1129,9 +1129,9 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
 
       {/* Se CEP não for válido, mostrar apenas mensagem de agradecimento */}
       {cepCityValid === false && (
-        <Alert variant="default" className="bg-primary/5 border-primary/20">
+        <Alert variant="default" className="bg-orange-500/5 border-orange-500/20">
           <AlertDescription className="text-base sm:text-lg text-center py-6">
-            <p className="font-semibold text-primary mb-2">Obrigado pelo interesse!</p>
+            <p className="font-semibold text-orange-500 mb-2">Obrigado pelo interesse!</p>
             <p className="text-foreground">
               Este mapeamento é exclusivo para artistas da cidade de <strong>São Roque</strong>.
             </p>
@@ -1198,8 +1198,8 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                 className={`space-y-6 sm:space-y-8 ${section === currentBlock ? 'block' : 'hidden'}`}
               >
                 {section !== 'Sem seção' && (
-                  <div className="border-b-2 border-primary/30 pb-3 -mx-2 sm:-mx-0">
-                    <h3 className="text-xl sm:text-2xl font-bold text-primary">{section}</h3>
+                  <div className="border-b-2 border-orange-500/30 pb-3 -mx-2 sm:-mx-0">
+                    <h3 className="text-xl sm:text-2xl font-bold text-orange-500">{section}</h3>
                   </div>
                 )}
                 {(() => {
@@ -1254,9 +1254,9 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                         
                         {/* Mostrar mensagem se a resposta for "Não" ou se não houver resposta ainda */}
                         {(currentRedeSocialAnswer === 'nao' || (!currentRedeSocialAnswer && redeSocialQuestion)) && (
-                          <Alert variant="default" className="bg-primary/5 border-primary/20 mt-4">
+                          <Alert variant="default" className="bg-orange-500/5 border-orange-500/20 mt-4">
                             <AlertDescription className="text-base text-center py-4">
-                              <p className="font-semibold text-primary mb-2">Atenção</p>
+                              <p className="font-semibold text-orange-500 mb-2">Atenção</p>
                               <p className="text-foreground">
                                 {currentRedeSocialAnswer === 'nao' 
                                   ? 'Para finalizar o cadastro, é necessário aceitar fazer parte da rede social de artistas LGBTQIA+ de São Roque.'
@@ -1293,7 +1293,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                   </div>
                   <div className="w-full bg-muted rounded-full h-2">
                     <div
-                      className="bg-primary h-2 rounded-full transition-all duration-300"
+                      className="bg-orange-500 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${((currentBlockIndex + 1) / totalBlocks) * 100}%` }}
                     />
                   </div>
@@ -1335,7 +1335,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                         }
                       })
                     }}
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98] rounded-full"
                   >
                     Continuar
                   </Button>
@@ -1354,7 +1354,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                   </div>
                   <div className="w-full bg-muted rounded-full h-2">
                     <div
-                      className="bg-primary h-2 rounded-full transition-all duration-300"
+                      className="bg-orange-500 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${((currentBlockIndex + 1) / totalBlocks) * 100}%` }}
                     />
                   </div>
@@ -1394,7 +1394,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
 
       <Button
         type="submit"
-        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
+        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98] rounded-full"
         disabled={loading || !watch('consent') || isCepInvalid || previewMode}
       >
             {previewMode ? 'Preview - Envio Desabilitado' : loading ? 'Enviando...' : 'Enviar Cadastro'}
