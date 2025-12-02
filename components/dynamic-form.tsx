@@ -57,6 +57,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   const [otherOptionValues, setOtherOptionValues] = useState<Record<string, string>>({}) // Armazenar valores de "outros"
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0) // Índice do bloco atual na navegação
   const [redeSocialAnswer, setRedeSocialAnswer] = useState<string | null>(null) // Resposta da pergunta sobre rede social
+  const [isFromSaoRoque, setIsFromSaoRoque] = useState<boolean | null>(null) // Resposta inicial: é de São Roque?
 
   // Criar schema Zod dinamicamente
   const createSchema = () => {
@@ -1114,11 +1115,61 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6 pb-12 sm:pb-6 mb-4 sm:mb-0">
-      <Alert className="text-left">
-        <AlertDescription className="text-xs sm:text-sm leading-relaxed">
-          <strong>Privacidade e Proteção de Dados:</strong> Seus dados serão utilizados exclusivamente para o projeto Visibilidade em Foco e não serão compartilhados com terceiros sem seu consentimento. Você pode solicitar a remoção das suas informações a qualquer momento.
-        </AlertDescription>
-      </Alert>
+      {/* Pergunta inicial - filtro de São Roque */}
+      {isFromSaoRoque === null && (
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="text-xl sm:text-2xl font-bold text-foreground leading-relaxed font-heading">
+              Você responde este formulário como pessoa artista LGBTQIAPN+ morador(a/e) do município de São Roque?
+              <span className="text-red-500 ml-1">*</span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mt-6">
+              <Button
+                type="button"
+                size="lg"
+                className="bg-orange-500 hover:bg-orange-600 text-white py-6 text-lg font-semibold rounded-full min-h-[56px]"
+                onClick={() => setIsFromSaoRoque(true)}
+              >
+                Sim
+              </Button>
+              <Button
+                type="button"
+                size="lg"
+                variant="outline"
+                className="border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-6 text-lg font-semibold rounded-full min-h-[56px]"
+                onClick={() => setIsFromSaoRoque(false)}
+              >
+                Não
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mensagem se respondeu "Não" */}
+      {isFromSaoRoque === false && (
+        <Alert variant="default" className="bg-orange-500/5 border-orange-500/20">
+          <AlertDescription className="text-base sm:text-lg text-center py-6">
+            <p className="font-semibold text-orange-500 mb-2">Obrigado pelo interesse!</p>
+            <p className="text-foreground">
+              Este mapeamento é exclusivo para artistas da cidade de <strong>São Roque</strong>.
+            </p>
+            <p className="text-muted-foreground mt-2">
+              Se você é de outra cidade, agradecemos sua compreensão.
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Formulário completo - só aparece se respondeu "Sim" */}
+      {isFromSaoRoque === true && (
+        <>
+          <Alert className="text-left">
+            <AlertDescription className="text-xs sm:text-sm leading-relaxed">
+              <strong>Privacidade e Proteção de Dados:</strong> Seus dados serão utilizados exclusivamente para o projeto Visibilidade em Foco e não serão compartilhados com terceiros sem seu consentimento. Você pode solicitar a remoção das suas informações a qualquer momento.
+            </AlertDescription>
+          </Alert>
 
       {/* Mostrar a pergunta CEP apenas quando ainda não avançou para os outros blocos */}
       {cepQuestion && !showOtherQuestions && (
@@ -1404,6 +1455,8 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             * Campos obrigatórios
           </p>
         </>
+      )}
+      </>
       )}
     </form>
   )
