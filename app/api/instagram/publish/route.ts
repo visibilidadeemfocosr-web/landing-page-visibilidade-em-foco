@@ -1,0 +1,89 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { publishInstagramPost, publishInstagramCarousel } from '@/lib/instagram';
+
+/**
+ * Rota para publicar posts no Instagram
+ * POST /api/instagram/publish
+ * 
+ * Body:
+ * {
+ *   imageUrl: string | string[],  // URL da imagem ou array de URLs para carousel
+ *   caption: string,               // Legenda do post
+ *   isCarousel?: boolean           // Se é um carousel (múltiplas imagens)
+ * }
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { imageUrl, caption, isCarousel } = body;
+
+    // Validações
+    if (!imageUrl || !caption) {
+      return NextResponse.json(
+        { error: 'imageUrl e caption são obrigatórios' },
+        { status: 400 }
+      );
+    }
+
+    // Verifica se o token está configurado
+    if (!process.env.INSTAGRAM_ACCESS_TOKEN) {
+      return NextResponse.json(
+        { error: 'Access Token do Instagram não configurado' },
+        { status: 500 }
+      );
+    }
+
+    let result;
+
+    if (isCarousel && Array.isArray(imageUrl)) {
+      // Publicar carousel (múltiplas imagens)
+      console.log('📸 Publicando carousel no Instagram...');
+      console.log(`   ${imageUrl.length} imagens`);
+      console.log(`   Caption: ${caption.substring(0, 50)}...`);
+      
+      result = await publishInstagramCarousel(
+        imageUrl,
+        caption,
+        process.env.INSTAGRAM_ACCESS_TOKEN
+      );
+    } else {
+      // Publicar post único
+      const singleImageUrl = Array.isArray(imageUrl) ? imageUrl[0] : imageUrl;
+      
+      console.log('📸 Publicando post no Instagram...');
+      console.log(`   Imagem: ${singleImageUrl}`);
+      console.log(`   Caption: ${caption.substring(0, 50)}...`);
+      
+      result = await publishInstagramPost(
+        singleImageUrl,
+        caption,
+        process.env.INSTAGRAM_ACCESS_TOKEN
+      );
+    }
+
+    console.log('✅ Post publicado com sucesso!');
+    console.log(`   ID: ${result.id}`);
+    if (result.permalink) {
+      console.log(`   Link: ${result.permalink}`);
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Post publicado no Instagram com sucesso',
+      data: result,
+    });
+  } catch (error) {
+    console.error('❌ Erro ao publicar no Instagram:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+    
+    return NextResponse.json(
+      { 
+        error: 'Erro ao publicar no Instagram', 
+        details: errorMessage 
+      },
+      { status: 500 }
+    );
+  }
+}
+

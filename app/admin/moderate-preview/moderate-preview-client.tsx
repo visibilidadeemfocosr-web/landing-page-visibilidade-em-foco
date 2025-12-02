@@ -162,6 +162,50 @@ export default function AdminModeratePreviewClient() {
     toast.success('Legenda copiada para a área de transferência!')
   }
 
+  // Função para publicar no Instagram (futura implementação)
+  const handlePublishToInstagram = async () => {
+    setLoading(true)
+    try {
+      // 1. Baixar as duas imagens do carousel
+      toast.info('Preparando imagens para publicação...')
+      
+      // Aqui você precisará:
+      // - Fazer upload das duas imagens para um servidor público
+      // - Obter URLs públicas das imagens
+      // - Chamar a API /api/instagram/publish com as URLs e a legenda
+      
+      toast.info('Função em desenvolvimento. Use "Baixar Preview" por enquanto.')
+      
+      // Código de exemplo (comentado):
+      // const imageUrls = [
+      //   'https://seu-servidor.com/post1.png',
+      //   'https://seu-servidor.com/post2.png'
+      // ]
+      // const caption = generateInstagramCaption()
+      // 
+      // const response = await fetch('/api/instagram/publish', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     imageUrl: imageUrls,
+      //     caption: caption,
+      //     isCarousel: true
+      //   })
+      // })
+      //
+      // if (!response.ok) throw new Error('Erro ao publicar')
+      // const data = await response.json()
+      // toast.success('Post publicado no Instagram com sucesso!')
+      // if (data.data?.permalink) {
+      //   window.open(data.data.permalink, '_blank')
+      // }
+    } catch (error: any) {
+      toast.error('Erro ao publicar: ' + error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleDownloadPreview = async () => {
     // Usar a nova API que renderiza exatamente como a preview
     try {
@@ -1330,12 +1374,27 @@ export default function AdminModeratePreviewClient() {
                 className="w-full" 
                 variant="outline"
                 onClick={handleDownloadPreview}
+                disabled={loading}
               >
                 <Download className="w-4 h-4 mr-2" />
                 Baixar Preview (PNG)
               </Button>
               <p className="text-xs text-muted-foreground text-center">
                 Baixa a imagem do post atual (Post {activePost === 'first' ? '1' : '2'}) em formato PNG 1080x1080px
+              </p>
+              
+              {/* Botão de publicar no Instagram - desabilitado por enquanto */}
+              <Button 
+                className="w-full" 
+                variant="default"
+                onClick={handlePublishToInstagram}
+                disabled={true}
+              >
+                <Instagram className="w-4 h-4 mr-2" />
+                Publicar no Instagram (Em breve)
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">
+                ⚠️ Função em desenvolvimento. Por enquanto, use "Baixar Preview" e publique manualmente.
               </p>
             </div>
           </CardContent>
