@@ -137,15 +137,15 @@ export async function POST(request: NextRequest) {
     /* Logo */
     .logo-container {
       position: absolute;
-      top: 32px;
-      left: 32px;
-      width: 140px;
-      height: 140px;
+      top: 40px;
+      left: 40px;
+      width: 200px;
+      height: 200px;
       background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 12px;
-      padding: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 16px;
       z-index: 10;
       display: flex;
       align-items: center;
@@ -161,21 +161,21 @@ export async function POST(request: NextRequest) {
     /* VFSR Tag */
     .vfsr-tag {
       position: absolute;
-      top: 32px;
-      right: 32px;
+      top: 40px;
+      right: 40px;
       background: linear-gradient(to bottom right, #ec4899, #9333ea);
       border-radius: 9999px;
-      padding: 12px 24px;
+      padding: 16px 32px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.3);
       z-index: 10;
     }
     
     .vfsr-tag span {
       color: white;
       font-weight: bold;
-      font-size: 20px;
+      font-size: 28px;
       letter-spacing: 0.05em;
     }
     
@@ -198,8 +198,8 @@ export async function POST(request: NextRequest) {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 24px;
-      margin-top: 64px;
+      gap: 32px;
+      margin-top: 140px;
     }
     
     .photo-container {
@@ -207,11 +207,11 @@ export async function POST(request: NextRequest) {
     }
     
     .photo-wrapper {
-      width: 380px;
-      height: 380px;
+      width: 550px;
+      height: 550px;
       border-radius: 50%;
       overflow: hidden;
-      border: 6px solid rgba(255, 255, 255, 0.3);
+      border: 8px solid rgba(255, 255, 255, 0.3);
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
       background: rgba(255, 255, 255, 0.1);
     }
@@ -237,16 +237,16 @@ export async function POST(request: NextRequest) {
     }
     
     .artist-name h2 {
-      font-size: 56px;
+      font-size: 72px;
       font-weight: bold;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
     
     .name-divider {
-      width: 200px;
-      height: 6px;
+      width: 280px;
+      height: 8px;
       background: #ec4899;
-      margin: 0 auto 20px;
+      margin: 0 auto 24px;
       border-radius: 9999px;
     }
     
@@ -260,10 +260,10 @@ export async function POST(request: NextRequest) {
     .language-tag {
       display: inline-flex;
       align-items: center;
-      gap: 12px;
-      padding: 16px 28px;
+      gap: 16px;
+      padding: 20px 36px;
       border-radius: 9999px;
-      border: 1px solid;
+      border: 2px solid;
     }
     
     .language-tag.principal {
@@ -278,13 +278,13 @@ export async function POST(request: NextRequest) {
     .language-tag.principal span:first-child {
       color: #f9a8d4;
       font-weight: 600;
-      font-size: 24px;
+      font-size: 32px;
     }
     
     .language-tag.principal span:last-child {
       color: white;
       font-weight: 500;
-      font-size: 24px;
+      font-size: 32px;
     }
     
     .language-tag.outras {
@@ -297,13 +297,13 @@ export async function POST(request: NextRequest) {
     .language-tag.outras span:first-child {
       color: rgba(255, 255, 255, 0.8);
       font-weight: 600;
-      font-size: 24px;
+      font-size: 32px;
     }
     
     .language-tag.outras span:last-child {
       color: white;
       font-weight: 500;
-      font-size: 24px;
+      font-size: 32px;
     }
     
     .swipe-indicator {
