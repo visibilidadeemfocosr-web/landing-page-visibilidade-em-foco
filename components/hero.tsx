@@ -54,7 +54,7 @@ export function Hero() {
           {/* Badge */}
           <div className="inline-block">
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white text-sm font-medium uppercase tracking-wider border border-white/20">
-              São Roque • 2025
+              São Roque • 2025/2026
             </span>
           </div>
 
@@ -72,7 +72,7 @@ export function Hero() {
 
           {/* Descrição */}
           <p className="text-base md:text-lg text-white/80 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
-            Um projeto que celebra, documenta e dá visibilidade à produção artística e cultural da comunidade LGBTS em São Roque
+            Um projeto que celebra, documenta e dá visibilidade à produção artística e cultural da comunidade LGBTS em São Roque! Participe do mapeamento, pesquisa aberta de <span className="font-bold text-primary">08/12/2025 até 08/02/2026</span>
           </p>
 
           {/* Call to Action */}

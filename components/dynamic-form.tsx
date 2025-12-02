@@ -1562,10 +1562,15 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
           if (addressInfo.bairro) setValue(q.id as any, addressInfo.bairro)
         }
         
-        // Cidade / Município - apenas se for um campo de input específico sobre cidade
-        if (questionText.includes('cidade') || 
-            (questionText.includes('município') && (questionText.includes('qual') || questionText.includes('sua') || questionText.includes('em qual'))) ||
-            (questionText.includes('municipio') && (questionText.includes('qual') || questionText.includes('sua') || questionText.includes('em qual')))) {
+        // Cidade / Município - apenas se for um campo de input específico sobre cidade do endereço
+        // Verificar se é realmente uma pergunta sobre a cidade do endereço, não apenas menciona "cidade" ou "município"
+        const isCityAddressField = (
+          (questionText.includes('cidade') && (questionText.includes('qual') || questionText.includes('sua') || questionText.includes('em qual') || questionText.includes('você mora') || questionText.includes('reside'))) ||
+          (questionText.includes('município') && (questionText.includes('qual') || questionText.includes('sua') || questionText.includes('em qual') || questionText.includes('você mora') || questionText.includes('reside'))) ||
+          (questionText.includes('municipio') && (questionText.includes('qual') || questionText.includes('sua') || questionText.includes('em qual') || questionText.includes('você mora') || questionText.includes('reside')))
+        ) && !questionText.includes('grupo') && !questionText.includes('coletivo') && !questionText.includes('companhia') && !questionText.includes('participa')
+        
+        if (isCityAddressField) {
           if (addressInfo.cidade) setValue(q.id as any, addressInfo.cidade)
         }
         
