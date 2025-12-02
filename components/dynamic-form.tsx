@@ -1472,8 +1472,6 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
           </p>
         </>
       )}
-      </>
-      )}
     </form>
   )
 }
