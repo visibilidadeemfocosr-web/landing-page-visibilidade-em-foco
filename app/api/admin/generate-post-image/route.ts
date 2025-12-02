@@ -60,12 +60,6 @@ export async function POST(request: NextRequest) {
     const width = 1080
     const height = 1080
 
-    // Função auxiliar para truncar texto longo
-    const truncateText = (text: string, maxLength: number = 35): string => {
-      if (!text) return ''
-      return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
-    }
-
     // Criar HTML completo com todos os estilos inline
     const htmlContent = `
 <!DOCTYPE html>
@@ -266,11 +260,10 @@ export async function POST(request: NextRequest) {
     .language-tag {
       display: inline-flex;
       align-items: center;
-      gap: 14px;
-      padding: 18px 32px;
+      gap: 16px;
+      padding: 20px 36px;
       border-radius: 9999px;
       border: 2px solid;
-      max-width: 90%;
     }
     
     .language-tag.principal {
@@ -285,17 +278,13 @@ export async function POST(request: NextRequest) {
     .language-tag.principal span:first-child {
       color: #f9a8d4;
       font-weight: 600;
-      font-size: 28px;
+      font-size: 32px;
     }
     
     .language-tag.principal span:last-child {
       color: white;
       font-weight: 500;
-      font-size: 28px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 400px;
+      font-size: 32px;
     }
     
     .language-tag.outras {
@@ -308,17 +297,13 @@ export async function POST(request: NextRequest) {
     .language-tag.outras span:first-child {
       color: rgba(255, 255, 255, 0.8);
       font-weight: 600;
-      font-size: 28px;
+      font-size: 32px;
     }
     
     .language-tag.outras span:last-child {
       color: white;
       font-weight: 500;
-      font-size: 28px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 400px;
+      font-size: 32px;
     }
     
     .swipe-indicator {
@@ -486,7 +471,7 @@ export async function POST(request: NextRequest) {
             ${otherArtisticLanguages ? `
               <div class="language-tag outras">
                 <span>Outras:</span>
-                <span>${truncateText(otherArtisticLanguages, 35)}</span>
+                <span>${otherArtisticLanguages}</span>
               </div>
             ` : ''}
             
