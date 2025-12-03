@@ -40,3 +40,59 @@ export interface AdminUser {
   created_at: string
 }
 
+export type InstagramPostTemplateType = 'chamamento' | 'artista' | 'evento' | 'citacao' | 'livre'
+export type InstagramPostStatus = 'draft' | 'published'
+export type LogoPosition = 
+  | 'topo-esquerda' | 'topo-centro' | 'topo-direita'
+  | 'centro-esquerda' | 'centro' | 'centro-direita'
+  | 'rodape-esquerda' | 'rodape-centro' | 'rodape-direita'
+export type LogoSize = 'pequena' | 'media' | 'grande'
+export type LogoVariant = 'black' | 'color' | 'gradient' | 'white'
+export type DecorativeEffect = 'none' | 'blobs' | 'grid' | 'gradient'
+
+export interface InstagramPostSlide {
+  order: number
+  title?: string
+  subtitle?: string
+  description?: string
+  ctaText?: string
+  ctaLink?: string
+  periodText?: string
+}
+
+export interface InstagramPostContent {
+  // Configurações de design
+  backgroundColor?: string
+  textColor?: string
+  logoPosition?: LogoPosition
+  logoSize?: LogoSize
+  logoVariant?: LogoVariant
+  decorativeEffect?: DecorativeEffect
+  
+  // Configurações específicas por template
+  [key: string]: any
+}
+
+export interface InstagramPost {
+  id: string
+  template_type: InstagramPostTemplateType
+  title?: string
+  subtitle?: string
+  description?: string
+  cta_text?: string // Call to Action
+  cta_link?: string
+  period_text?: string
+  tag_text?: string
+  is_carousel?: boolean
+  slides?: InstagramPostSlide[]
+  content?: InstagramPostContent
+  image_url?: string
+  caption?: string
+  hashtags?: string[]
+  status: InstagramPostStatus
+  instagram_post_id?: string
+  published_at?: string
+  created_at: string
+  updated_at: string
+}
+
