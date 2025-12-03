@@ -321,7 +321,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
     if (redeSocialQuestion) {
       const redeSocialValue = data[redeSocialQuestion.id as keyof FormData] as string
       if (redeSocialValue === 'nao') {
-        toast.error('Para finalizar o cadastro, é necessário aceitar fazer parte da rede social de artistas LGBTQIA+ de São Roque')
+        toast.error('Para finalizar o cadastro, é necessário aceitar os termos e Enviar o Cadastro de participação.')
         setLoading(false)
         return
       }
@@ -1336,7 +1336,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                               <p className="font-semibold text-orange-500 mb-2">Atenção</p>
                               <p className="text-foreground">
                                 {currentRedeSocialAnswer === 'nao' 
-                                  ? 'Para finalizar o cadastro, é necessário aceitar fazer parte da rede social de artistas LGBTQIA+ de São Roque.'
+                                  ? 'Para finalizar o cadastro, é necessário aceitar os termos e Enviar o Cadastro de participação.'
                                   : 'Selecione "Sim" para continuar com o cadastro e preencher os demais campos.'}
                               </p>
                             </AlertDescription>
