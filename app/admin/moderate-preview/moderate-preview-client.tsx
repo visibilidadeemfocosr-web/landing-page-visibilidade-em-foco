@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Instagram, Facebook, Linkedin, Download, Edit2, Check, X, ChevronRight, Copy, Camera, FileText, Music, Palette, Film, BookOpen, Shirt, AudioLines, Theater, Sparkles, Mic } from 'lucide-react'
+import { Instagram, Facebook, Linkedin, Download, Edit2, Check, X, ChevronRight, Copy, Camera, FileText, Guitar, Palette, Film, BookOpen, Shirt, AudioLines, Theater, Sparkles, MicVocal } from 'lucide-react'
 import Image from 'next/image'
 import { toast } from 'sonner'
 import html2canvas from 'html2canvas'
@@ -106,14 +106,14 @@ export default function AdminModeratePreviewClient() {
     
     const lang = language.toLowerCase()
     
-    if (lang.includes('música') || lang.includes('musica')) return <Music className="w-6 h-6" />
+    if (lang.includes('música') || lang.includes('musica')) return <Guitar className="w-6 h-6" />
     if (lang.includes('artes visuais') || lang.includes('pintura') || lang.includes('desenho')) return <Palette className="w-6 h-6" />
     if (lang.includes('audiovisual') || lang.includes('cinema') || lang.includes('vídeo') || lang.includes('video')) return <Film className="w-6 h-6" />
     if (lang.includes('literatura') || lang.includes('escrita') || lang.includes('poeta')) return <BookOpen className="w-6 h-6" />
     if (lang.includes('moda') || lang.includes('design')) return <Shirt className="w-6 h-6" />
     if (lang.includes('dança') || lang.includes('danca')) return <AudioLines className="w-6 h-6" />
     if (lang.includes('teatro') || lang.includes('cênica') || lang.includes('cenica') || lang.includes('atuação') || lang.includes('atuacao')) return <Theater className="w-6 h-6" />
-    if (lang.includes('performance')) return <Mic className="w-6 h-6" />
+    if (lang.includes('performance')) return <MicVocal className="w-6 h-6" />
     
     return <Sparkles className="w-6 h-6" />
   }
