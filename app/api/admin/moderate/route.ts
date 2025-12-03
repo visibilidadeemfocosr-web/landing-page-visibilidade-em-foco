@@ -95,7 +95,7 @@ export async function GET() {
 
       // Extrair dados
       const nameAnswer = findAnswer('gostaria de ser chamado') || findAnswer('nome')
-      const bioAnswer = findAnswer('biografia') || findAnswer('trajetória artística')
+      const bioAnswer = findAnswer('compartilhar um pouco da sua trajetória') || findAnswer('trajetória como artista') || findAnswer('biografia')
       const photoAnswer = findAnswer('foto') || submissionAnswers.find(a => a.file_url)
       const mainLanguageAnswer = findAnswer('linguagem artística principal')
       const otherLanguagesAnswer = findAnswer('outras linguagens')
