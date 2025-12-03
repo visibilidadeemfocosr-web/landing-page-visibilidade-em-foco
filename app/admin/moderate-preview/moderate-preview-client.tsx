@@ -1082,30 +1082,30 @@ export default function AdminModeratePreviewClient() {
                   <div className="flex-1 flex flex-col items-center justify-center space-y-6 mt-16">
                     {/* Nome do artista (menor, no topo) */}
                     <div className="text-center">
-                      <h2 className="text-2xl font-bold mb-2 text-gray-900">{previewData.name}</h2>
-                      <div className="w-20 h-1 bg-orange-500 mx-auto rounded-full" />
+                      <h2 className="text-3xl font-bold mb-2 text-gray-900">{previewData.name}</h2>
+                      <div className="w-24 h-1.5 bg-orange-500 mx-auto rounded-full" />
                     </div>
 
                     {/* Bio */}
                     <div className="max-w-lg text-center space-y-4 px-4">
-                      <p className="text-lg leading-relaxed text-gray-700">
+                      <p className="text-xl leading-relaxed text-gray-900">
                         {previewData.isEditing ? editedBio : previewData.bio}
                       </p>
                     </div>
 
                     {/* Redes sociais */}
                     <div className="flex flex-col items-center gap-3 pt-4">
-                      <p className="text-sm text-gray-600 mb-2">Entre em contato:</p>
+                      <p className="text-base text-gray-700 mb-2 font-medium">Entre em contato:</p>
                       <div className="flex items-center justify-center gap-3 flex-wrap">
                         {previewData.instagram && (
                           <a
                             href={`https://instagram.com/${previewData.instagram.replace('@', '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-5 py-3 bg-orange-500/10 hover:bg-orange-500/20 rounded-full backdrop-blur-sm border-2 border-orange-500/20 transition-all"
+                            className="flex items-center gap-3 px-6 py-3 bg-orange-500/10 hover:bg-orange-500/20 rounded-full backdrop-blur-sm border-2 border-orange-500/20 transition-all"
                           >
-                            <Instagram className="w-5 h-5 text-orange-500" />
-                            <span className="text-sm font-medium text-gray-900">{previewData.instagram}</span>
+                            <Instagram className="w-6 h-6 text-orange-500" />
+                            <span className="text-base font-medium text-gray-900">{previewData.instagram}</span>
                           </a>
                         )}
                         {previewData.facebook && (
@@ -1113,10 +1113,10 @@ export default function AdminModeratePreviewClient() {
                             href={previewData.facebook}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-5 py-3 bg-orange-500/10 hover:bg-orange-500/20 rounded-full backdrop-blur-sm border-2 border-orange-500/20 transition-all"
+                            className="flex items-center gap-3 px-6 py-3 bg-orange-500/10 hover:bg-orange-500/20 rounded-full backdrop-blur-sm border-2 border-orange-500/20 transition-all"
                           >
-                            <Facebook className="w-5 h-5 text-orange-500" />
-                            <span className="text-sm font-medium text-gray-900">Facebook</span>
+                            <Facebook className="w-6 h-6 text-orange-500" />
+                            <span className="text-base font-medium text-gray-900">Facebook</span>
                           </a>
                         )}
                         {previewData.linkedin && (
@@ -1124,10 +1124,10 @@ export default function AdminModeratePreviewClient() {
                             href={previewData.linkedin}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 px-5 py-3 bg-orange-500/10 hover:bg-orange-500/20 rounded-full backdrop-blur-sm border-2 border-orange-500/20 transition-all"
+                            className="flex items-center gap-3 px-6 py-3 bg-orange-500/10 hover:bg-orange-500/20 rounded-full backdrop-blur-sm border-2 border-orange-500/20 transition-all"
                           >
-                            <Linkedin className="w-5 h-5 text-orange-500" />
-                            <span className="text-sm font-medium text-gray-900">LinkedIn</span>
+                            <Linkedin className="w-6 h-6 text-orange-500" />
+                            <span className="text-base font-medium text-gray-900">LinkedIn</span>
                           </a>
                         )}
                       </div>

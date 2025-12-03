@@ -395,30 +395,30 @@ export async function POST(request: NextRequest) {
     }
     
     .artist-name-small h2 {
-      font-size: 40px;
+      font-size: 56px;
       font-weight: bold;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       color: #1f2937;
     }
     
     .name-divider-small {
-      width: 140px;
-      height: 6px;
+      width: 200px;
+      height: 8px;
       background: #f97316;
       margin: 0 auto;
       border-radius: 9999px;
     }
     
     .bio {
-      max-width: 700px;
+      max-width: 750px;
       text-align: center;
-      padding: 0 32px;
+      padding: 0 40px;
     }
     
     .bio p {
-      font-size: 28px;
-      line-height: 1.75;
-      color: #374151;
+      font-size: 32px;
+      line-height: 1.65;
+      color: #1f2937;
     }
     
     .social-links {
@@ -430,24 +430,25 @@ export async function POST(request: NextRequest) {
     }
     
     .social-links p {
-      font-size: 20px;
-      color: rgba(255, 255, 255, 0.7);
-      margin-bottom: 12px;
+      font-size: 24px;
+      color: #6b7280;
+      margin-bottom: 16px;
+      font-weight: 500;
     }
     
     .social-buttons {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 20px;
       flex-wrap: wrap;
     }
     
     .social-button {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 16px 28px;
+      gap: 14px;
+      padding: 18px 32px;
       background: rgba(249, 115, 22, 0.1);
       backdrop-filter: blur(10px);
       border-radius: 9999px;
@@ -455,13 +456,13 @@ export async function POST(request: NextRequest) {
     }
     
     .social-button svg {
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       color: #f97316;
     }
     
     .social-button span {
-      font-size: 20px;
+      font-size: 24px;
       font-weight: 500;
       color: #1f2937;
     }
@@ -472,8 +473,9 @@ export async function POST(request: NextRequest) {
     }
     
     .hashtags p {
-      font-size: 18px;
+      font-size: 22px;
       color: #6b7280;
+      font-weight: 500;
     }
     `}
   </style>
