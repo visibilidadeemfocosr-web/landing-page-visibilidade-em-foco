@@ -1029,12 +1029,12 @@ export default function AdminModeratePreviewClient() {
 
                     {/* Nome do artista */}
                     <div className="text-center">
-                      <h2 className="text-4xl font-bold mb-3 text-gray-900">{previewData.name}</h2>
-                      <div className="w-32 h-1 bg-orange-500 mx-auto rounded-full mb-4" />
+                      <h2 className="text-4xl font-bold mb-2 text-gray-900">{previewData.name}</h2>
+                      <div className="w-32 h-1 bg-orange-500 mx-auto rounded-full mb-2" />
                     </div>
 
                     {/* Linguagens Artísticas */}
-                    <div className="text-center space-y-3">
+                    <div className="text-center space-y-2">
                       {previewData.mainArtisticLanguage && (
                         <div className="inline-flex items-center gap-2 px-5 py-3 bg-orange-500/10 backdrop-blur-sm rounded-full border border-orange-500/30">
                           <span className="text-base font-semibold text-orange-500">Principal:</span>

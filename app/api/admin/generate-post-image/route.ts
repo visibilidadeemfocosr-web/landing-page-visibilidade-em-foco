@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
     .artist-name h2 {
       font-size: 72px;
       font-weight: bold;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       color: #1f2937;
     }
     
@@ -255,7 +255,7 @@ export async function POST(request: NextRequest) {
       width: 280px;
       height: 8px;
       background: #f97316;
-      margin: 0 auto 24px;
+      margin: 0 auto 12px;
       border-radius: 9999px;
     }
     
@@ -263,7 +263,7 @@ export async function POST(request: NextRequest) {
       text-align: center;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
     
     .language-tag {
