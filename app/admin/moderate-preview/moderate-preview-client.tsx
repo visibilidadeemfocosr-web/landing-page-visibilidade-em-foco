@@ -1033,7 +1033,7 @@ export default function AdminModeratePreviewClient() {
                   <div className="flex-1 flex flex-col items-center justify-center space-y-6 mt-16">
                     {/* Foto do artista */}
                     <div className="relative">
-                      <div className="w-56 h-56 rounded-full overflow-hidden border-4 border-white/30 shadow-2xl bg-white/10">
+                      <div className="w-80 h-80 rounded-full overflow-hidden border-4 border-orange-500/20 shadow-2xl bg-white/10">
                         <img
                           src={previewData.photo}
                           alt={previewData.name}
@@ -1044,7 +1044,7 @@ export default function AdminModeratePreviewClient() {
                         />
                       </div>
                       {/* Decoração ao redor da foto */}
-                      <div className="absolute -inset-4 rounded-full border-2 border-pink-500/30 animate-pulse" />
+                      <div className="absolute -inset-4 rounded-full border-2 border-orange-500/20 animate-pulse" />
                     </div>
 
                     {/* Nome do artista */}
@@ -1053,28 +1053,12 @@ export default function AdminModeratePreviewClient() {
                       <div className="w-32 h-1 bg-orange-500 mx-auto rounded-full mb-1.5" />
                     </div>
 
-                    {/* Linguagens Artísticas */}
-                    <div className="text-center space-y-1.5">
-                      {previewData.mainArtisticLanguage && (
-                        <div className="inline-flex items-center gap-2 px-5 py-3 bg-orange-500/10 backdrop-blur-sm rounded-full border border-orange-500/30">
-                          <span className="text-base font-semibold text-orange-500">Principal:</span>
-                          <span className="text-base font-medium text-gray-900">{getShortLanguage(previewData.mainArtisticLanguage)}</span>
-                        </div>
-                      )}
-                      {previewData.otherArtisticLanguages && (
-                        <div className="inline-flex items-center gap-2 px-5 py-3 bg-gray-200/50 backdrop-blur-sm rounded-full border border-gray-300/50">
-                          <span className="text-base font-semibold text-gray-600">Outras:</span>
-                          <span className="text-base font-medium text-gray-900">{previewData.otherArtisticLanguages}</span>
-                        </div>
-                      )}
-                      
-                      {/* Ícone de arraste para ver mais - abaixo das tags */}
-                      <div className="flex flex-col items-center gap-2 pt-4 animate-bounce">
-                        <div className="bg-orange-500/10 backdrop-blur-sm rounded-full p-3 border-2 border-orange-500/30">
-                          <ChevronRight className="w-6 h-6 text-orange-500" />
-                        </div>
-                        <span className="text-xs text-gray-600 font-medium">Arraste para ver mais</span>
+                    {/* Ícone de arraste para ver mais */}
+                    <div className="flex flex-col items-center gap-2 pt-4 animate-bounce">
+                      <div className="bg-orange-500/10 backdrop-blur-sm rounded-full p-3 border-2 border-orange-500/30">
+                        <ChevronRight className="w-6 h-6 text-orange-500" />
                       </div>
+                      <span className="text-xs text-gray-600 font-medium">Arraste para ver mais</span>
                     </div>
                   </div>
                 ) : (

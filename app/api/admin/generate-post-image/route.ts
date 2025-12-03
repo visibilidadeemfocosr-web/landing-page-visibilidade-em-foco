@@ -242,8 +242,8 @@ export async function POST(request: NextRequest) {
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 32px;
-      margin-top: 140px;
+      gap: 24px;
+      margin-top: 80px;
     }
     
     .photo-container {
@@ -251,11 +251,11 @@ export async function POST(request: NextRequest) {
     }
     
     .photo-wrapper {
-      width: 550px;
-      height: 550px;
+      width: 720px;
+      height: 720px;
       border-radius: 50%;
       overflow: hidden;
-      border: 8px solid rgba(255, 255, 255, 0.3);
+      border: 10px solid rgba(249, 115, 22, 0.2);
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
       background: rgba(255, 255, 255, 0.1);
     }
@@ -295,11 +295,13 @@ export async function POST(request: NextRequest) {
       border-radius: 9999px;
     }
     
-    .languages {
+    .swipe-indicator-container {
       text-align: center;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      align-items: center;
+      gap: 12px;
+      padding-top: 16px;
     }
     
     .language-tag {
@@ -511,22 +513,8 @@ export async function POST(request: NextRequest) {
             <div class="name-divider"></div>
           </div>
           
-          <div class="languages">
-            ${mainArtisticLanguage ? `
-              <div class="language-tag principal">
-                <span>Principal:</span>
-                <span>${mainArtisticLanguage.split('(')[0].trim()}</span>
-              </div>
-            ` : ''}
-            ${otherArtisticLanguages ? `
-              <div class="language-tag outras">
-                <span>Outras:</span>
-                <span>${otherArtisticLanguages}</span>
-              </div>
-            ` : ''}
-            
-            <div class="swipe-indicator">
-              <div class="swipe-icon">
+          <div class="swipe-indicator-container">
+            <div class="swipe-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
