@@ -999,12 +999,12 @@ export default function AdminModeratePreviewClient() {
               {/* Conteúdo do post */}
               <div className="relative z-0 h-full flex flex-col p-8">
                 {/* Logo no canto superior esquerdo */}
-                <div className="absolute top-4 left-4 w-24 h-24 z-[1]">
+                <div className="absolute top-4 left-4 w-20 h-20 z-[1]">
                   <Image
                     src="/logoN.png?v=2"
                     alt="Visibilidade em Foco"
-                    width={96}
-                    height={96}
+                    width={80}
+                    height={80}
                     className="w-full h-full object-contain drop-shadow-2xl"
                     unoptimized
                     onError={(e) => {
