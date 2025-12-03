@@ -186,8 +186,8 @@ export async function POST(request: NextRequest) {
       position: absolute;
       top: 40px;
       left: 40px;
-      width: 170px;
-      height: 170px;
+      width: 195px;
+      height: 195px;
       z-index: 10;
       display: flex;
       align-items: center;
