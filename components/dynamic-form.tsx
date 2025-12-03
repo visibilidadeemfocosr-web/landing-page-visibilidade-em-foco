@@ -55,6 +55,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   const [submitted, setSubmitted] = useState(false)
   const [cepBairro, setCepBairro] = useState<string>('') // Armazenar bairro do CEP
   const [otherOptionValues, setOtherOptionValues] = useState<Record<string, string>>({}) // Armazenar valores de "outros"
+  const [otherFieldErrors, setOtherFieldErrors] = useState<Record<string, boolean>>({}) // Rastrear erros nos campos "outros"
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0) // Índice do bloco atual na navegação
   const [redeSocialAnswer, setRedeSocialAnswer] = useState<string | null>(null) // Resposta da pergunta sobre rede social
   const [isFromSaoRoque, setIsFromSaoRoque] = useState<boolean | null>(null) // Resposta inicial: é de São Roque?
@@ -170,7 +171,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       schemaFields[question.id] = fieldSchema
       
       // Adicionar campo para "outros" se a pergunta permitir
-      if ((question.field_type === 'radio' || question.field_type === 'select') && question.has_other_option) {
+      if ((question.field_type === 'radio' || question.field_type === 'select' || question.field_type === 'checkbox') && question.has_other_option) {
         // O campo "outros" será validado dinamicamente - será obrigatório apenas se "outros" estiver selecionado
         schemaFields[`${question.id}_other`] = z.string().optional()
       }
@@ -240,6 +241,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
     const fieldsToValidate: string[] = []
     
     questions.forEach((question) => {
+      // Verificar campos radio e select com opção "outros"
       if ((question.field_type === 'radio' || question.field_type === 'select') && 
           question.has_other_option) {
         const selectedValue = data[question.id as keyof FormData] as string
@@ -248,6 +250,22 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
         )
         
         if (isOtherOption) {
+          const otherValue = data[`${question.id}_other` as keyof FormData] as string
+          if (!otherValue || !otherValue.trim()) {
+            isValid = false
+            fieldsToValidate.push(`${question.id}_other`)
+          }
+        }
+      }
+      
+      // Verificar campos checkbox com opção "outros"
+      if (question.field_type === 'checkbox' && question.has_other_option) {
+        const selectedValues = data[question.id as keyof FormData] as string[] | undefined
+        const hasOtherSelected = selectedValues?.some(val => 
+          question.options?.some(opt => opt.toLowerCase().includes('outro') && opt === val)
+        )
+        
+        if (hasOtherSelected) {
           const otherValue = data[`${question.id}_other` as keyof FormData] as string
           if (!otherValue || !otherValue.trim()) {
             isValid = false
@@ -367,6 +385,33 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
               if (question.required) return null
               return null
             }
+            
+            // Verificar se tem opção "Outros" selecionada e mesclar com o valor
+            if (question.has_other_option) {
+              const hasOtherSelected = checkboxValues.some(val => 
+                question.options?.some(opt => opt.toLowerCase().includes('outro') && opt === val)
+              )
+              
+              if (hasOtherSelected) {
+                const otherValue = data[`${question.id}_other` as keyof FormData] as string
+                if (otherValue && otherValue.trim()) {
+                  // Substituir a opção "Outros" pelo "Outros: [valor especificado]"
+                  const processedValues = checkboxValues.map(val => {
+                    const isOtherOption = question.options?.some(opt => 
+                      opt.toLowerCase().includes('outro') && opt === val
+                    )
+                    return isOtherOption ? `Outros: ${otherValue.trim()}` : val
+                  })
+                  
+                  return {
+                    question_id: question.id,
+                    value: processedValues.join(', '),
+                    file_url: fileUrl || null,
+                  }
+                }
+              }
+            }
+            
             return {
               question_id: question.id,
               value: checkboxValues.join(', '),
@@ -605,11 +650,18 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                     const value = e.target.value
                     setOtherOptionValues(prev => ({ ...prev, [fieldId]: value }))
                     setValue(`${fieldId}_other` as keyof FormData, value as any)
+                    // Limpar erro quando usuário digitar
+                    if (otherFieldErrors[fieldId]) {
+                      setOtherFieldErrors(prev => ({ ...prev, [fieldId]: false }))
+                    }
                   }}
-                          placeholder={question.other_option_label || 'Especifique...'}
-                          className="min-h-[48px] text-base"
-                        />
-                {errors[`${fieldId}_other`] && (
+                  placeholder={question.other_option_label || 'Especifique...'}
+                  className={`min-h-[48px] text-base ${otherFieldErrors[fieldId] ? 'border-red-500' : ''}`}
+                />
+                {otherFieldErrors[fieldId] && (
+                  <p className="text-sm text-red-500">Este campo é obrigatório</p>
+                )}
+                {errors[`${fieldId}_other`] && !otherFieldErrors[fieldId] && (
                   <p className="text-sm text-red-500">
                     {(errors[`${fieldId}_other`] as any)?.message as string}
                   </p>
@@ -677,11 +729,18 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                             const value = e.target.value
                             setOtherOptionValues(prev => ({ ...prev, [fieldId]: value }))
                             setValue(`${fieldId}_other` as keyof FormData, value as any)
+                            // Limpar erro quando usuário digitar
+                            if (otherFieldErrors[fieldId]) {
+                              setOtherFieldErrors(prev => ({ ...prev, [fieldId]: false }))
+                            }
                           }}
                           placeholder={question.other_option_label || 'Especifique...'}
-                          className="min-h-[48px] text-base"
+                          className={`min-h-[48px] text-base ${otherFieldErrors[fieldId] ? 'border-red-500' : ''}`}
                         />
-                        {errors[`${fieldId}_other`] && (
+                        {otherFieldErrors[fieldId] && (
+                          <p className="text-sm text-red-500">Este campo é obrigatório</p>
+                        )}
+                        {errors[`${fieldId}_other`] && !otherFieldErrors[fieldId] && (
                           <p className="text-sm text-red-500">
                             {(errors[`${fieldId}_other`] as any)?.message as string}
                           </p>
@@ -716,35 +775,75 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                 {question.options.map((option, idx) => {
                   const optionId = `${fieldId}-${idx}`
                   const isChecked = selectedValues.includes(option)
+                  const isOtherOption = question.has_other_option && option.toLowerCase().includes('outro')
                   
                   return (
-                    <label
-                      key={idx}
-                      htmlFor={optionId}
-                      className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer touch-manipulation min-h-[48px] active:bg-muted"
-                    >
-                      <Checkbox
-                        id={optionId}
-                        checked={isChecked}
-                        onCheckedChange={(checked) => {
-                          const currentValues = selectedValues || []
-                          let newValues: string[]
-                          
-                          if (checked) {
-                            newValues = [...currentValues, option]
-                          } else {
-                            newValues = currentValues.filter(v => v !== option)
-                          }
-                          
-                          setValue(fieldId as keyof FormData, newValues as any)
-                          clearErrors(fieldId as keyof FormData)
-                        }}
-                        className="h-5 w-5"
-                      />
-                      <Label htmlFor={optionId} className="font-normal cursor-pointer text-base sm:text-sm flex-1">
-                        {option}
-                      </Label>
-                    </label>
+                    <div key={idx} className="space-y-2">
+                      <label
+                        htmlFor={optionId}
+                        className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer touch-manipulation min-h-[48px] active:bg-muted"
+                      >
+                        <Checkbox
+                          id={optionId}
+                          checked={isChecked}
+                          onCheckedChange={(checked) => {
+                            const currentValues = selectedValues || []
+                            let newValues: string[]
+                            
+                            if (checked) {
+                              newValues = [...currentValues, option]
+                            } else {
+                              newValues = currentValues.filter(v => v !== option)
+                              // Se desmarcar "Outros", limpar o campo de texto e o erro
+                              if (isOtherOption) {
+                                setOtherOptionValues(prev => ({ ...prev, [fieldId]: '' }))
+                                setValue(`${fieldId}_other` as keyof FormData, '' as any)
+                                setOtherFieldErrors(prev => ({ ...prev, [fieldId]: false }))
+                              }
+                            }
+                            
+                            setValue(fieldId as keyof FormData, newValues as any)
+                            clearErrors(fieldId as keyof FormData)
+                          }}
+                          className="h-5 w-5"
+                        />
+                        <Label htmlFor={optionId} className="font-normal cursor-pointer text-base sm:text-sm flex-1">
+                          {option}
+                        </Label>
+                      </label>
+                      
+                      {/* Mostrar campo de texto se "outros" estiver selecionado */}
+                      {isOtherOption && isChecked && (
+                        <div className="ml-8 space-y-2">
+                          <Label htmlFor={`${fieldId}_other`} className="text-sm font-medium">
+                            {question.other_option_label || 'Qual?'}
+                          </Label>
+                          <Input
+                            id={`${fieldId}_other`}
+                            value={otherOptionValues[fieldId] || ''}
+                            onChange={(e) => {
+                              const value = e.target.value
+                              setOtherOptionValues(prev => ({ ...prev, [fieldId]: value }))
+                              setValue(`${fieldId}_other` as keyof FormData, value as any)
+                              // Limpar erro quando usuário digitar
+                              if (otherFieldErrors[fieldId]) {
+                                setOtherFieldErrors(prev => ({ ...prev, [fieldId]: false }))
+                              }
+                            }}
+                            placeholder={question.other_option_label || 'Especifique...'}
+                            className={`min-h-[48px] text-base ${otherFieldErrors[fieldId] ? 'border-red-500' : ''}`}
+                          />
+                          {otherFieldErrors[fieldId] && (
+                            <p className="text-sm text-red-500">Este campo é obrigatório</p>
+                          )}
+                          {errors[`${fieldId}_other`] && !otherFieldErrors[fieldId] && (
+                            <p className="text-sm text-red-500">
+                              {(errors[`${fieldId}_other`] as any)?.message as string}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   )
                 })}
               </div>
@@ -1401,39 +1500,88 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                     {/* Botão Continuar */}
                     <Button
                     type="button"
-                    onClick={() => {
+                    onClick={async () => {
                       // Validar campos do bloco atual antes de continuar
                       const currentBlockQuestions = grouped[currentBlock] || []
                       const fieldsToValidate = currentBlockQuestions
                         .filter(q => q.required)
                         .map(q => q.id)
                       
-                      trigger(fieldsToValidate as any).then((isValid) => {
-                        if (isValid) {
-                          // Avançar para o próximo bloco
-                          setCurrentBlockIndex(prev => prev + 1)
-                          
-                          // Scroll para o topo do formulário após um pequeno delay
-                          setTimeout(() => {
-                            // Tentar encontrar o container de scroll do formulário
-                            const formContainer = document.getElementById('form-scroll-container')
-                            if (formContainer) {
-                              formContainer.scrollTo({ top: 0, behavior: 'smooth' })
-                            } else {
-                              // Fallback: procurar por qualquer elemento scrollável próximo
-                              const scrollableParent = document.querySelector('[class*="overflow-y-auto"]')
-                              if (scrollableParent) {
-                                scrollableParent.scrollTo({ top: 0, behavior: 'smooth' })
-                              } else {
-                                // Último fallback: scroll da window
-                                window.scrollTo({ top: 0, behavior: 'smooth' })
+                      const isValid = await trigger(fieldsToValidate as any)
+                      
+                      if (isValid) {
+                        // Validar também campos "outros" apenas do bloco atual
+                        const formData = watch() as FormData
+                        let otherFieldsValid = true
+                        const newOtherFieldErrors: Record<string, boolean> = {}
+                        
+                        currentBlockQuestions.forEach((question) => {
+                          // Radio e Select com "outros"
+                          if ((question.field_type === 'radio' || question.field_type === 'select') && question.has_other_option) {
+                            const selectedValue = formData[question.id as keyof FormData] as string
+                            const isOtherOption = selectedValue && question.options?.some(opt => 
+                              opt.toLowerCase().includes('outro') && opt === selectedValue
+                            )
+                            
+                            if (isOtherOption) {
+                              const otherValue = formData[`${question.id}_other` as keyof FormData] as string
+                              if (!otherValue || !otherValue.trim()) {
+                                otherFieldsValid = false
+                                newOtherFieldErrors[question.id] = true
                               }
                             }
-                          }, 150)
-                        } else {
-                          toast.error('Por favor, preencha todos os campos obrigatórios deste bloco')
+                          }
+                          
+                          // Checkbox com "outros"
+                          if (question.field_type === 'checkbox' && question.has_other_option) {
+                            const selectedValues = formData[question.id as keyof FormData] as string[] | undefined
+                            const hasOtherSelected = selectedValues?.some(val => 
+                              question.options?.some(opt => opt.toLowerCase().includes('outro') && opt === val)
+                            )
+                            
+                            if (hasOtherSelected) {
+                              const otherValue = formData[`${question.id}_other` as keyof FormData] as string
+                              if (!otherValue || !otherValue.trim()) {
+                                otherFieldsValid = false
+                                newOtherFieldErrors[question.id] = true
+                              }
+                            }
+                          }
+                        })
+                        
+                        if (!otherFieldsValid) {
+                          setOtherFieldErrors(newOtherFieldErrors)
+                          toast.error('Por favor, preencha o campo "Qual?" quando selecionar a opção "Outros"')
+                          
+                          // Scroll para o primeiro campo com erro
+                          setTimeout(() => {
+                            const firstErrorFieldId = Object.keys(newOtherFieldErrors)[0]
+                            if (firstErrorFieldId) {
+                              const errorInput = document.getElementById(`${firstErrorFieldId}_other`)
+                              if (errorInput) {
+                                errorInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                                errorInput.focus()
+                              }
+                            }
+                          }, 100)
+                          
+                          return
                         }
-                      })
+                        
+                        // Limpar erros e avançar para o próximo bloco
+                        setOtherFieldErrors({})
+                        setCurrentBlockIndex(prev => prev + 1)
+                        
+                        // Scroll para o topo do formulário após um pequeno delay
+                        setTimeout(() => {
+                          const formContainer = document.getElementById('form-scroll-container')
+                          if (formContainer) {
+                            formContainer.scrollTo({ top: 0, behavior: 'smooth' })
+                          }
+                        }, 150)
+                      } else {
+                        toast.error('Por favor, preencha todos os campos obrigatórios deste bloco')
+                      }
                     }}
                     className={`${currentBlockIndex > 0 ? 'flex-1' : 'w-full'} bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98] rounded-full`}
                   >
