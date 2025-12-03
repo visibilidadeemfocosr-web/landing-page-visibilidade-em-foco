@@ -291,8 +291,6 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   }
 
   const onSubmit = async (data: FormData) => {
-    console.log('🚀 onSubmit chamado!', { previewMode, cepCityValid, dataKeys: Object.keys(data) })
-    
     // Em modo preview, não enviar dados
     if (previewMode) {
       toast.info('Este é apenas um preview. O formulário não será enviado.')
@@ -301,12 +299,9 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
     
     // Verificar se a cidade do CEP é válida (São Roque)
     if (cepCityValid === false) {
-      console.log('❌ CEP inválido')
       toast.error('Este mapeamento é exclusivo para a cidade de São Roque')
       return
     }
-    
-    console.log('✅ CEP válido, continuando...')
     
     // Validar campos "outros" se necessário
     if (!validateOtherFields(data)) {
@@ -1129,8 +1124,23 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
     )
   }
 
+  // Handler de erros de validação
+  const onError = (errors: any) => {
+    const firstError = Object.keys(errors)[0]
+    const firstQuestion = questions.find(q => q.id === firstError)
+    
+    if (firstQuestion) {
+      const questionText = firstQuestion.text.replace(/<[^>]+>/g, '').substring(0, 100)
+      toast.error(`Campo obrigatório não preenchido: "${questionText}..."`)
+    } else if (firstError && errors[firstError]?.message) {
+      toast.error(errors[firstError].message)
+    } else {
+      toast.error('Por favor, preencha todos os campos obrigatórios')
+    }
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6 pb-12 sm:pb-6 mb-4 sm:mb-0">
+    <form onSubmit={handleSubmit(onSubmit, onError)} noValidate className="space-y-6 pb-12 sm:pb-6 mb-4 sm:mb-0">
       {/* Pergunta inicial - filtro de São Roque */}
       {isFromSaoRoque === null && (
         <div className="space-y-6">
@@ -1187,30 +1197,30 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             </AlertDescription>
           </Alert>
 
-      {/* Mostrar a pergunta CEP apenas quando ainda não avançou para os outros blocos */}
-      {cepQuestion && !showOtherQuestions && (
-        <div className="space-y-6 sm:space-y-8">
-          {renderField(cepQuestion)}
-        </div>
-      )}
+          {/* Mostrar a pergunta CEP apenas quando ainda não avançou para os outros blocos */}
+          {cepQuestion && !showOtherQuestions && (
+            <div className="space-y-6 sm:space-y-8">
+              {renderField(cepQuestion)}
+            </div>
+          )}
 
-      {/* Se CEP não for válido, mostrar apenas mensagem de agradecimento */}
-      {cepCityValid === false && (
-        <Alert variant="default" className="bg-orange-500/5 border-orange-500/20">
-          <AlertDescription className="text-base sm:text-lg text-center py-6">
-            <p className="font-semibold text-orange-500 mb-2">Obrigado pelo interesse!</p>
-            <p className="text-foreground">
-              Este mapeamento é exclusivo para artistas da cidade de <strong>São Roque</strong>.
-            </p>
-            <p className="text-muted-foreground mt-2">
-              Se você é de outra cidade, agradecemos sua compreensão.
-            </p>
-          </AlertDescription>
-        </Alert>
-      )}
+          {/* Se CEP não for válido, mostrar apenas mensagem de agradecimento */}
+          {cepCityValid === false && (
+            <Alert variant="default" className="bg-orange-500/5 border-orange-500/20">
+              <AlertDescription className="text-base sm:text-lg text-center py-6">
+                <p className="font-semibold text-orange-500 mb-2">Obrigado pelo interesse!</p>
+                <p className="text-foreground">
+                  Este mapeamento é exclusivo para artistas da cidade de <strong>São Roque</strong>.
+                </p>
+                <p className="text-muted-foreground mt-2">
+                  Se você é de outra cidade, agradecemos sua compreensão.
+                </p>
+              </AlertDescription>
+            </Alert>
+          )}
 
-      {/* Mostrar outras perguntas apenas se CEP for explicitamente válido (true) */}
-      {showOtherQuestions && otherQuestions.length > 0 && (() => {
+          {/* Mostrar outras perguntas apenas se CEP for explicitamente válido (true) */}
+          {showOtherQuestions && otherQuestions.length > 0 && (() => {
         // Agrupar perguntas por seção
         const grouped = otherQuestions.reduce((acc, question) => {
           const section = question.section || 'Sem seção'
@@ -1470,6 +1480,8 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
           <p className="text-xs text-center text-muted-foreground pb-safe sm:pb-0">
             * Campos obrigatórios
           </p>
+        </>
+      )}
         </>
       )}
     </form>
