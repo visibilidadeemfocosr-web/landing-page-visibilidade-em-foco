@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       width: ${width}px;
       height: ${height}px;
       position: relative;
-      background: linear-gradient(to bottom right, #1a4b8c 0%, #2d1b69 50%, #4a1942 100%);
+      background: linear-gradient(to bottom right, #ffffff 0%, #f8f9fa 50%, #f1f3f5 100%);
       overflow: hidden;
     }
     
@@ -100,8 +100,8 @@ export async function POST(request: NextRequest) {
       right: 0;
       bottom: 0;
       background-image: 
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px);
       background-size: 50px 50px;
       z-index: 0;
       pointer-events: none;
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       left: -80px;
       width: 256px;
       height: 256px;
-      background: linear-gradient(to bottom right, rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.2));
+      background: linear-gradient(to bottom right, rgba(147, 197, 253, 0.25), rgba(196, 181, 253, 0.25));
       border-radius: 50%;
       filter: blur(80px);
       z-index: 0;
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
       right: -80px;
       width: 256px;
       height: 256px;
-      background: linear-gradient(to bottom right, rgba(34, 211, 238, 0.2), rgba(59, 130, 246, 0.2));
+      background: linear-gradient(to bottom right, rgba(251, 207, 232, 0.25), rgba(251, 191, 36, 0.15));
       border-radius: 50%;
       filter: blur(80px);
       z-index: 0;
@@ -139,13 +139,8 @@ export async function POST(request: NextRequest) {
       position: absolute;
       top: 40px;
       left: 40px;
-      width: 200px;
-      height: 200px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      border-radius: 16px;
-      padding: 16px;
+      width: 180px;
+      height: 180px;
       z-index: 10;
       display: flex;
       align-items: center;
@@ -156,6 +151,7 @@ export async function POST(request: NextRequest) {
       width: 100%;
       height: 100%;
       object-fit: contain;
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.15));
     }
     
     /* VFSR Tag */
@@ -163,12 +159,11 @@ export async function POST(request: NextRequest) {
       position: absolute;
       top: 40px;
       right: 40px;
-      background: linear-gradient(to bottom right, #ec4899, #9333ea);
+      background: #f97316;
       border-radius: 9999px;
       padding: 16px 32px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(10px);
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      border: 2px solid rgba(249, 115, 22, 0.3);
       z-index: 10;
     }
     
@@ -240,12 +235,13 @@ export async function POST(request: NextRequest) {
       font-size: 72px;
       font-weight: bold;
       margin-bottom: 20px;
+      color: #1f2937;
     }
     
     .name-divider {
       width: 280px;
       height: 8px;
-      background: #ec4899;
+      background: #f97316;
       margin: 0 auto 24px;
       border-radius: 9999px;
     }
@@ -267,8 +263,8 @@ export async function POST(request: NextRequest) {
     }
     
     .language-tag.principal {
-      background: rgba(236, 72, 153, 0.2);
-      border-color: rgba(236, 72, 153, 0.3);
+      background: rgba(249, 115, 22, 0.1);
+      border-color: rgba(249, 115, 22, 0.3);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
       width: fit-content;
@@ -276,32 +272,32 @@ export async function POST(request: NextRequest) {
     }
     
     .language-tag.principal span:first-child {
-      color: #f9a8d4;
+      color: #f97316;
       font-weight: 600;
       font-size: 32px;
     }
     
     .language-tag.principal span:last-child {
-      color: white;
+      color: #1f2937;
       font-weight: 500;
       font-size: 32px;
     }
     
     .language-tag.outras {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(107, 114, 128, 0.1);
+      border-color: rgba(107, 114, 128, 0.2);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
     }
     
     .language-tag.outras span:first-child {
-      color: rgba(255, 255, 255, 0.8);
+      color: #6b7280;
       font-weight: 600;
       font-size: 32px;
     }
     
     .language-tag.outras span:last-child {
-      color: white;
+      color: #1f2937;
       font-weight: 500;
       font-size: 32px;
     }
@@ -315,22 +311,22 @@ export async function POST(request: NextRequest) {
     }
     
     .swipe-icon {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(249, 115, 22, 0.1);
       backdrop-filter: blur(10px);
       border-radius: 50%;
       padding: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      border: 2px solid rgba(249, 115, 22, 0.3);
     }
     
     .swipe-icon svg {
       width: 32px;
       height: 32px;
-      color: white;
+      color: #f97316;
     }
     
     .swipe-text {
       font-size: 16px;
-      color: rgba(255, 255, 255, 0.7);
+      color: #6b7280;
       font-weight: 500;
     }
     ` : `
@@ -353,12 +349,13 @@ export async function POST(request: NextRequest) {
       font-size: 40px;
       font-weight: bold;
       margin-bottom: 12px;
+      color: #1f2937;
     }
     
     .name-divider-small {
       width: 140px;
       height: 6px;
-      background: #ec4899;
+      background: #f97316;
       margin: 0 auto;
       border-radius: 9999px;
     }
@@ -372,7 +369,7 @@ export async function POST(request: NextRequest) {
     .bio p {
       font-size: 28px;
       line-height: 1.75;
-      color: rgba(255, 255, 255, 0.9);
+      color: #374151;
     }
     
     .social-links {
@@ -402,22 +399,22 @@ export async function POST(request: NextRequest) {
       align-items: center;
       gap: 12px;
       padding: 16px 28px;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(249, 115, 22, 0.1);
       backdrop-filter: blur(10px);
       border-radius: 9999px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(249, 115, 22, 0.2);
     }
     
     .social-button svg {
       width: 28px;
       height: 28px;
-      color: white;
+      color: #f97316;
     }
     
     .social-button span {
       font-size: 20px;
       font-weight: 500;
-      color: white;
+      color: #1f2937;
     }
     
     .hashtags {
@@ -427,7 +424,7 @@ export async function POST(request: NextRequest) {
     
     .hashtags p {
       font-size: 18px;
-      color: rgba(255, 255, 255, 0.6);
+      color: #6b7280;
     }
     `}
   </style>
@@ -439,7 +436,7 @@ export async function POST(request: NextRequest) {
     <div class="blob-2"></div>
     
     <div class="logo-container">
-      <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura_de_Tela_2025-11-14_a%CC%80s_20.28.13-removebg-preview-ZHLqMcqvj2fR23VIPIBhdOyvkeAAcx.png" alt="Visibilidade em Foco" />
+      <img src="https://${request.headers.get('host') || 'localhost:3001'}/logoN.png" alt="Visibilidade em Foco" />
     </div>
     
     <div class="vfsr-tag">
