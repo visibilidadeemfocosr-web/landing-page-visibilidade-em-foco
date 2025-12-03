@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Instagram, Facebook, Linkedin, Download, Edit2, Check, X, ChevronRight, Copy, Camera, FileText } from 'lucide-react'
+import { Instagram, Facebook, Linkedin, Download, Edit2, Check, X, ChevronRight, Copy, Camera, FileText, Music, Palette, Film, BookOpen, Shirt, Move, Theater, Sparkles, Mic } from 'lucide-react'
 import Image from 'next/image'
 import { toast } from 'sonner'
 import html2canvas from 'html2canvas'
@@ -98,6 +98,24 @@ export default function AdminModeratePreviewClient() {
     // Pega apenas a parte antes do primeiro parêntese
     const match = language.match(/^([^(]+)/)
     return match ? match[1].trim() : language
+  }
+
+  // Função para retornar o ícone baseado na linguagem artística
+  const getLanguageIcon = (language: string | undefined) => {
+    if (!language) return <Sparkles className="w-6 h-6" />
+    
+    const lang = language.toLowerCase()
+    
+    if (lang.includes('música') || lang.includes('musica')) return <Music className="w-6 h-6" />
+    if (lang.includes('artes visuais') || lang.includes('pintura') || lang.includes('desenho')) return <Palette className="w-6 h-6" />
+    if (lang.includes('audiovisual') || lang.includes('cinema') || lang.includes('vídeo') || lang.includes('video')) return <Film className="w-6 h-6" />
+    if (lang.includes('literatura') || lang.includes('escrita') || lang.includes('poeta')) return <BookOpen className="w-6 h-6" />
+    if (lang.includes('moda') || lang.includes('design')) return <Shirt className="w-6 h-6" />
+    if (lang.includes('dança') || lang.includes('danca')) return <Move className="w-6 h-6" />
+    if (lang.includes('teatro') || lang.includes('cênica') || lang.includes('cenica') || lang.includes('atuação') || lang.includes('atuacao')) return <Theater className="w-6 h-6" />
+    if (lang.includes('performance')) return <Mic className="w-6 h-6" />
+    
+    return <Sparkles className="w-6 h-6" />
   }
 
   // Função para gerar a legenda do Instagram
@@ -1000,10 +1018,12 @@ export default function AdminModeratePreviewClient() {
                   />
                 </div>
 
-                {/* Tag VFSR no canto superior direito */}
+                {/* Ícone da linguagem artística no canto superior direito */}
                 <div className="absolute top-4 right-4 z-[1]">
-                  <div className="bg-orange-500 rounded-full px-4 py-2 shadow-lg border-2 border-orange-500/30">
-                    <span className="text-white font-bold text-sm tracking-wider">VFSR</span>
+                  <div className="bg-orange-500 rounded-full p-3 shadow-lg border-2 border-orange-500/30">
+                    <div className="text-white">
+                      {getLanguageIcon(previewData.mainArtisticLanguage)}
+                    </div>
                   </div>
                 </div>
 

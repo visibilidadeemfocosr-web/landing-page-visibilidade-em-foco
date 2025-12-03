@@ -73,6 +73,40 @@ export async function POST(request: NextRequest) {
       console.error('Erro ao ler logo:', error)
     }
 
+    // Função para retornar SVG do ícone baseado na linguagem
+    const getLanguageIconSVG = (language?: string): string => {
+      if (!language) return '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>'
+      
+      const lang = language.toLowerCase()
+      
+      if (lang.includes('música') || lang.includes('musica')) {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>'
+      }
+      if (lang.includes('artes visuais') || lang.includes('pintura') || lang.includes('desenho')) {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>'
+      }
+      if (lang.includes('audiovisual') || lang.includes('cinema') || lang.includes('vídeo') || lang.includes('video')) {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>'
+      }
+      if (lang.includes('literatura') || lang.includes('escrita') || lang.includes('poeta')) {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>'
+      }
+      if (lang.includes('moda') || lang.includes('design')) {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>'
+      }
+      if (lang.includes('dança') || lang.includes('danca')) {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 9H4L2 7l2-2h6"/><path d="M14 5h6l2 2-2 2h-6"/><path d="M10 22V4a2 2 0 1 1 4 0v18"/><path d="M8 22h8"/></svg>'
+      }
+      if (lang.includes('teatro') || lang.includes('cênica') || lang.includes('cenica') || lang.includes('atuação') || lang.includes('atuacao')) {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12a5 5 0 0 0 5 5 8 8 0 0 1 5 2 8 8 0 0 1 5-2 5 5 0 0 0 5-5V7h-5a8 8 0 0 0-5 2 8 8 0 0 0-5-2H2Z"/><path d="M6 11c1.5 0 3 .5 3 2-2 0-3 0-3-2Z"/><path d="M18 11c-1.5 0-3 .5-3 2 2 0 3 0 3-2Z"/></svg>'
+      }
+      if (lang.includes('performance')) {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>'
+      }
+      
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>'
+    }
+
     // Criar HTML completo com todos os estilos inline
     const htmlContent = `
 <!DOCTYPE html>
@@ -167,24 +201,26 @@ export async function POST(request: NextRequest) {
       filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.15));
     }
     
-    /* VFSR Tag */
+    /* Ícone da linguagem artística */
     .vfsr-tag {
       position: absolute;
       top: 40px;
       right: 40px;
       background: #f97316;
-      border-radius: 9999px;
-      padding: 16px 32px;
+      border-radius: 50%;
+      padding: 14px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       border: 2px solid rgba(249, 115, 22, 0.3);
       z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
-    .vfsr-tag span {
+    .vfsr-tag svg {
       color: white;
-      font-weight: bold;
-      font-size: 28px;
-      letter-spacing: 0.05em;
+      width: 28px;
+      height: 28px;
     }
     
     /* Conteúdo principal */
@@ -455,7 +491,7 @@ export async function POST(request: NextRequest) {
     ` : ''}
     
     <div class="vfsr-tag">
-      <span>VFSR</span>
+      ${getLanguageIconSVG(mainArtisticLanguage)}
     </div>
     
     <div class="content">
