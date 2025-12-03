@@ -65,6 +65,9 @@ export interface InstagramPostContent {
   // Configurações de design
   backgroundColor?: string
   textColor?: string
+  titleColor?: string
+  subtitleColor?: string
+  descriptionColor?: string
   logoPosition?: LogoPosition
   logoSize?: LogoSize
   logoVariant?: LogoVariant

@@ -31,6 +31,9 @@ interface PostData {
   // Configurações globais (aplicam a todos os slides)
   backgroundColor: string
   textColor: string
+  titleColor: string
+  subtitleColor: string
+  descriptionColor: string
   logoPosition: LogoPosition
   logoSize: LogoSize
   logoVariant: LogoVariant
@@ -61,6 +64,9 @@ export function CreatePostClient() {
     currentSlideIndex: 0,
     backgroundColor: '#f8f9fa',
     textColor: '#1f2937',
+    titleColor: '#1f2937',
+    subtitleColor: '#4b5563',
+    descriptionColor: '#6b7280',
     logoPosition: 'topo-direita',
     logoSize: 'media',
     logoVariant: 'black',
@@ -195,6 +201,9 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
           content: {
             backgroundColor: postData.backgroundColor,
             textColor: postData.textColor,
+            titleColor: postData.titleColor,
+            subtitleColor: postData.subtitleColor,
+            descriptionColor: postData.descriptionColor,
             logoPosition: postData.logoPosition,
             logoSize: postData.logoSize,
             logoVariant: postData.logoVariant,
@@ -309,6 +318,9 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
           content: {
             backgroundColor: postData.backgroundColor,
             textColor: postData.textColor,
+            titleColor: postData.titleColor,
+            subtitleColor: postData.subtitleColor,
+            descriptionColor: postData.descriptionColor,
             logoPosition: postData.logoPosition,
             logoSize: postData.logoSize,
             logoVariant: postData.logoVariant,
@@ -661,28 +673,89 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Cores */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="backgroundColor">Cor de Fundo</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="backgroundColor"
-                      type="color"
-                      value={postData.backgroundColor}
-                      onChange={(e) => updateField('backgroundColor', e.target.value)}
-                      className="w-16 h-10 p-1"
-                    />
-                    <Input
-                      value={postData.backgroundColor}
-                      onChange={(e) => updateField('backgroundColor', e.target.value)}
-                      placeholder="#FF5722"
-                      className="flex-1"
-                    />
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="backgroundColor">Cor de Fundo</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="backgroundColor"
+                        type="color"
+                        value={postData.backgroundColor}
+                        onChange={(e) => updateField('backgroundColor', e.target.value)}
+                        className="w-16 h-10 p-1"
+                      />
+                      <Input
+                        value={postData.backgroundColor}
+                        onChange={(e) => updateField('backgroundColor', e.target.value)}
+                        placeholder="#F8F9FA"
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="titleColor">Cor do Título</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="titleColor"
+                        type="color"
+                        value={postData.titleColor}
+                        onChange={(e) => updateField('titleColor', e.target.value)}
+                        className="w-16 h-10 p-1"
+                      />
+                      <Input
+                        value={postData.titleColor}
+                        onChange={(e) => updateField('titleColor', e.target.value)}
+                        placeholder="#1F2937"
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="subtitleColor">Cor do Subtítulo</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="subtitleColor"
+                        type="color"
+                        value={postData.subtitleColor}
+                        onChange={(e) => updateField('subtitleColor', e.target.value)}
+                        className="w-16 h-10 p-1"
+                      />
+                      <Input
+                        value={postData.subtitleColor}
+                        onChange={(e) => updateField('subtitleColor', e.target.value)}
+                        placeholder="#4B5563"
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="descriptionColor">Cor da Descrição</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="descriptionColor"
+                        type="color"
+                        value={postData.descriptionColor}
+                        onChange={(e) => updateField('descriptionColor', e.target.value)}
+                        className="w-16 h-10 p-1"
+                      />
+                      <Input
+                        value={postData.descriptionColor}
+                        onChange={(e) => updateField('descriptionColor', e.target.value)}
+                        placeholder="#6B7280"
+                        className="flex-1"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="textColor">Cor do Texto</Label>
+                  <Label htmlFor="textColor">Cor de Elementos (CTA, Ícones, Tag)</Label>
                   <div className="flex gap-2">
                     <Input
                       id="textColor"
@@ -694,10 +767,13 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
                     <Input
                       value={postData.textColor}
                       onChange={(e) => updateField('textColor', e.target.value)}
-                      placeholder="#FFFFFF"
+                      placeholder="#1F2937"
                       className="flex-1"
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    Cor para botões, ícones, bordas e tag do projeto
+                  </p>
                 </div>
               </div>
 
@@ -1044,6 +1120,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
             className="font-black leading-tight"
             style={{ 
               fontSize: slide.title.length > 30 ? '2rem' : '2.5rem',
+              color: globalSettings.titleColor,
               textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
             }}
           >
@@ -1056,7 +1133,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
           <div 
             className="w-24 h-1"
             style={{ 
-              backgroundColor: globalSettings.textColor,
+              backgroundColor: globalSettings.titleColor,
               opacity: 0.5
             }}
           />
@@ -1067,6 +1144,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
           <h2 
             className="font-semibold text-xl"
             style={{ 
+              color: globalSettings.subtitleColor,
               textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
             }}
           >
@@ -1079,6 +1157,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
           <p 
             className="text-lg leading-relaxed max-w-md"
             style={{ 
+              color: globalSettings.descriptionColor,
               textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
             }}
           >
