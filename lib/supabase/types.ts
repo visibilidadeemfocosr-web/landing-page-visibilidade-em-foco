@@ -58,6 +58,7 @@ export interface InstagramPostSlide {
   ctaText?: string
   ctaLink?: string
   periodText?: string
+  tagText?: string
 }
 
 export interface InstagramPostContent {

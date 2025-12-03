@@ -29,7 +29,6 @@ interface PostData {
   slides: InstagramPostSlide[]
   currentSlideIndex: number
   // Configurações globais (aplicam a todos os slides)
-  tagText: string
   backgroundColor: string
   textColor: string
   logoPosition: LogoPosition
@@ -56,10 +55,10 @@ export function CreatePostClient() {
         ctaText: 'CADASTRE-SE AGORA',
         ctaLink: '',
         periodText: '08/12/2025 até 08/02/2026',
+        tagText: 'VFSR • São Roque',
       }
     ],
     currentSlideIndex: 0,
-    tagText: 'VFSR • São Roque',
     backgroundColor: '#f8f9fa',
     textColor: '#1f2937',
     logoPosition: 'topo-direita',
@@ -155,23 +154,23 @@ export function CreatePostClient() {
     }
   }
   
-  // Gerar legenda automática
+  // Gerar legenda automática baseada no Slide 1
   useEffect(() => {
-    const slide = currentSlide
-    const caption = `${slide.title || ''}
+    const slide1 = postData.slides[0]
+    const caption = `${slide1.title || ''}
 
-${slide.subtitle || ''}
+${slide1.subtitle || ''}
 
-${slide.description || ''}
+${slide1.description || ''}
 
-${slide.periodText ? `📅 ${slide.periodText}` : ''}
+${slide1.periodText ? `📅 ${slide1.periodText}` : ''}
 
-${slide.ctaLink ? `🔗 ${slide.ctaLink}` : ''}
+${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
 
 #VisibilidadeEmFoco #LGBTQIA #SaoRoque #ArteLGBT #Diversidade #RepresentaçãoImporta`
     
     updateField('caption', caption.trim())
-  }, [currentSlide.title, currentSlide.subtitle, currentSlide.description, currentSlide.periodText, currentSlide.ctaLink])
+  }, [postData.slides[0]?.title, postData.slides[0]?.subtitle, postData.slides[0]?.description, postData.slides[0]?.periodText, postData.slides[0]?.ctaLink])
   
   // Salvar como rascunho
   const handleSaveDraft = async () => {
@@ -191,7 +190,7 @@ ${slide.ctaLink ? `🔗 ${slide.ctaLink}` : ''}
           cta_text: postData.slides[0]?.ctaText,
           cta_link: postData.slides[0]?.ctaLink,
           period_text: postData.slides[0]?.periodText,
-          tag_text: postData.tagText,
+          tag_text: postData.slides[0]?.tagText,
           caption: postData.caption,
           content: {
             backgroundColor: postData.backgroundColor,
@@ -304,7 +303,7 @@ ${slide.ctaLink ? `🔗 ${slide.ctaLink}` : ''}
           cta_text: postData.slides[0]?.ctaText,
           cta_link: postData.slides[0]?.ctaLink,
           period_text: postData.slides[0]?.periodText,
-          tag_text: postData.tagText,
+          tag_text: postData.slides[0]?.tagText,
           caption: postData.caption,
           image_url: imageUrl,
           content: {
@@ -486,16 +485,23 @@ ${slide.ctaLink ? `🔗 ${slide.ctaLink}` : ''}
                 </Button>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
+              {postData.isCarousel && postData.slides.length > 1 && (
+                <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md border border-dashed">
+                  💡 <strong>Dica:</strong> A legenda é gerada automaticamente com base no <strong>Slide 1</strong>. Você pode editar livremente o texto abaixo.
+                </div>
+              )}
               <Textarea
                 value={postData.caption}
                 onChange={(e) => updateField('caption', e.target.value)}
                 rows={10}
                 className="font-mono text-sm resize-none"
+                placeholder="Digite a legenda do post..."
               />
-              <p className="text-xs text-muted-foreground mt-2">
-                {postData.caption.length} caracteres
-              </p>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{postData.caption.length} caracteres (máx: 2.200)</span>
+                <span>Hashtags: {(postData.caption.match(/#/g) || []).length}/30</span>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -552,10 +558,11 @@ ${slide.ctaLink ? `🔗 ${slide.ctaLink}` : ''}
                         {postData.slides.length > 1 && (
                           <button
                             type="button"
-                            className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 flex items-center justify-center shadow-md z-10 border-2 border-background"
+                            className="absolute -top-3 -right-3 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 flex items-center justify-center z-10"
+                            style={{ width: '8px', height: '8px' }}
                             onClick={() => removeSlide(idx)}
                           >
-                            <X className="h-3 w-3" strokeWidth={2} />
+                            <X style={{ width: '6px', height: '6px' }} strokeWidth={3} />
                           </button>
                         )}
                       </div>
@@ -633,15 +640,15 @@ ${slide.ctaLink ? `🔗 ${slide.ctaLink}` : ''}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="tagText">Tag do Projeto</Label>
+                <Label htmlFor="tagText">Tag do Projeto (Opcional)</Label>
                 <Input
                   id="tagText"
-                  value={postData.tagText}
-                  onChange={(e) => updateField('tagText', e.target.value)}
-                  placeholder="Ex: VFSR • São Roque"
+                  value={currentSlide.tagText || ''}
+                  onChange={(e) => updateSlide('tagText', e.target.value)}
+                  placeholder="Ex: VFSR • São Roque (deixe vazio para não exibir)"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Aparece no canto do post (oposto à logo)
+                  Aparece no canto do post (oposto à logo). Pode ser diferente em cada slide.
                 </p>
               </div>
             </CardContent>
@@ -1124,7 +1131,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
       </div>
       
       {/* Tag do projeto no canto oposto da logo */}
-      {globalSettings.tagText && globalSettings.logoPosition.includes('topo') && (
+      {slide.tagText && globalSettings.logoPosition.includes('topo') && (
         <div 
           className="absolute bottom-24 right-6 text-xs font-semibold px-3 py-1 rounded z-20"
           style={{
@@ -1132,10 +1139,10 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
             color: globalSettings.textColor,
           }}
         >
-          {globalSettings.tagText}
+          {slide.tagText}
         </div>
       )}
-      {globalSettings.tagText && globalSettings.logoPosition.includes('rodape') && (
+      {slide.tagText && globalSettings.logoPosition.includes('rodape') && (
         <div 
           className="absolute top-6 right-6 text-xs font-semibold px-3 py-1 rounded z-20"
           style={{
@@ -1143,7 +1150,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
             color: globalSettings.textColor,
           }}
         >
-          {globalSettings.tagText}
+          {slide.tagText}
         </div>
       )}
 
