@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import puppeteer from 'puppeteer-core'
-import { existsSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import { execSync } from 'child_process'
+import path from 'path'
 
 function findChromeExecutable(): string | null {
   const possiblePaths = [
@@ -59,6 +60,18 @@ export async function POST(request: NextRequest) {
 
     const width = 1080
     const height = 1080
+
+    // Converter logo para base64
+    const logoPath = path.join(process.cwd(), 'public', 'logoN.png')
+    let logoBase64 = ''
+    try {
+      if (existsSync(logoPath)) {
+        const logoBuffer = readFileSync(logoPath)
+        logoBase64 = `data:image/png;base64,${logoBuffer.toString('base64')}`
+      }
+    } catch (error) {
+      console.error('Erro ao ler logo:', error)
+    }
 
     // Criar HTML completo com todos os estilos inline
     const htmlContent = `
@@ -435,9 +448,11 @@ export async function POST(request: NextRequest) {
     <div class="blob-1"></div>
     <div class="blob-2"></div>
     
+    ${logoBase64 ? `
     <div class="logo-container">
-      <img src="https://${request.headers.get('host') || 'localhost:3001'}/logoN.png" alt="Visibilidade em Foco" />
+      <img src="${logoBase64}" alt="Visibilidade em Foco" />
     </div>
+    ` : ''}
     
     <div class="vfsr-tag">
       <span>VFSR</span>
