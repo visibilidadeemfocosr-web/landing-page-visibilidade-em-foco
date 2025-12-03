@@ -128,14 +128,26 @@ export default function AdminModerateClient() {
   }
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, any> = {
-      pending: { variant: 'secondary' as const, label: 'Pendente' },
-      approved: { variant: 'default' as const, label: 'Aprovado' },
-      rejected: { variant: 'destructive' as const, label: 'Rejeitado' },
-      published: { variant: 'default' as const, label: 'Publicado' },
+    const statusConfig: Record<string, { className: string; label: string }> = {
+      pending: { 
+        className: 'bg-gray-100 text-gray-800 hover:bg-gray-200', 
+        label: 'Pendente' 
+      },
+      approved: { 
+        className: 'bg-green-100 text-green-800 hover:bg-green-200', 
+        label: 'Aprovado' 
+      },
+      rejected: { 
+        className: 'bg-red-100 text-red-800 hover:bg-red-200', 
+        label: 'Rejeitado' 
+      },
+      published: { 
+        className: 'bg-blue-100 text-blue-800 hover:bg-blue-200', 
+        label: 'Publicado' 
+      },
     }
-    const config = variants[status] || variants.pending
-    return <Badge variant={config.variant}>{config.label}</Badge>
+    const config = statusConfig[status] || statusConfig.pending
+    return <Badge className={config.className}>{config.label}</Badge>
   }
 
   const generateInstagramCaption = (artist: Artist) => {
