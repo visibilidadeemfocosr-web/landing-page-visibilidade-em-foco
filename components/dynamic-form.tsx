@@ -1361,7 +1361,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             {/* Botão Continuar e Indicador de Progresso */}
             {/* Mostrar apenas se não for o último bloco (no último bloco, mostrar apenas o botão "Enviar Cadastro") */}
             {totalBlocks > 1 && !isLastBlock && (
-              <div className="sticky bottom-0 bg-background border-t pt-4 pb-safe sm:pb-4 mt-8">
+              <div className="bg-background border-t pt-6 pb-safe sm:pb-4 mt-8">
                 <div className="flex flex-col gap-4">
                   {/* Indicador de Progresso */}
                   <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
@@ -1375,8 +1375,31 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                     />
                   </div>
                   
-                  {/* Botão Continuar */}
-                  <Button
+                  {/* Botões de navegação */}
+                  <div className="flex gap-3">
+                    {/* Botão Voltar - apenas se não for o primeiro bloco */}
+                    {currentBlockIndex > 0 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setCurrentBlockIndex(prev => Math.max(prev - 1, 0))
+                          // Scroll para o topo
+                          setTimeout(() => {
+                            const formContainer = document.getElementById('form-scroll-container')
+                            if (formContainer) {
+                              formContainer.scrollTo({ top: 0, behavior: 'smooth' })
+                            }
+                          }, 150)
+                        }}
+                        className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-6 text-base sm:text-lg font-semibold min-h-[56px] rounded-full"
+                      >
+                        Voltar
+                      </Button>
+                    )}
+                    
+                    {/* Botão Continuar */}
+                    <Button
                     type="button"
                     onClick={() => {
                       // Validar campos do bloco atual antes de continuar
@@ -1412,17 +1435,18 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                         }
                       })
                     }}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98] rounded-full"
+                    className={`${currentBlockIndex > 0 ? 'flex-1' : 'w-full'} bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98] rounded-full`}
                   >
                     Continuar
                   </Button>
+                  </div>
                 </div>
               </div>
             )}
             
-            {/* Indicador de Progresso no último bloco (sem botão Continuar) */}
+            {/* Indicador de Progresso no último bloco */}
             {totalBlocks > 1 && isLastBlock && (
-              <div className="sticky bottom-0 bg-background border-t pt-4 pb-safe sm:pb-4 mt-8">
+              <div className="bg-background border-t pt-6 pb-safe sm:pb-4 mt-8">
                 <div className="flex flex-col gap-4">
                   {/* Indicador de Progresso */}
                   <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
@@ -1435,6 +1459,26 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                       style={{ width: `${((currentBlockIndex + 1) / totalBlocks) * 100}%` }}
                     />
                   </div>
+                  
+                  {/* Botão Voltar no último bloco */}
+                  {currentBlockIndex > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setCurrentBlockIndex(prev => Math.max(prev - 1, 0))
+                        setTimeout(() => {
+                          const formContainer = document.getElementById('form-scroll-container')
+                          if (formContainer) {
+                            formContainer.scrollTo({ top: 0, behavior: 'smooth' })
+                          }
+                        }, 150)
+                      }}
+                      className="w-full border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-6 text-base sm:text-lg font-semibold min-h-[56px] rounded-full"
+                    >
+                      Voltar
+                    </Button>
+                  )}
                 </div>
               </div>
             )}
