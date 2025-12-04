@@ -1736,7 +1736,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
         {/* Período */}
         {slide.periodText && (
           <div 
-            className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
+            className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap"
             style={{
               backgroundColor: `${globalSettings.textColor}20`,
               border: `2px solid ${globalSettings.textColor}`,
@@ -1766,7 +1766,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
         {/* CTA Button */}
         {slide.ctaText && (
           <div 
-            className="px-8 py-4 rounded-full font-bold text-lg shadow-lg transform hover:scale-105 transition-transform"
+            className="px-8 py-4 rounded-full font-bold text-lg shadow-lg transform hover:scale-105 transition-transform whitespace-nowrap"
             style={{
               backgroundColor: globalSettings.textColor,
               color: globalSettings.backgroundColor,
@@ -1780,7 +1780,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
       {/* Tag do projeto no canto oposto da logo */}
       {slide.tagText && globalSettings.logoPosition.includes('topo') && (
         <div 
-          className="absolute bottom-6 right-6 text-xs font-semibold px-3 py-1 rounded z-20"
+          className="absolute bottom-6 right-6 text-xs font-semibold px-3 py-1 rounded z-20 whitespace-nowrap"
           style={{
             backgroundColor: `${globalSettings.textColor}20`,
             color: globalSettings.textColor,
@@ -1791,7 +1791,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
       )}
       {slide.tagText && globalSettings.logoPosition.includes('rodape') && (
         <div 
-          className="absolute top-6 right-6 text-xs font-semibold px-3 py-1 rounded z-20"
+          className="absolute top-6 right-6 text-xs font-semibold px-3 py-1 rounded z-20 whitespace-nowrap"
           style={{
             backgroundColor: `${globalSettings.textColor}20`,
             color: globalSettings.textColor,
