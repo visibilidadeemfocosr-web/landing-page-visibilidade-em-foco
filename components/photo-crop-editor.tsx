@@ -59,24 +59,32 @@ export function PhotoCropEditor({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-white dark:bg-gray-950">
+      <DialogContent className="max-w-3xl max-h-[90vh] bg-white dark:bg-gray-950">
         <DialogHeader>
           <DialogTitle>Ajustar Foto para o Post</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6">
           {/* Área de Crop */}
-          <div className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden">
+          <div className="relative w-full h-[500px] bg-gray-100 rounded-lg overflow-hidden">
             <Cropper
               image={photoUrl}
               crop={crop}
               zoom={zoom}
-              aspect={1} // Quadrado 1:1
-              cropShape="round" // Círculo
+              aspect={1}
+              cropShape="round"
               showGrid={false}
+              restrictPosition={false}
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={onCropComplete}
+              style={{
+                containerStyle: {
+                  width: '100%',
+                  height: '100%',
+                  backgroundColor: '#f3f4f6'
+                }
+              }}
             />
           </div>
 
@@ -104,7 +112,8 @@ export function PhotoCropEditor({
           {/* Instruções */}
           <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
             <p className="text-sm text-blue-700 dark:text-blue-400">
-              <strong>Como usar:</strong> Arraste a foto para reposicionar. Use o controle de zoom (0.5x a 3x) para aproximar ou afastar. 
+              <strong>Como usar:</strong> Clique e arraste a foto em qualquer direção (↑ ↓ ← →) para reposicionar. 
+              Use o controle de zoom (0.5x a 3x) para aproximar ou afastar. 
               A área circular mostra como a foto aparecerá no Post 1. Comece com zoom reduzido para ver a foto completa.
             </p>
           </div>
