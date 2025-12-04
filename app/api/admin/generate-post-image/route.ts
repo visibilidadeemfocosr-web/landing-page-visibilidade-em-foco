@@ -46,7 +46,6 @@ export async function POST(request: NextRequest) {
       otherArtisticLanguages,
       bio,
       photo,
-      photo_crop, // Dados de crop da foto
       instagram,
       facebook,
       linkedin
@@ -264,11 +263,7 @@ export async function POST(request: NextRequest) {
     .photo-wrapper img {
       width: 100%;
       height: 100%;
-      object-fit: ${photo_crop ? 'cover' : 'contain'};
-      ${photo_crop ? `
-        transform: translate(${-photo_crop.x}%, ${-photo_crop.y}%) scale(${photo_crop.zoom});
-        transform-origin: center center;
-      ` : ''}
+      object-fit: cover;
     }
     
     .photo-decoration {

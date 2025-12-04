@@ -77,10 +77,10 @@ export async function GET() {
       .select('submission_id, status, edited_bio, moderator_notes, edited_instagram, edited_facebook, edited_linkedin')
       .in('submission_id', submissionIds)
 
-    // Buscar photo_crop das submissions
+    // Buscar photo_crop e cropped_photo_url das submissions
     const { data: submissions } = await adminClient
       .from('submissions')
-      .select('id, photo_crop')
+      .select('id, photo_crop, cropped_photo_url')
       .in('id', submissionIds)
 
     // Agrupar dados por submission
@@ -141,8 +141,9 @@ export async function GET() {
         name: nameAnswer?.value || 'Sem nome',
         bio: moderation?.edited_bio || bioAnswer?.value || '',
         original_bio: bioAnswer?.value || '',
-        photo: photoAnswer?.file_url || photoAnswer?.value || null,
-        photo_crop: submission?.photo_crop || null, // Dados de crop da foto
+        photo: submission?.cropped_photo_url || photoAnswer?.file_url || photoAnswer?.value || null,
+        original_photo: photoAnswer?.file_url || photoAnswer?.value || null,
+        photo_crop: submission?.photo_crop || null,
         main_artistic_language: mainLanguageAnswer?.value || '',
         other_artistic_languages: otherLanguagesAnswer?.value || '',
         instagram,
@@ -150,7 +151,7 @@ export async function GET() {
         linkedin,
         status: moderation?.status || 'pending',
         moderator_notes: moderation?.moderator_notes || null,
-        created_at: submissionAnswers[0]?.id || null, // Usar como referência temporal
+        created_at: submissionAnswers[0]?.id || null,
       })
     })
 

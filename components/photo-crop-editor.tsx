@@ -11,8 +11,59 @@ interface PhotoCropEditorProps {
   photoUrl: string
   open: boolean
   onClose: () => void
-  onSave: (cropData: CropData) => void
+  onSave: (result: CroppedImageResult) => void
   initialCrop?: CropData
+}
+
+// Função para processar a imagem cropada
+async function getCroppedImg(
+  imageSrc: string,
+  pixelCrop: { x: number; y: number; width: number; height: number }
+): Promise<string> {
+  const image = new Image()
+  image.src = imageSrc
+  await new Promise((resolve) => {
+    image.onload = resolve
+  })
+
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+
+  if (!ctx) {
+    throw new Error('Não foi possível criar canvas')
+  }
+
+  // Definir tamanho do canvas para 1000x1000 (tamanho do círculo)
+  canvas.width = 1000
+  canvas.height = 1000
+
+  // Preencher com branco
+  ctx.fillStyle = '#FFFFFF'
+  ctx.fillRect(0, 0, 1000, 1000)
+
+  // Desenhar a imagem cropada
+  ctx.drawImage(
+    image,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    1000,
+    1000
+  )
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('Erro ao criar blob'))
+        return
+      }
+      const url = URL.createObjectURL(blob)
+      resolve(url)
+    }, 'image/jpeg', 0.95)
+  })
 }
 
 export interface CropData {
@@ -21,6 +72,11 @@ export interface CropData {
   zoom: number
   width: number
   height: number
+}
+
+export interface CroppedImageResult {
+  croppedImageUrl: string
+  cropData: CropData
 }
 
 export function PhotoCropEditor({ 
@@ -38,17 +94,28 @@ export function PhotoCropEditor({
     setCroppedAreaPixels(croppedAreaPixels)
   }, [])
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (croppedAreaPixels) {
-      const cropData: CropData = {
-        x: crop.x,
-        y: crop.y,
-        zoom,
-        width: croppedAreaPixels.width,
-        height: croppedAreaPixels.height
+      try {
+        // Processar imagem cropada
+        const croppedImageUrl = await getCroppedImg(photoUrl, croppedAreaPixels)
+        
+        const cropData: CropData = {
+          x: crop.x,
+          y: crop.y,
+          zoom,
+          width: croppedAreaPixels.width,
+          height: croppedAreaPixels.height
+        }
+        
+        onSave({
+          croppedImageUrl,
+          cropData
+        })
+        onClose()
+      } catch (error) {
+        console.error('Erro ao processar imagem:', error)
       }
-      onSave(cropData)
-      onClose()
     }
   }
 

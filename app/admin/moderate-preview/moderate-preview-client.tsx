@@ -23,6 +23,7 @@ interface ArtistData {
   facebook?: string
   linkedin?: string
   photo?: string | null
+  original_photo?: string | null
   photo_crop?: CropData | null
 }
 
@@ -77,7 +78,9 @@ export default function AdminModeratePreviewClient() {
           moderator_notes: (artist as any).moderator_notes || null
         })
         setEditedBio(artist.bio || artist.original_bio || '')
-        // Carregar crop da foto se existir
+        // Guardar foto original para usar no editor
+        setOriginalPhoto(artist.original_photo || artist.photo || '')
+        // Carregar crop se existir
         if (artist.photo_crop) {
           setPhotoCrop(artist.photo_crop)
         }
@@ -89,23 +92,47 @@ export default function AdminModeratePreviewClient() {
     }
   }
 
-  const handleSaveCrop = async (cropData: CropData) => {
+  const handleSaveCrop = async (result: { croppedImageUrl: string; cropData: CropData }) => {
     if (!submissionId) {
       toast.error('ID da submissão não encontrado')
       return
     }
 
     try {
+      // Converter blob URL para File
+      const blob = await fetch(result.croppedImageUrl).then(r => r.blob())
+      const file = new File([blob], 'cropped-photo.jpg', { type: 'image/jpeg' })
+      
+      // Fazer upload da imagem cropada
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!uploadResponse.ok) throw new Error('Erro no upload')
+
+      const { url: croppedPhotoUrl } = await uploadResponse.json()
+
+      // Salvar crop data e URL da foto cropada
       const response = await fetch(`/api/admin/submissions/${submissionId}/crop`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ photo_crop: cropData })
+        body: JSON.stringify({ 
+          photo_crop: result.cropData,
+          cropped_photo_url: croppedPhotoUrl 
+        })
       })
 
       if (!response.ok) throw new Error('Erro ao salvar crop')
 
-      setPhotoCrop(cropData)
-      toast.success('Ajuste de foto salvo com sucesso!')
+      setPhotoCrop(result.cropData)
+      // Atualizar preview com foto cropada
+      setPreviewData({ ...previewData, photo: croppedPhotoUrl })
+      
+      toast.success('Foto ajustada e salva com sucesso!')
     } catch (error: any) {
       console.error('Erro ao salvar crop:', error)
       toast.error('Erro ao salvar ajuste: ' + error.message)
@@ -122,6 +149,7 @@ export default function AdminModeratePreviewClient() {
   const [activePost, setActivePost] = useState<'first' | 'second'>('first')
   const [cropEditorOpen, setCropEditorOpen] = useState(false)
   const [photoCrop, setPhotoCrop] = useState<CropData | null>(null)
+  const [originalPhoto, setOriginalPhoto] = useState<string>('')
 
   // Função helper para pegar apenas a primeira parte antes do parêntese
   const getShortLanguage = (language: string | undefined): string => {
@@ -234,7 +262,6 @@ export default function AdminModeratePreviewClient() {
           otherArtisticLanguages: previewData.otherArtisticLanguages,
           bio: previewData.bio,
           photo: previewData.photo,
-          photo_crop: photoCrop, // Incluir dados de crop
           instagram: previewData.instagram,
           facebook: previewData.facebook,
           linkedin: previewData.linkedin,
@@ -1084,14 +1111,7 @@ export default function AdminModeratePreviewClient() {
                         <img
                           src={previewData.photo}
                           alt={previewData.name}
-                          className="w-full h-full"
-                          style={photoCrop ? {
-                            transform: `translate(${-photoCrop.x}%, ${-photoCrop.y}%) scale(${photoCrop.zoom})`,
-                            transformOrigin: 'center center',
-                            objectFit: 'cover'
-                          } : {
-                            objectFit: 'contain'
-                          }}
+                          className="w-full h-full object-cover"
                           onError={(e) => {
                             e.currentTarget.src = 'https://via.placeholder.com/400x400?text=Foto'
                           }}
@@ -1573,9 +1593,9 @@ export default function AdminModeratePreviewClient() {
       </Card>
       
       {/* Editor de Crop de Foto */}
-      {previewData.photo && (
+      {(originalPhoto || previewData.photo) && (
         <PhotoCropEditor
-          photoUrl={previewData.photo}
+          photoUrl={originalPhoto || previewData.photo!}
           open={cropEditorOpen}
           onClose={() => setCropEditorOpen(false)}
           onSave={handleSaveCrop}
