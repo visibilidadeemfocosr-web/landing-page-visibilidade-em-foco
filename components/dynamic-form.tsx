@@ -320,15 +320,19 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
           canvas.width = targetSize
           canvas.height = targetSize
           
-          // Calcular dimensões para cobrir o quadrado (crop centralizado)
-          const scale = Math.max(targetSize / img.width, targetSize / img.height)
+          // Preencher fundo branco
+          ctx.fillStyle = '#FFFFFF'
+          ctx.fillRect(0, 0, targetSize, targetSize)
+          
+          // Calcular dimensões para caber no quadrado SEM CORTAR (object-contain)
+          const scale = Math.min(targetSize / img.width, targetSize / img.height)
           const scaledWidth = img.width * scale
           const scaledHeight = img.height * scale
           
           const x = (targetSize - scaledWidth) / 2
           const y = (targetSize - scaledHeight) / 2
           
-          // Desenhar imagem redimensionada e centralizada
+          // Desenhar imagem redimensionada e centralizada SEM CORTAR
           ctx.drawImage(img, x, y, scaledWidth, scaledHeight)
           
           // Converter para blob
