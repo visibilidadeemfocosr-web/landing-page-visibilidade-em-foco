@@ -387,28 +387,16 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
             const originalEl = originalElements[index]
             
             if (originalEl) {
-              // Se elemento tem data-center-text, NÃO sobrescrever estilos!
-              if (htmlEl.getAttribute('data-center-text') === 'true') {
-                // Apenas copiar cores, não layout
-                const cs = window.getComputedStyle(originalEl)
-                htmlEl.style.color = cs.color
-                htmlEl.style.backgroundColor = cs.backgroundColor
-                htmlEl.style.background = cs.background
-                htmlEl.style.borderColor = cs.borderColor
-                return
+              // Se elemento tem data-center-text, NÃO tocar!
+              // Inline styles já estão perfeitos
+              if (htmlEl.getAttribute('data-center-text') === 'true' || 
+                  htmlEl.parentElement?.getAttribute('data-center-text') === 'true') {
+                return // Pular completamente, não alterar NADA
               }
               
               const cs = window.getComputedStyle(originalEl)
               
-              // PRESERVAR estilos inline ANTES de copiar
-              const inlineDisplay = htmlEl.style.display
-              const inlineAlignItems = htmlEl.style.alignItems
-              const inlineJustifyContent = htmlEl.style.justifyContent
-              const inlinePadding = htmlEl.style.padding
-              const inlinePaddingTop = htmlEl.style.paddingTop
-              const inlinePaddingBottom = htmlEl.style.paddingBottom
-              
-              // Copiar cssText completo
+              // Copiar cssText completo para outros elementos
               try {
                 htmlEl.style.cssText = cs.cssText
               } catch (e) {
@@ -421,14 +409,6 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
                 htmlEl.style.position = cs.position
                 htmlEl.style.display = cs.display
               }
-              
-              // RESTAURAR estilos inline críticos para centralização
-              if (inlineDisplay) htmlEl.style.display = inlineDisplay
-              if (inlineAlignItems) htmlEl.style.alignItems = inlineAlignItems
-              if (inlineJustifyContent) htmlEl.style.justifyContent = inlineJustifyContent
-              if (inlinePadding) htmlEl.style.padding = inlinePadding
-              if (inlinePaddingTop) htmlEl.style.paddingTop = inlinePaddingTop
-              if (inlinePaddingBottom) htmlEl.style.paddingBottom = inlinePaddingBottom
             }
           })
         }
@@ -1762,7 +1742,6 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
         {/* Período */}
         {slide.periodText && (
           <div 
-            className="whitespace-nowrap"
             data-center-text="true"
             style={{
               backgroundColor: `${globalSettings.textColor}20`,
@@ -1770,6 +1749,8 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
               color: globalSettings.textColor,
               display: 'inline-flex',
               alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
               paddingLeft: '16px',
               paddingRight: '16px',
               paddingTop: '8px',
@@ -1777,6 +1758,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
               borderRadius: '9999px',
               fontSize: '14px',
               fontWeight: 500,
+              whiteSpace: 'nowrap',
             }}
           >
             <svg 
@@ -1789,7 +1771,6 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
               strokeWidth="2" 
               strokeLinecap="round" 
               strokeLinejoin="round"
-              style={{ flexShrink: 0, marginRight: '8px' }}
             >
               <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
               <line x1="16" x2="16" y1="2" y2="6"/>
@@ -1803,7 +1784,6 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
         {/* CTA Button */}
         {slide.ctaText && (
           <div 
-            className="whitespace-nowrap"
             data-center-text="true"
             style={{
               backgroundColor: globalSettings.textColor,
@@ -1819,6 +1799,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
               fontSize: '18px',
               fontWeight: 700,
               boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+              whiteSpace: 'nowrap',
             }}
           >
             {slide.ctaText}
@@ -1829,9 +1810,12 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
       {/* Tag do projeto no canto oposto da logo */}
       {slide.tagText && globalSettings.logoPosition.includes('topo') && (
         <div 
-          className="absolute bottom-6 right-6 z-20 whitespace-nowrap"
           data-center-text="true"
           style={{
+            position: 'absolute',
+            bottom: '24px',
+            right: '24px',
+            zIndex: 20,
             backgroundColor: `${globalSettings.textColor}20`,
             color: globalSettings.textColor,
             display: 'inline-flex',
@@ -1844,6 +1828,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
             borderRadius: '4px',
             fontSize: '12px',
             fontWeight: 600,
+            whiteSpace: 'nowrap',
           }}
         >
           {slide.tagText}
@@ -1851,9 +1836,12 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
       )}
       {slide.tagText && globalSettings.logoPosition.includes('rodape') && (
         <div 
-          className="absolute top-6 right-6 z-20 whitespace-nowrap"
           data-center-text="true"
           style={{
+            position: 'absolute',
+            top: '24px',
+            right: '24px',
+            zIndex: 20,
             backgroundColor: `${globalSettings.textColor}20`,
             color: globalSettings.textColor,
             display: 'inline-flex',
@@ -1866,6 +1854,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
             borderRadius: '4px',
             fontSize: '12px',
             fontWeight: 600,
+            whiteSpace: 'nowrap',
           }}
         >
           {slide.tagText}
