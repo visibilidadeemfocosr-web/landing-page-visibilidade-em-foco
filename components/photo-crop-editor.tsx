@@ -21,6 +21,7 @@ async function getCroppedImg(
   pixelCrop: { x: number; y: number; width: number; height: number }
 ): Promise<string> {
   const image = new Image()
+  image.crossOrigin = 'anonymous' // Permitir processar imagens de outros domínios
   image.src = imageSrc
   await new Promise((resolve) => {
     image.onload = resolve
