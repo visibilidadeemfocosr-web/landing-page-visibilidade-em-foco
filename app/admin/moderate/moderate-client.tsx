@@ -44,6 +44,7 @@ export default function AdminModerateClient() {
   const [editedBio, setEditedBio] = useState<string>('')
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null)
   const [saving, setSaving] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState<string>('all')
 
   useEffect(() => {
     loadArtists()
@@ -211,6 +212,11 @@ export default function AdminModerateClient() {
   const rejectedArtists = artists.filter(a => a.status === 'rejected')
   const publishedArtists = artists.filter(a => a.status === 'published')
 
+  // Filtrar artistas por status
+  const filteredArtists = statusFilter === 'all' 
+    ? artists 
+    : artists.filter(artist => artist.status === statusFilter)
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       <div>
@@ -218,6 +224,45 @@ export default function AdminModerateClient() {
         <p className="text-muted-foreground">
           Gerencie os artistas que desejam fazer parte da rede social
         </p>
+      </div>
+
+      {/* Filtros por Status */}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant={statusFilter === 'all' ? 'default' : 'outline'}
+          onClick={() => setStatusFilter('all')}
+          size="sm"
+        >
+          Todos ({artists.length})
+        </Button>
+        <Button
+          variant={statusFilter === 'pending' ? 'default' : 'outline'}
+          onClick={() => setStatusFilter('pending')}
+          size="sm"
+        >
+          Pendentes ({pendingArtists.length})
+        </Button>
+        <Button
+          variant={statusFilter === 'approved' ? 'default' : 'outline'}
+          onClick={() => setStatusFilter('approved')}
+          size="sm"
+        >
+          Aprovados ({approvedArtists.length})
+        </Button>
+        <Button
+          variant={statusFilter === 'rejected' ? 'default' : 'outline'}
+          onClick={() => setStatusFilter('rejected')}
+          size="sm"
+        >
+          Rejeitados ({rejectedArtists.length})
+        </Button>
+        <Button
+          variant={statusFilter === 'published' ? 'default' : 'outline'}
+          onClick={() => setStatusFilter('published')}
+          size="sm"
+        >
+          Publicados ({publishedArtists.length})
+        </Button>
       </div>
 
       {/* Estatísticas */}
@@ -250,14 +295,20 @@ export default function AdminModerateClient() {
 
       {/* Lista de Artistas */}
       <div className="space-y-4">
-        {artists.length === 0 ? (
+        {filteredArtists.length === 0 ? (
           <Card>
             <CardContent className="pt-6 text-center text-muted-foreground">
-              Nenhum artista encontrado
+              {statusFilter === 'all' 
+                ? 'Nenhum artista encontrado' 
+                : `Nenhum artista ${
+                    statusFilter === 'pending' ? 'pendente' : 
+                    statusFilter === 'approved' ? 'aprovado' : 
+                    statusFilter === 'rejected' ? 'rejeitado' : 'publicado'
+                  } encontrado`}
             </CardContent>
           </Card>
         ) : (
-          artists.map((artist) => (
+          filteredArtists.map((artist) => (
             <Card key={artist.submission_id}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -272,11 +323,11 @@ export default function AdminModerateClient() {
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <CardTitle className="text-xl truncate">{artist.name}</CardTitle>
+                      <CardTitle className="text-xl">{artist.name}</CardTitle>
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
                         {getStatusBadge(artist.status)}
                         {artist.main_artistic_language && (
-                          <Badge variant="outline" className="truncate max-w-[200px]">{artist.main_artistic_language}</Badge>
+                          <Badge variant="outline" className="max-w-full whitespace-normal text-left">{artist.main_artistic_language}</Badge>
                         )}
                       </div>
                     </div>
