@@ -387,21 +387,31 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
             const originalEl = originalElements[index]
             
             if (originalEl) {
+              // Se elemento tem data-center-text, NÃO sobrescrever estilos!
+              if (htmlEl.getAttribute('data-center-text') === 'true') {
+                // Apenas copiar cores, não layout
+                const cs = window.getComputedStyle(originalEl)
+                htmlEl.style.color = cs.color
+                htmlEl.style.backgroundColor = cs.backgroundColor
+                htmlEl.style.background = cs.background
+                htmlEl.style.borderColor = cs.borderColor
+                return
+              }
+              
               const cs = window.getComputedStyle(originalEl)
               
-              // PRESERVAR estilos inline ANTES de copiar (crítico!)
+              // PRESERVAR estilos inline ANTES de copiar
               const inlineDisplay = htmlEl.style.display
-              const inlineVerticalAlign = htmlEl.style.verticalAlign
-              const inlineHeight = htmlEl.style.height
-              const inlineLineHeight = htmlEl.style.lineHeight
-              const inlinePaddingLeft = htmlEl.style.paddingLeft
-              const inlinePaddingRight = htmlEl.style.paddingRight
+              const inlineAlignItems = htmlEl.style.alignItems
+              const inlineJustifyContent = htmlEl.style.justifyContent
+              const inlinePadding = htmlEl.style.padding
+              const inlinePaddingTop = htmlEl.style.paddingTop
+              const inlinePaddingBottom = htmlEl.style.paddingBottom
               
               // Copiar cssText completo
               try {
                 htmlEl.style.cssText = cs.cssText
               } catch (e) {
-                // Se falhar, copiar propriedades importantes
                 htmlEl.style.color = cs.color
                 htmlEl.style.backgroundColor = cs.backgroundColor
                 htmlEl.style.background = cs.background
@@ -412,13 +422,13 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
                 htmlEl.style.display = cs.display
               }
               
-              // RESTAURAR estilos inline preservados (sobrescreve computados)
+              // RESTAURAR estilos inline críticos para centralização
               if (inlineDisplay) htmlEl.style.display = inlineDisplay
-              if (inlineVerticalAlign) htmlEl.style.verticalAlign = inlineVerticalAlign
-              if (inlineHeight) htmlEl.style.height = inlineHeight
-              if (inlineLineHeight) htmlEl.style.lineHeight = inlineLineHeight
-              if (inlinePaddingLeft) htmlEl.style.paddingLeft = inlinePaddingLeft
-              if (inlinePaddingRight) htmlEl.style.paddingRight = inlinePaddingRight
+              if (inlineAlignItems) htmlEl.style.alignItems = inlineAlignItems
+              if (inlineJustifyContent) htmlEl.style.justifyContent = inlineJustifyContent
+              if (inlinePadding) htmlEl.style.padding = inlinePadding
+              if (inlinePaddingTop) htmlEl.style.paddingTop = inlinePaddingTop
+              if (inlinePaddingBottom) htmlEl.style.paddingBottom = inlinePaddingBottom
             }
           })
         }
@@ -1753,37 +1763,40 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
         {slide.periodText && (
           <div 
             className="whitespace-nowrap"
+            data-center-text="true"
             style={{
               backgroundColor: `${globalSettings.textColor}20`,
               border: `2px solid ${globalSettings.textColor}`,
               color: globalSettings.textColor,
-              display: 'table',
+              display: 'inline-flex',
+              alignItems: 'center',
               paddingLeft: '16px',
               paddingRight: '16px',
-              height: '36px',
+              paddingTop: '8px',
+              paddingBottom: '8px',
               borderRadius: '9999px',
+              fontSize: '14px',
+              fontWeight: 500,
             }}
           >
-            <div style={{ display: 'table-cell', verticalAlign: 'middle', fontSize: '14px', fontWeight: 500 }}>
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="16" 
-                height="16" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-                style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '8px' }}
-              >
-                <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
-                <line x1="16" x2="16" y1="2" y2="6"/>
-                <line x1="8" x2="8" y1="2" y2="6"/>
-                <line x1="3" x2="21" y1="10" y2="10"/>
-              </svg>
-              <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>{slide.periodText}</span>
-            </div>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="16" 
+              height="16" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              style={{ flexShrink: 0, marginRight: '8px' }}
+            >
+              <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+              <line x1="16" x2="16" y1="2" y2="6"/>
+              <line x1="8" x2="8" y1="2" y2="6"/>
+              <line x1="3" x2="21" y1="10" y2="10"/>
+            </svg>
+            <span>{slide.periodText}</span>
           </div>
         )}
         
@@ -1791,20 +1804,24 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
         {slide.ctaText && (
           <div 
             className="whitespace-nowrap"
+            data-center-text="true"
             style={{
               backgroundColor: globalSettings.textColor,
               color: globalSettings.backgroundColor,
-              display: 'table',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               paddingLeft: '32px',
               paddingRight: '32px',
-              height: '56px',
+              paddingTop: '16px',
+              paddingBottom: '16px',
               borderRadius: '9999px',
+              fontSize: '18px',
+              fontWeight: 700,
               boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             }}
           >
-            <div style={{ display: 'table-cell', verticalAlign: 'middle', fontSize: '18px', fontWeight: 700, textAlign: 'center' }}>
-              {slide.ctaText}
-            </div>
+            {slide.ctaText}
           </div>
         )}
       </div>
@@ -1813,37 +1830,45 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
       {slide.tagText && globalSettings.logoPosition.includes('topo') && (
         <div 
           className="absolute bottom-6 right-6 z-20 whitespace-nowrap"
+          data-center-text="true"
           style={{
             backgroundColor: `${globalSettings.textColor}20`,
             color: globalSettings.textColor,
-            display: 'table',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             paddingLeft: '12px',
             paddingRight: '12px',
-            height: '28px',
+            paddingTop: '6px',
+            paddingBottom: '6px',
             borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 600,
           }}
         >
-          <div style={{ display: 'table-cell', verticalAlign: 'middle', fontSize: '12px', fontWeight: 600, textAlign: 'center' }}>
-            {slide.tagText}
-          </div>
+          {slide.tagText}
         </div>
       )}
       {slide.tagText && globalSettings.logoPosition.includes('rodape') && (
         <div 
           className="absolute top-6 right-6 z-20 whitespace-nowrap"
+          data-center-text="true"
           style={{
             backgroundColor: `${globalSettings.textColor}20`,
             color: globalSettings.textColor,
-            display: 'table',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             paddingLeft: '12px',
             paddingRight: '12px',
-            height: '28px',
+            paddingTop: '6px',
+            paddingBottom: '6px',
             borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 600,
           }}
         >
-          <div style={{ display: 'table-cell', verticalAlign: 'middle', fontSize: '12px', fontWeight: 600, textAlign: 'center' }}>
-            {slide.tagText}
-          </div>
+          {slide.tagText}
         </div>
       )}
 
