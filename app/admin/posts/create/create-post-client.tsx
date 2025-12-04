@@ -376,39 +376,36 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
           return element.hasAttribute('data-sonner-toast') || element.hasAttribute('data-sonner-toaster')
         },
         onclone: (clonedDoc, element) => {
-          // Injetar CSS que sobrescreve TODAS as cores oklch para RGB
-          const style = clonedDoc.createElement('style')
-          style.textContent = `
-            * {
-              color: inherit !important;
-              background-color: transparent !important;
-              border-color: currentColor !important;
-            }
-            [data-post-preview="true"] {
-              background-color: ${postData.backgroundColor} !important;
-              color: ${postData.textColor} !important;
-            }
-          `
-          clonedDoc.head.appendChild(style)
+          // Ocultar toasts e modais
+          const toasts = clonedDoc.querySelectorAll('[data-sonner-toast], [data-sonner-toaster]')
+          toasts.forEach((el) => (el as HTMLElement).style.display = 'none')
           
-          const clonedEl = element as HTMLElement
-          clonedEl.style.backgroundColor = postData.backgroundColor
-          
-          // Aplicar estilos inline em TODOS os elementos
+          // Copiar TODOS os estilos computados como inline para garantir renderização
           const allElements = clonedDoc.querySelectorAll('*')
-          allElements.forEach((el) => {
+          allElements.forEach((el, index) => {
             const htmlEl = el as HTMLElement
-            const computedStyle = window.getComputedStyle(el)
             
-            // Forçar cores como inline (RGB, não oklch)
-            if (computedStyle.color && computedStyle.color !== 'rgba(0, 0, 0, 0)') {
-              htmlEl.style.setProperty('color', computedStyle.color, 'important')
-            }
-            if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
-              htmlEl.style.setProperty('background-color', computedStyle.backgroundColor, 'important')
-            }
-            if (computedStyle.borderColor) {
-              htmlEl.style.setProperty('border-color', computedStyle.borderColor, 'important')
+            // Pegar elemento original pelo índice
+            const originalElements = previewRef.current?.querySelectorAll('*')
+            const originalEl = originalElements?.[index]
+            
+            if (originalEl) {
+              const computedStyle = window.getComputedStyle(originalEl)
+              
+              // Copiar TODOS os estilos importantes como inline
+              // Isso garante que Blobs, gradientes, transforms, tudo seja preservado
+              htmlEl.style.cssText = computedStyle.cssText
+              
+              // Garantir cores específicas (converte oklch para rgb)
+              if (computedStyle.color) htmlEl.style.color = computedStyle.color
+              if (computedStyle.backgroundColor) htmlEl.style.backgroundColor = computedStyle.backgroundColor
+              if (computedStyle.borderColor) htmlEl.style.borderColor = computedStyle.borderColor
+              if (computedStyle.background) htmlEl.style.background = computedStyle.background
+              
+              // Preservar transforms, blur, opacity
+              if (computedStyle.transform) htmlEl.style.transform = computedStyle.transform
+              if (computedStyle.filter) htmlEl.style.filter = computedStyle.filter
+              if (computedStyle.opacity) htmlEl.style.opacity = computedStyle.opacity
             }
           })
         }
@@ -482,11 +479,13 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
         const currentIndex = postData.currentSlideIndex
         
         for (let i = 0; i < postData.slides.length; i++) {
+          toast.info(`Gerando slide ${i + 1} de ${postData.slides.length}...`)
+          
           // Mudar para o slide atual
           setPostData(prev => ({ ...prev, currentSlideIndex: i }))
           
           // Aguardar React atualizar o preview
-          await new Promise(resolve => setTimeout(resolve, 500))
+          await new Promise(resolve => setTimeout(resolve, 800))
           
           // Gerar imagem do slide
           const imageDataUrl = await generateImage()
