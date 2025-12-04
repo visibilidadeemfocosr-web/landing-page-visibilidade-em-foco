@@ -303,8 +303,50 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
     setUploading({ ...uploading, [questionId]: true })
     
     try {
+      // Redimensionar imagem para 1000x1000px antes do upload
+      const resizedBlob = await new Promise<Blob>((resolve, reject) => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d')
+          
+          if (!ctx) {
+            reject(new Error('Não foi possível criar canvas'))
+            return
+          }
+          
+          // Definir tamanho fixo 1000x1000
+          const targetSize = 1000
+          canvas.width = targetSize
+          canvas.height = targetSize
+          
+          // Calcular dimensões para cobrir o quadrado (crop centralizado)
+          const scale = Math.max(targetSize / img.width, targetSize / img.height)
+          const scaledWidth = img.width * scale
+          const scaledHeight = img.height * scale
+          
+          const x = (targetSize - scaledWidth) / 2
+          const y = (targetSize - scaledHeight) / 2
+          
+          // Desenhar imagem redimensionada e centralizada
+          ctx.drawImage(img, x, y, scaledWidth, scaledHeight)
+          
+          // Converter para blob
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(blob)
+            } else {
+              reject(new Error('Erro ao criar blob'))
+            }
+          }, 'image/jpeg', 0.9) // JPEG com 90% de qualidade
+        }
+        
+        img.onerror = () => reject(new Error('Erro ao carregar imagem'))
+        img.src = URL.createObjectURL(file)
+      })
+      
       const formData = new FormData()
-      formData.append('file', file)
+      formData.append('file', resizedBlob, 'photo.jpg')
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -316,8 +358,9 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       const { url } = await response.json()
       setFileUrls({ ...fileUrls, [questionId]: url })
       setValue(questionId as keyof FormData, url as any)
-      toast.success('Imagem enviada com sucesso!')
+      toast.success('Imagem enviada e otimizada com sucesso!')
     } catch (error) {
+      console.error('Erro ao processar imagem:', error)
       toast.error('Erro ao fazer upload da imagem')
     } finally {
       setUploading({ ...uploading, [questionId]: false })
