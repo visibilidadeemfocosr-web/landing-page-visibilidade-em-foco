@@ -439,7 +439,8 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
       const imageDataUrl = await generateImage()
       
       if (!imageDataUrl) {
-        throw new Error('Não foi possível gerar a imagem')
+        toast.error('Use o botão "Baixar" para gerar a imagem e depois publique pela lista de posts.')
+        return
       }
       
       // 2. Converter para blob
