@@ -73,7 +73,8 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
              questionTextLower.includes('lgbtqia+')
     })
     
-    const redeSocialValue = redeSocialQuestion ? watch(redeSocialQuestion.id as keyof FormData) : null
+    // Usar estado redeSocialAnswer ao invés de watch (que ainda não existe neste ponto)
+    const redeSocialValue = redeSocialAnswer
     
     questions.forEach((question) => {
       let fieldSchema: z.ZodTypeAny
