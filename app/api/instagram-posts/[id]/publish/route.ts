@@ -63,10 +63,23 @@ export async function POST(
     
     if (!createMediaResponse.ok || createMediaData.error) {
       console.error('Erro ao criar container de mídia:', createMediaData)
+      
+      // Mensagem de erro mais detalhada
+      let errorMessage = 'Erro ao criar container de mídia no Instagram'
+      if (createMediaData.error?.message) {
+        errorMessage += ': ' + createMediaData.error.message
+      }
+      if (createMediaData.error?.error_user_title) {
+        errorMessage += ' - ' + createMediaData.error.error_user_title
+      }
+      if (createMediaData.error?.error_user_msg) {
+        errorMessage += ' - ' + createMediaData.error.error_user_msg
+      }
+      
       return NextResponse.json(
         { 
-          error: 'Erro ao criar container de mídia', 
-          details: createMediaData.error?.message || createMediaData 
+          error: errorMessage, 
+          details: createMediaData 
         },
         { status: 500 }
       )
