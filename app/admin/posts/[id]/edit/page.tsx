@@ -1,11 +1,8 @@
 import { Suspense } from 'react'
 import { Loader2 } from 'lucide-react'
-import { requireAdmin } from '@/lib/auth'
 import AdminNavLayout from '../../../admin-nav-layout'
 
-export default async function EditPostPage() {
-  await requireAdmin()
-  
+export default function EditPostPage() {
   return (
     <AdminNavLayout>
       <div className="container mx-auto py-8 px-4">

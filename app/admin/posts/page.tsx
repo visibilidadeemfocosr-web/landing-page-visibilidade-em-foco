@@ -1,7 +1,6 @@
 import { Suspense } from 'react'
 import { PostsClient } from './posts-client'
 import { Loader2 } from 'lucide-react'
-import { requireAdmin } from '@/lib/auth'
 import AdminNavLayout from '../admin-nav-layout'
 
 export const metadata = {
@@ -9,9 +8,7 @@ export const metadata = {
   description: 'Gerenciar posts do Instagram',
 }
 
-export default async function PostsPage() {
-  await requireAdmin()
-  
+export default function PostsPage() {
   return (
     <AdminNavLayout>
       <div className="container mx-auto py-8 px-4">

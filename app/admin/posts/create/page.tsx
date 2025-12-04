@@ -1,7 +1,6 @@
 import { Suspense } from 'react'
 import { CreatePostClient } from './create-post-client'
 import { Loader2 } from 'lucide-react'
-import { requireAdmin } from '@/lib/auth'
 import AdminNavLayout from '../../admin-nav-layout'
 
 export const metadata = {
@@ -9,9 +8,7 @@ export const metadata = {
   description: 'Criar novo post para Instagram',
 }
 
-export default async function CreatePostPage() {
-  await requireAdmin()
-  
+export default function CreatePostPage() {
   return (
     <AdminNavLayout>
       <div className="container mx-auto py-8 px-4">
