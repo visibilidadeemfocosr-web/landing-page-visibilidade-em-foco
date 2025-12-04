@@ -1736,16 +1736,16 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
         {/* Período */}
         {slide.periodText && (
           <div 
-            className="flex items-center gap-2 px-4 rounded-full text-sm font-medium whitespace-nowrap"
+            className="whitespace-nowrap"
             style={{
               backgroundColor: `${globalSettings.textColor}20`,
               border: `2px solid ${globalSettings.textColor}`,
               color: globalSettings.textColor,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '36px',
-              lineHeight: '36px',
+              display: 'inline-block',
+              padding: '8px 16px',
+              borderRadius: '9999px',
+              fontSize: '14px',
+              fontWeight: 500,
             }}
           >
             <svg 
@@ -1758,32 +1758,34 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
               strokeWidth="2" 
               strokeLinecap="round" 
               strokeLinejoin="round"
-              style={{ flexShrink: 0, verticalAlign: 'middle' }}
+              style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '8px' }}
             >
               <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
               <line x1="16" x2="16" y1="2" y2="6"/>
               <line x1="8" x2="8" y1="2" y2="6"/>
               <line x1="3" x2="21" y1="10" y2="10"/>
             </svg>
-            <span style={{ verticalAlign: 'middle', lineHeight: '1' }}>{slide.periodText}</span>
+            <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>{slide.periodText}</span>
           </div>
         )}
         
         {/* CTA Button */}
         {slide.ctaText && (
           <div 
-            className="px-8 rounded-full font-bold text-lg shadow-lg transform hover:scale-105 transition-transform whitespace-nowrap"
+            className="whitespace-nowrap"
             style={{
               backgroundColor: globalSettings.textColor,
               color: globalSettings.backgroundColor,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '56px',
-              lineHeight: '56px',
+              display: 'inline-block',
+              padding: '16px 32px',
+              borderRadius: '9999px',
+              fontSize: '18px',
+              fontWeight: 700,
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+              textAlign: 'center',
             }}
           >
-            <span style={{ verticalAlign: 'middle', lineHeight: '1' }}>{slide.ctaText}</span>
+            <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>{slide.ctaText}</span>
           </div>
         )}
       </div>
@@ -1791,34 +1793,36 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
       {/* Tag do projeto no canto oposto da logo */}
       {slide.tagText && globalSettings.logoPosition.includes('topo') && (
         <div 
-          className="absolute bottom-6 right-6 text-xs font-semibold px-3 rounded z-20 whitespace-nowrap"
+          className="absolute bottom-6 right-6 z-20 whitespace-nowrap"
           style={{
             backgroundColor: `${globalSettings.textColor}20`,
             color: globalSettings.textColor,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '24px',
-            lineHeight: '24px',
+            display: 'inline-block',
+            padding: '6px 12px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 600,
+            textAlign: 'center',
           }}
         >
-          <span style={{ verticalAlign: 'middle', lineHeight: '1' }}>{slide.tagText}</span>
+          <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>{slide.tagText}</span>
         </div>
       )}
       {slide.tagText && globalSettings.logoPosition.includes('rodape') && (
         <div 
-          className="absolute top-6 right-6 text-xs font-semibold px-3 rounded z-20 whitespace-nowrap"
+          className="absolute top-6 right-6 z-20 whitespace-nowrap"
           style={{
             backgroundColor: `${globalSettings.textColor}20`,
             color: globalSettings.textColor,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '24px',
-            lineHeight: '24px',
+            display: 'inline-block',
+            padding: '6px 12px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 600,
+            textAlign: 'center',
           }}
         >
-          <span style={{ verticalAlign: 'middle', lineHeight: '1' }}>{slide.tagText}</span>
+          <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>{slide.tagText}</span>
         </div>
       )}
 
