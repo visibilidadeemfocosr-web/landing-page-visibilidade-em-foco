@@ -1627,7 +1627,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
     <div
       ref={ref}
       data-post-preview="true"
-      className="w-full h-full relative flex flex-col items-center justify-center p-8 pb-20 overflow-hidden"
+      className="w-full h-full relative flex flex-col items-center justify-center p-8 overflow-hidden"
       style={{
         backgroundColor: globalSettings.backgroundColor,
         color: globalSettings.textColor,
