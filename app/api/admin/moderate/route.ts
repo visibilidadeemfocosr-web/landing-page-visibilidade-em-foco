@@ -77,12 +77,19 @@ export async function GET() {
       .select('submission_id, status, edited_bio, moderator_notes, edited_instagram, edited_facebook, edited_linkedin')
       .in('submission_id', submissionIds)
 
+    // Buscar photo_crop das submissions
+    const { data: submissions } = await adminClient
+      .from('submissions')
+      .select('id, photo_crop')
+      .in('id', submissionIds)
+
     // Agrupar dados por submission
     const artistsMap = new Map()
 
     submissionIds.forEach(submissionId => {
       const submissionAnswers = allAnswers?.filter(a => a.submission_id === submissionId) || []
       const moderation = moderationStatuses?.find(m => m.submission_id === submissionId)
+      const submission = submissions?.find(s => s.id === submissionId)
 
       // Encontrar dados específicos
       const findAnswer = (questionText: string) => {
@@ -135,6 +142,7 @@ export async function GET() {
         bio: moderation?.edited_bio || bioAnswer?.value || '',
         original_bio: bioAnswer?.value || '',
         photo: photoAnswer?.file_url || photoAnswer?.value || null,
+        photo_crop: submission?.photo_crop || null, // Dados de crop da foto
         main_artistic_language: mainLanguageAnswer?.value || '',
         other_artistic_languages: otherLanguagesAnswer?.value || '',
         instagram,

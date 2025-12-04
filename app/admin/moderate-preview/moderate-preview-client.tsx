@@ -23,6 +23,7 @@ interface ArtistData {
   facebook?: string
   linkedin?: string
   photo?: string | null
+  photo_crop?: CropData | null
 }
 
 export default function AdminModeratePreviewClient() {
@@ -76,6 +77,10 @@ export default function AdminModeratePreviewClient() {
           moderator_notes: (artist as any).moderator_notes || null
         })
         setEditedBio(artist.bio || artist.original_bio || '')
+        // Carregar crop da foto se existir
+        if (artist.photo_crop) {
+          setPhotoCrop(artist.photo_crop)
+        }
       }
     } catch (error: any) {
       toast.error('Erro ao carregar dados do artista: ' + error.message)
@@ -229,6 +234,7 @@ export default function AdminModeratePreviewClient() {
           otherArtisticLanguages: previewData.otherArtisticLanguages,
           bio: previewData.bio,
           photo: previewData.photo,
+          photo_crop: photoCrop, // Incluir dados de crop
           instagram: previewData.instagram,
           facebook: previewData.facebook,
           linkedin: previewData.linkedin,
@@ -1079,6 +1085,11 @@ export default function AdminModeratePreviewClient() {
                           src={previewData.photo}
                           alt={previewData.name}
                           className="w-full h-full object-contain"
+                          style={photoCrop ? {
+                            transform: `translate(${photoCrop.x}%, ${photoCrop.y}%) scale(${photoCrop.zoom})`,
+                            transformOrigin: 'center center',
+                            objectFit: 'cover'
+                          } : undefined}
                           onError={(e) => {
                             e.currentTarget.src = 'https://via.placeholder.com/400x400?text=Foto'
                           }}
