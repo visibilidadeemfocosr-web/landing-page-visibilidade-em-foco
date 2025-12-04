@@ -274,6 +274,7 @@ export const decorativeElementsMap = {
   'organic-blob': OrganicBlob,
   'pink-triangle': PinkTriangle,
   'ink-splash': InkSplash,
+  'custom': null, // Custom será renderizado com <img>
 }
 
 // Labels para o dropdown
@@ -287,5 +288,6 @@ export const decorativeElementsLabels = {
   'organic-blob': '💧 Blob Orgânico',
   'pink-triangle': '🔺 Triângulo Rosa',
   'ink-splash': '💥 Respingo de Tinta',
+  'custom': '📤 Imagem Personalizada (Upload)',
 }
 

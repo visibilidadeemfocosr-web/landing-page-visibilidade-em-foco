@@ -60,6 +60,7 @@ export type DecorativeElement =
   | 'organic-blob' 
   | 'pink-triangle' 
   | 'ink-splash'
+  | 'custom'
 
 export type ElementPosition = 
   | 'topo-esquerda' 
@@ -90,6 +91,7 @@ export interface InstagramPostSlide {
   elementSize?: ElementSize
   elementOpacity?: number
   elementLayer?: ElementLayer
+  customElementUrl?: string
 }
 
 export interface InstagramPostContent {

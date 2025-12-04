@@ -528,10 +528,10 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
         {/* Editor */}
         <div className="space-y-4">
           {/* Conteúdo */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center justify-between">
-                Conteúdo
+          <Card className="border-2 border-primary/20">
+            <CardHeader className="bg-primary/5">
+              <CardTitle className="text-lg flex items-center justify-between">
+                📝 Conteúdo do Slide
                 <div className="flex items-center gap-2 text-sm font-normal">
                   <Label htmlFor="carousel-toggle" className="cursor-pointer">
                     {postData.isCarousel ? '🎠 Carrossel' : '📄 Post Único'}
@@ -544,7 +544,7 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
                 </div>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               {/* Gerenciamento de Slides */}
               {postData.isCarousel && (
                 <div className="space-y-3 pb-4 border-b">
@@ -674,20 +674,23 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
           </Card>
 
           {/* Elementos Decorativos */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Elementos Decorativos</CardTitle>
+          <Card className="border-2 border-purple-200">
+            <CardHeader className="bg-purple-50">
+              <CardTitle className="text-lg">🎨 Elementos Decorativos</CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                Adicione elementos LGBT e artísticos modernos ao slide
+              </p>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6 pt-6">
               {/* Seleção do Elemento */}
               <div className="space-y-2">
-                <Label htmlFor="decorativeElement">Elemento</Label>
+                <Label htmlFor="decorativeElement" className="text-sm font-semibold">Selecionar Elemento</Label>
                 <Select
                   value={currentSlide.decorativeElement || 'none'}
                   onValueChange={(value) => updateSlide('decorativeElement', value as DecorativeElement)}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um elemento" />
+                  <SelectTrigger className="h-11">
+                    <SelectValue placeholder="Escolha um elemento decorativo..." />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(decorativeElementsLabels).map(([key, label]) => (
@@ -697,16 +700,101 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground">
-                  Adicione elementos LGBT e artísticos modernos ao slide
-                </p>
               </div>
+
+              {/* Upload de Imagem Custom */}
+              {currentSlide.decorativeElement === 'custom' && (
+                <div className="space-y-2">
+                  <Label htmlFor="customElementUpload">Upload da Imagem</Label>
+                  <Input
+                    id="customElementUpload"
+                    type="file"
+                    accept="image/png,image/svg+xml"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      
+                      // Validar tamanho (max 2MB)
+                      if (file.size > 2 * 1024 * 1024) {
+                        toast.error('Arquivo muito grande! Máximo: 2MB')
+                        return
+                      }
+                      
+                      // Validar tipo
+                      if (!['image/png', 'image/svg+xml'].includes(file.type)) {
+                        toast.error('Formato inválido! Use PNG ou SVG')
+                        return
+                      }
+                      
+                      try {
+                        toast.info('Fazendo upload...')
+                        
+                        // Upload para Supabase
+                        const formData = new FormData()
+                        formData.append('file', file)
+                        
+                        const response = await fetch('/api/upload', {
+                          method: 'POST',
+                          body: formData,
+                        })
+                        
+                        if (!response.ok) throw new Error('Erro no upload')
+                        
+                        const { url } = await response.json()
+                        updateSlide('customElementUrl', url)
+                        toast.success('Imagem enviada com sucesso!')
+                      } catch (error) {
+                        console.error('Erro ao fazer upload:', error)
+                        toast.error('Erro ao enviar imagem')
+                      }
+                    }}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    PNG ou SVG, máximo 2MB. A imagem será redimensionada automaticamente.
+                  </p>
+                  {currentSlide.customElementUrl && (
+                    <div className="mt-2 p-2 border rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-2">
+                        <div className="w-12 h-12 bg-white rounded border flex items-center justify-center overflow-hidden">
+                          <img 
+                            src={currentSlide.customElementUrl} 
+                            alt="Preview"
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <div className="flex-1 text-xs text-muted-foreground truncate">
+                          {currentSlide.customElementUrl.split('/').pop()}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => updateSlide('customElementUrl', undefined)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {currentSlide.decorativeElement && currentSlide.decorativeElement !== 'none' && (
                 <>
+                  {/* Separador */}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-purple-200"></div>
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-purple-50 px-2 text-purple-600 font-medium">Configurações do Elemento</span>
+                    </div>
+                  </div>
+
                   {/* Posição do Elemento */}
                   <div className="space-y-3">
-                    <Label>Posição</Label>
+                    <Label className="text-sm font-semibold">📍 Posição</Label>
                     <RadioGroup
                       value={currentSlide.elementPosition || 'topo-direita'}
                       onValueChange={(value) => updateSlide('elementPosition', value as ElementPosition)}
@@ -736,7 +824,7 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
 
                   {/* Tamanho */}
                   <div className="space-y-3">
-                    <Label>Tamanho</Label>
+                    <Label className="text-sm font-semibold">📏 Tamanho</Label>
                     <RadioGroup
                       value={currentSlide.elementSize || 'medio'}
                       onValueChange={(value) => updateSlide('elementSize', value as ElementSize)}
@@ -760,7 +848,7 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
                   {/* Opacidade */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <Label>Opacidade</Label>
+                      <Label className="text-sm font-semibold">🌫️ Opacidade</Label>
                       <span className="text-sm text-muted-foreground">{currentSlide.elementOpacity || 30}%</span>
                     </div>
                     <Slider
@@ -775,7 +863,7 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
 
                   {/* Camada */}
                   <div className="space-y-3">
-                    <Label>Camada</Label>
+                    <Label className="text-sm font-semibold">📊 Camada</Label>
                     <RadioGroup
                       value={currentSlide.elementLayer || 'background'}
                       onValueChange={(value) => updateSlide('elementLayer', value as ElementLayer)}
@@ -797,11 +885,14 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
           </Card>
 
           {/* Design */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Design</CardTitle>
+          <Card className="border-2 border-blue-200">
+            <CardHeader className="bg-blue-50">
+              <CardTitle className="text-lg">🎨 Design e Cores</CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                Personalize as cores e aparência visual do post
+              </p>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 pt-6">
               {/* Cores */}
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -1277,9 +1368,29 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
       
       {/* Elemento Decorativo (Background) */}
       {slide.decorativeElement && slide.decorativeElement !== 'none' && slide.elementLayer === 'background' && (() => {
+        const size = elementSizes[slide.elementSize || 'medio']
+        
+        // Se for custom e tiver URL
+        if (slide.decorativeElement === 'custom' && slide.customElementUrl) {
+          return (
+            <div style={{...getElementStyle(), zIndex: 5, opacity: (slide.elementOpacity || 30) / 100}}>
+              <img 
+                src={slide.customElementUrl} 
+                alt="Elemento decorativo custom"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                }}
+              />
+            </div>
+          )
+        }
+        
+        // Elementos pré-definidos
         const ElementComponent = decorativeElementsMap[slide.decorativeElement]
         if (!ElementComponent) return null
-        const size = elementSizes[slide.elementSize || 'medio']
+        
         return (
           <div style={{...getElementStyle(), zIndex: 5}}>
             <ElementComponent 
@@ -1422,9 +1533,29 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
 
       {/* Elemento Decorativo (Foreground) */}
       {slide.decorativeElement && slide.decorativeElement !== 'none' && slide.elementLayer === 'foreground' && (() => {
+        const size = elementSizes[slide.elementSize || 'medio']
+        
+        // Se for custom e tiver URL
+        if (slide.decorativeElement === 'custom' && slide.customElementUrl) {
+          return (
+            <div style={{...getElementStyle(), zIndex: 15, opacity: (slide.elementOpacity || 30) / 100}}>
+              <img 
+                src={slide.customElementUrl} 
+                alt="Elemento decorativo custom"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                }}
+              />
+            </div>
+          )
+        }
+        
+        // Elementos pré-definidos
         const ElementComponent = decorativeElementsMap[slide.decorativeElement]
         if (!ElementComponent) return null
-        const size = elementSizes[slide.elementSize || 'medio']
+        
         return (
           <div style={{...getElementStyle(), zIndex: 15}}>
             <ElementComponent 
