@@ -82,17 +82,14 @@ export function PostsClient() {
   }
 
   const handlePublish = async (post: InstagramPost) => {
+    // Se não tiver imagem, abrir editor automaticamente
     if (!post.image_url) {
-      toast.error('Este post ainda não tem imagem gerada!')
-      setTimeout(() => {
-        if (confirm('Deseja editar o post para gerar a imagem?')) {
-          router.push(`/admin/posts/${post.id}/edit`)
-        }
-      }, 500)
+      toast.info('Abrindo editor para gerar imagem...')
+      router.push(`/admin/posts/${post.id}/edit`)
       return
     }
     
-    if (!confirm('Deseja publicar este post no Instagram agora?')) return
+    if (!confirm(`Publicar "${post.title}" no Instagram agora?`)) return
     
     try {
       setPublishing(post.id)
@@ -112,7 +109,7 @@ export function PostsClient() {
         throw new Error(error.error || 'Erro ao publicar')
       }
       
-      toast.success('Post publicado no Instagram com sucesso!')
+      toast.success('Post publicado no Instagram com sucesso! 🎉')
       fetchPosts()
     } catch (error: any) {
       console.error('Erro ao publicar:', error)
