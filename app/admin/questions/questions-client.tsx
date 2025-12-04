@@ -993,7 +993,7 @@ export default function AdminQuestionsClient() {
                 Adicionar Bloco
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md bg-white dark:bg-gray-950">
               <DialogHeader>
                 <DialogTitle>Novo Bloco/Seção</DialogTitle>
               </DialogHeader>
@@ -1043,7 +1043,7 @@ export default function AdminQuestionsClient() {
         }
       }}>
         <DialogContent 
-          className="max-w-[95vw] sm:max-w-3xl max-h-[95vh] overflow-y-auto p-0"
+          className="max-w-[95vw] sm:max-w-3xl max-h-[95vh] overflow-y-auto p-0 bg-white dark:bg-gray-950"
           onInteractOutside={(e) => {
             // Prevenir fechamento ao clicar fora da modal
             e.preventDefault()
@@ -1432,7 +1432,7 @@ export default function AdminQuestionsClient() {
 
       {/* Dialog de Preview */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="!max-w-[100vw] !w-[100vw] !max-h-[100vh] !h-[100vh] !top-0 !left-0 !translate-x-0 !translate-y-0 rounded-none p-0 overflow-hidden flex flex-col">
+        <DialogContent className="!max-w-[100vw] !w-[100vw] !max-h-[100vh] !h-[100vh] !top-0 !left-0 !translate-x-0 !translate-y-0 rounded-none p-0 overflow-hidden flex flex-col bg-white dark:bg-gray-950">
           <DialogHeader className="px-6 pt-6 pb-4 border-b bg-background z-10 flex-shrink-0">
             <DialogTitle className="text-2xl font-bold">Preview do Formulário</DialogTitle>
             <p className="text-sm text-muted-foreground mt-2">
