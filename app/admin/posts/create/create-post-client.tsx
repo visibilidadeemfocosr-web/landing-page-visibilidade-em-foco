@@ -341,7 +341,13 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
   
   // Gerar imagem
   const generateImage = async (): Promise<string | null> => {
-    if (!previewRef.current) return null
+    console.log('=== generateImage() INICIADO ===')
+    console.log('previewRef.current existe?', !!previewRef.current)
+    
+    if (!previewRef.current) {
+      console.log('previewRef.current é null - retornando null')
+      return null
+    }
     
     setGenerating(true)
     
@@ -352,6 +358,7 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     console.error = (...args: any[]) => {
       const msg = String(args.join(' ')).toLowerCase()
       if (msg.includes('oklch') || msg.includes('unsupported color') || msg.includes('attempting to parse')) {
+        console.log('ERRO OKLCH DETECTADO (suprimido):', args[0])
         return // Ignora completamente
       }
       originalError(...args)
@@ -359,45 +366,100 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     
     console.warn = () => {}
     
+    let canvas = null
+    let oklchError = false
+    
     try {
-      const canvas = await html2canvas(previewRef.current, {
+      console.log('Chamando html2canvas...')
+      canvas = await html2canvas(previewRef.current, {
         scale: 2,
         backgroundColor: postData.backgroundColor,
         logging: false,
         useCORS: true,
         allowTaint: false,
         foreignObjectRendering: false,
+        ignoreElements: (element) => {
+          return element.hasAttribute('data-sonner-toast') || element.hasAttribute('data-sonner-toaster')
+        },
         onclone: (clonedDoc, element) => {
-          const toasts = clonedDoc.querySelectorAll('[data-sonner-toast], [data-sonner-toaster]')
-          toasts.forEach((el) => (el as HTMLElement).style.display = 'none')
+          // Injetar CSS que sobrescreve TODAS as cores oklch para RGB
+          const style = clonedDoc.createElement('style')
+          style.textContent = `
+            * {
+              color: inherit !important;
+              background-color: transparent !important;
+              border-color: currentColor !important;
+            }
+            [data-post-preview="true"] {
+              background-color: ${postData.backgroundColor} !important;
+              color: ${postData.textColor} !important;
+            }
+          `
+          clonedDoc.head.appendChild(style)
           
           const clonedEl = element as HTMLElement
           clonedEl.style.backgroundColor = postData.backgroundColor
+          
+          // Aplicar estilos inline em TODOS os elementos
+          const allElements = clonedDoc.querySelectorAll('*')
+          allElements.forEach((el) => {
+            const htmlEl = el as HTMLElement
+            const computedStyle = window.getComputedStyle(el)
+            
+            // Forçar cores como inline (RGB, não oklch)
+            if (computedStyle.color && computedStyle.color !== 'rgba(0, 0, 0, 0)') {
+              htmlEl.style.setProperty('color', computedStyle.color, 'important')
+            }
+            if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+              htmlEl.style.setProperty('background-color', computedStyle.backgroundColor, 'important')
+            }
+            if (computedStyle.borderColor) {
+              htmlEl.style.setProperty('border-color', computedStyle.borderColor, 'important')
+            }
+          })
         }
       })
       
-      console.error = originalError
-      console.warn = originalWarn
-      
-      // SEMPRE retorna imagem se canvas foi gerado, MESMO com aviso oklch
-      if (canvas && canvas.width > 0 && canvas.height > 0) {
-        return canvas.toDataURL('image/png')
-      }
-      
-      return null
+      console.log('html2canvas completou!')
     } catch (error: any) {
-      console.error = originalError
-      console.warn = originalWarn
+      console.log('ERRO em html2canvas:', error?.message)
       
       const errorMsg = String(error?.message || '').toLowerCase()
-      if (!errorMsg.includes('oklch') && !errorMsg.includes('unsupported')) {
-        console.error('Erro ao gerar imagem:', error)
+      if (errorMsg.includes('oklch') || errorMsg.includes('unsupported')) {
+        console.log('Erro oklch detectado - mas vamos tentar usar canvas mesmo assim')
+        oklchError = true
+      } else {
+        // Erro real, não oklch
+        console.error = originalError
+        console.warn = originalWarn
+        console.error('Erro real ao gerar imagem:', error)
+        setGenerating(false)
+        return null
       }
-      
-      return null
-    } finally {
-      setGenerating(false)
     }
+    
+    // Restaurar console
+    console.error = originalError
+    console.warn = originalWarn
+    
+    // Verificar se canvas foi gerado (mesmo com erro oklch)
+    console.log('Canvas final:', { 
+      existe: !!canvas, 
+      width: canvas?.width, 
+      height: canvas?.height,
+      oklchError 
+    })
+    
+    if (canvas && canvas.width > 0 && canvas.height > 0) {
+      const dataUrl = canvas.toDataURL('image/png')
+      console.log('Data URL gerada:', dataUrl ? 'SIM (tamanho: ' + dataUrl.length + ')' : 'NÃO')
+      setGenerating(false)
+      return dataUrl
+    }
+    
+    console.log('Retornando null - canvas não foi gerado')
+    setGenerating(false)
+    return null
   }
   
   // Download da imagem
@@ -426,14 +488,18 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
   
   // Publicar no Instagram
   const handlePublish = async () => {
+    console.log('=== INICIANDO PUBLICAÇÃO ===')
     try {
       setPublishing(true)
       
       // 1. Gerar imagem
+      console.log('Chamando generateImage()...')
       toast.info('Gerando imagem...')
       const imageDataUrl = await generateImage()
+      console.log('generateImage() retornou:', imageDataUrl ? 'DATA URL' : 'NULL')
       
       if (!imageDataUrl) {
+        console.log('Imagem não foi gerada - retornando')
         toast.error('Use o botão "Baixar" para gerar a imagem e depois publique pela lista de posts.')
         return
       }
@@ -1523,6 +1589,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
   return (
     <div
       ref={ref}
+      data-post-preview="true"
       className="w-full h-full relative flex flex-col items-center justify-center p-8 pb-20 overflow-hidden"
       style={{
         backgroundColor: globalSettings.backgroundColor,
