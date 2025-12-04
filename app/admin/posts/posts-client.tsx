@@ -83,7 +83,12 @@ export function PostsClient() {
 
   const handlePublish = async (post: InstagramPost) => {
     if (!post.image_url) {
-      toast.error('Post sem imagem! Edite e gere a imagem primeiro.')
+      toast.error('Este post ainda não tem imagem gerada!')
+      setTimeout(() => {
+        if (confirm('Deseja editar o post para gerar a imagem?')) {
+          router.push(`/admin/posts/${post.id}/edit`)
+        }
+      }, 500)
       return
     }
     
@@ -267,7 +272,7 @@ export function PostsClient() {
                   
                   {/* Ações */}
                   <div className="space-y-2 pt-2">
-                    {post.status === 'draft' && post.image_url && (
+                    {post.status === 'draft' && (
                       <Button
                         className="w-full"
                         size="sm"

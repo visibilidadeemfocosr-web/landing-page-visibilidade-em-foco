@@ -244,15 +244,40 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     updateField('caption', caption.trim())
   }, [postData.slides[0]?.title, postData.slides[0]?.subtitle, postData.slides[0]?.description, postData.slides[0]?.periodText, postData.slides[0]?.ctaLink])
   
-  // Salvar como rascunho (criar ou atualizar)
+  // Salvar como rascunho (criar ou atualizar) com geração de imagem
   const handleSaveDraft = async () => {
     try {
       setSaving(true)
       
+      // 1. Gerar e fazer upload da imagem
+      toast.info('Gerando imagem...')
+      const imageDataUrl = await generateImage()
+      
+      // 2. Converter para blob
+      const response = await fetch(imageDataUrl)
+      const blob = await response.blob()
+      
+      // 3. Upload para Supabase
+      toast.info('Fazendo upload...')
+      const fileName = `post-${Date.now()}.png`
+      const formData = new FormData()
+      formData.append('file', blob, fileName)
+      
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      })
+      
+      if (!uploadResponse.ok) throw new Error('Erro no upload')
+      
+      const { url: imageUrl } = await uploadResponse.json()
+      
+      // 4. Salvar post
+      toast.info('Salvando...')
       const url = editPostId ? `/api/instagram-posts/${editPostId}` : '/api/instagram-posts'
       const method = editPostId ? 'PUT' : 'POST'
       
-      const response = await fetch(url, {
+      const saveResponse = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -267,6 +292,7 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
           period_text: postData.slides[0]?.periodText,
           tag_text: postData.slides[0]?.tagText,
           caption: postData.caption,
+          image_url: imageUrl,
           content: {
             backgroundColor: postData.backgroundColor,
             textColor: postData.textColor,
@@ -282,9 +308,9 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
         }),
       })
       
-      if (!response.ok) throw new Error('Erro ao salvar rascunho')
+      if (!saveResponse.ok) throw new Error('Erro ao salvar rascunho')
       
-      const data = await response.json()
+      const data = await saveResponse.json()
       const successMessage = editPostId ? 'Post atualizado com sucesso!' : 'Rascunho salvo com sucesso!'
       toast.success(successMessage)
       router.push(`/admin/posts/${editPostId || data.id}`)
