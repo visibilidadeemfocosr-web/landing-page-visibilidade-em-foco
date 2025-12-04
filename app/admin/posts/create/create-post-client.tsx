@@ -43,11 +43,16 @@ interface PostData {
   caption: string
 }
 
-export function CreatePostClient() {
+interface CreatePostClientProps {
+  editPostId?: string
+}
+
+export function CreatePostClient({ editPostId }: CreatePostClientProps = {}) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const template = searchParams.get('template') || 'chamamento'
+  const [template, setTemplate] = useState(searchParams.get('template') || 'chamamento')
   const previewRef = useRef<HTMLDivElement>(null)
+  const [initialLoading, setInitialLoading] = useState(!!editPostId)
   
   const [postData, setPostData] = useState<PostData>({
     isCarousel: false,
@@ -84,6 +89,60 @@ export function CreatePostClient() {
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [generating, setGenerating] = useState(false)
+  
+  // Carregar dados do post se estiver em modo de edição
+  useEffect(() => {
+    if (editPostId) {
+      loadPostData()
+    }
+  }, [editPostId])
+  
+  const loadPostData = async () => {
+    try {
+      setInitialLoading(true)
+      const response = await fetch(`/api/instagram-posts/${editPostId}`)
+      if (!response.ok) throw new Error('Post não encontrado')
+      
+      const post: InstagramPost = await response.json()
+      
+      setTemplate(post.template_type)
+      setPostData({
+        isCarousel: post.is_carousel || false,
+        slides: post.slides || [{
+          order: 1,
+          title: post.title || '',
+          subtitle: post.subtitle || '',
+          description: post.description || '',
+          ctaText: post.cta_text,
+          ctaLink: post.cta_link,
+          periodText: post.period_text,
+          tagText: post.tag_text,
+          decorativeElement: 'none',
+          elementPosition: 'topo-direita',
+          elementSize: 'medio',
+          elementOpacity: 30,
+          elementLayer: 'background',
+        }],
+        currentSlideIndex: 0,
+        backgroundColor: post.content?.backgroundColor || '#f8f9fa',
+        textColor: post.content?.textColor || '#1f2937',
+        titleColor: post.content?.titleColor || '#1f2937',
+        subtitleColor: post.content?.subtitleColor || '#4b5563',
+        descriptionColor: post.content?.descriptionColor || '#6b7280',
+        logoPosition: post.content?.logoPosition || 'topo-direita',
+        logoSize: post.content?.logoSize || 'media',
+        logoVariant: post.content?.logoVariant || 'black',
+        decorativeEffect: post.content?.decorativeEffect || 'none',
+        caption: post.caption || '',
+      })
+    } catch (error) {
+      console.error('Erro ao carregar post:', error)
+      toast.error('Erro ao carregar post')
+      router.push('/admin/posts')
+    } finally {
+      setInitialLoading(false)
+    }
+  }
   
   // Atualizar campo
   const updateField = <K extends keyof PostData>(field: K, value: PostData[K]) => {
@@ -185,13 +244,16 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     updateField('caption', caption.trim())
   }, [postData.slides[0]?.title, postData.slides[0]?.subtitle, postData.slides[0]?.description, postData.slides[0]?.periodText, postData.slides[0]?.ctaLink])
   
-  // Salvar como rascunho
+  // Salvar como rascunho (criar ou atualizar)
   const handleSaveDraft = async () => {
     try {
       setSaving(true)
       
-      const response = await fetch('/api/instagram-posts', {
-        method: 'POST',
+      const url = editPostId ? `/api/instagram-posts/${editPostId}` : '/api/instagram-posts'
+      const method = editPostId ? 'PUT' : 'POST'
+      
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           template_type: template,
@@ -223,8 +285,9 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
       if (!response.ok) throw new Error('Erro ao salvar rascunho')
       
       const data = await response.json()
-      toast.success('Rascunho salvo com sucesso!')
-      router.push(`/admin/posts/${data.id}`)
+      const successMessage = editPostId ? 'Post atualizado com sucesso!' : 'Rascunho salvo com sucesso!'
+      toast.success(successMessage)
+      router.push(`/admin/posts/${editPostId || data.id}`)
     } catch (error) {
       console.error('Erro ao salvar:', error)
       toast.error('Erro ao salvar rascunho')
@@ -367,6 +430,15 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     }
   }
 
+  // Loading inicial ao carregar post para edição
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
@@ -380,9 +452,11 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Criar Post de Chamamento</h1>
+            <h1 className="text-3xl font-bold">
+              {editPostId ? 'Editar Post' : 'Criar Post de Chamamento'}
+            </h1>
             <p className="text-muted-foreground mt-1">
-              Personalize seu post e publique no Instagram
+              {editPostId ? 'Modifique seu post e salve as alterações' : 'Personalize seu post e publique no Instagram'}
             </p>
           </div>
         </div>
@@ -400,26 +474,28 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Salvar Rascunho
+                {editPostId ? 'Salvar Alterações' : 'Salvar Rascunho'}
               </>
             )}
           </Button>
-          <Button
-            onClick={handlePublish}
-            disabled={saving || publishing || generating}
-          >
-            {publishing ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Publicando...
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4 mr-2" />
-                Publicar no Instagram
-              </>
-            )}
-          </Button>
+          {!editPostId && (
+            <Button
+              onClick={handlePublish}
+              disabled={saving || publishing || generating}
+            >
+              {publishing ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Publicando...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4 mr-2" />
+                  Publicar no Instagram
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
