@@ -341,25 +341,18 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
   
   // Gerar imagem
   const generateImage = async (): Promise<string | null> => {
-    console.log('=== generateImage() INICIADO ===')
-    console.log('previewRef.current existe?', !!previewRef.current)
-    
-    if (!previewRef.current) {
-      console.log('previewRef.current é null - retornando null')
-      return null
-    }
+    if (!previewRef.current) return null
     
     setGenerating(true)
     
-    // Suprimir completamente erros oklch
+    // Suprimir erros oklch
     const originalError = console.error
     const originalWarn = console.warn
     
     console.error = (...args: any[]) => {
       const msg = String(args.join(' ')).toLowerCase()
       if (msg.includes('oklch') || msg.includes('unsupported color') || msg.includes('attempting to parse')) {
-        console.log('ERRO OKLCH DETECTADO (suprimido):', args[0])
-        return // Ignora completamente
+        return
       }
       originalError(...args)
     }
@@ -370,7 +363,6 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     let oklchError = false
     
     try {
-      console.log('Chamando html2canvas...')
       canvas = await html2canvas(previewRef.current, {
         scale: 2,
         backgroundColor: postData.backgroundColor,
@@ -422,17 +414,14 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
       
       console.log('html2canvas completou!')
     } catch (error: any) {
-      console.log('ERRO em html2canvas:', error?.message)
-      
       const errorMsg = String(error?.message || '').toLowerCase()
       if (errorMsg.includes('oklch') || errorMsg.includes('unsupported')) {
-        console.log('Erro oklch detectado - mas vamos tentar usar canvas mesmo assim')
         oklchError = true
       } else {
         // Erro real, não oklch
         console.error = originalError
         console.warn = originalWarn
-        console.error('Erro real ao gerar imagem:', error)
+        console.error('Erro ao gerar imagem:', error)
         setGenerating(false)
         return null
       }
@@ -443,21 +432,12 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     console.warn = originalWarn
     
     // Verificar se canvas foi gerado (mesmo com erro oklch)
-    console.log('Canvas final:', { 
-      existe: !!canvas, 
-      width: canvas?.width, 
-      height: canvas?.height,
-      oklchError 
-    })
-    
     if (canvas && canvas.width > 0 && canvas.height > 0) {
       const dataUrl = canvas.toDataURL('image/png')
-      console.log('Data URL gerada:', dataUrl ? 'SIM (tamanho: ' + dataUrl.length + ')' : 'NÃO')
       setGenerating(false)
       return dataUrl
     }
     
-    console.log('Retornando null - canvas não foi gerado')
     setGenerating(false)
     return null
   }
@@ -488,18 +468,14 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
   
   // Publicar no Instagram
   const handlePublish = async () => {
-    console.log('=== INICIANDO PUBLICAÇÃO ===')
     try {
       setPublishing(true)
       
       // 1. Gerar imagem
-      console.log('Chamando generateImage()...')
       toast.info('Gerando imagem...')
       const imageDataUrl = await generateImage()
-      console.log('generateImage() retornou:', imageDataUrl ? 'DATA URL' : 'NULL')
       
       if (!imageDataUrl) {
-        console.log('Imagem não foi gerada - retornando')
         toast.error('Use o botão "Baixar" para gerar a imagem e depois publique pela lista de posts.')
         return
       }
