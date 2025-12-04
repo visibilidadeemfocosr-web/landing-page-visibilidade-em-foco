@@ -329,12 +329,64 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     setGenerating(true)
     
     try {
+      // Suprimir erros de oklch no console
+      const originalError = console.error
+      const originalWarn = console.warn
+      
+      console.error = (...args: any[]) => {
+        const msg = String(args.join(' ')).toLowerCase()
+        if (msg.includes('oklch') || msg.includes('unsupported color')) {
+          return // Ignorar erros de oklch
+        }
+        originalError(...args)
+      }
+      
+      console.warn = (...args: any[]) => {
+        const msg = String(args.join(' ')).toLowerCase()
+        if (msg.includes('oklch') || msg.includes('unsupported color')) {
+          return // Ignorar avisos de oklch
+        }
+        originalWarn(...args)
+      }
+      
+      // Gerar imagem com html2canvas
       const canvas = await html2canvas(previewRef.current, {
         scale: 2,
         backgroundColor: null,
         logging: false,
         useCORS: true,
+        allowTaint: false,
+        foreignObjectRendering: false,
+        onclone: (clonedDoc, element) => {
+          // Garantir que estilos sejam aplicados corretamente
+          const clonedElement = element as HTMLElement
+          
+          // Ocultar toasts e modais
+          const toasts = clonedDoc.querySelectorAll('[data-sonner-toast], [data-sonner-toaster]')
+          toasts.forEach((el) => {
+            (el as HTMLElement).style.display = 'none'
+          })
+          
+          // Garantir que elementos com cor oklch sejam convertidos
+          const allElements = clonedDoc.querySelectorAll('*')
+          allElements.forEach((el) => {
+            const htmlEl = el as HTMLElement
+            const computedStyle = window.getComputedStyle(htmlEl)
+            
+            // Copiar cores importantes como inline styles para garantir renderização
+            if (computedStyle.color && computedStyle.color !== 'rgba(0, 0, 0, 0)') {
+              htmlEl.style.color = computedStyle.color
+            }
+            if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+              htmlEl.style.backgroundColor = computedStyle.backgroundColor
+            }
+          })
+        }
       })
+      
+      // Restaurar console
+      console.error = originalError
+      console.warn = originalWarn
       
       return canvas.toDataURL('image/png')
     } catch (error) {
