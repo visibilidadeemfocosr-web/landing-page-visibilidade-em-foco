@@ -1084,12 +1084,14 @@ export default function AdminModeratePreviewClient() {
                         <img
                           src={previewData.photo}
                           alt={previewData.name}
-                          className="w-full h-full object-contain"
+                          className="w-full h-full"
                           style={photoCrop ? {
-                            transform: `translate(${photoCrop.x}%, ${photoCrop.y}%) scale(${photoCrop.zoom})`,
+                            transform: `translate(${-photoCrop.x}%, ${-photoCrop.y}%) scale(${photoCrop.zoom})`,
                             transformOrigin: 'center center',
                             objectFit: 'cover'
-                          } : undefined}
+                          } : {
+                            objectFit: 'contain'
+                          }}
                           onError={(e) => {
                             e.currentTarget.src = 'https://via.placeholder.com/400x400?text=Foto'
                           }}

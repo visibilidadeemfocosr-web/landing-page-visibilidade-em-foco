@@ -266,7 +266,7 @@ export async function POST(request: NextRequest) {
       height: 100%;
       object-fit: ${photo_crop ? 'cover' : 'contain'};
       ${photo_crop ? `
-        transform: translate(${photo_crop.x}%, ${photo_crop.y}%) scale(${photo_crop.zoom});
+        transform: translate(${-photo_crop.x}%, ${-photo_crop.y}%) scale(${photo_crop.zoom});
         transform-origin: center center;
       ` : ''}
     }
