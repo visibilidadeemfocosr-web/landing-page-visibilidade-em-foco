@@ -344,18 +344,17 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     if (!previewRef.current) return null
     
     setGenerating(true)
-    let useServerFallback = false
     
-    // Suprimir TODOS os erros e avisos durante a geração
+    // Suprimir completamente erros oklch
     const originalError = console.error
     const originalWarn = console.warn
     
     console.error = (...args: any[]) => {
       const msg = String(args.join(' ')).toLowerCase()
       if (msg.includes('oklch') || msg.includes('unsupported color') || msg.includes('attempting to parse')) {
-        useServerFallback = true
-        return
+        return // Ignora completamente
       }
+      originalError(...args)
     }
     
     console.warn = () => {}
@@ -380,15 +379,12 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
       console.error = originalError
       console.warn = originalWarn
       
-      // Se teve erro oklch mas canvas foi gerado, ainda assim funciona
-      if (useServerFallback) {
-        // Mas se realmente não conseguiu gerar, não retornar canvas vazio
-        if (canvas.width === 0 || canvas.height === 0) {
-          return null
-        }
+      // SEMPRE retorna imagem se canvas foi gerado, MESMO com aviso oklch
+      if (canvas && canvas.width > 0 && canvas.height > 0) {
+        return canvas.toDataURL('image/png')
       }
       
-      return canvas.toDataURL('image/png')
+      return null
     } catch (error: any) {
       console.error = originalError
       console.warn = originalWarn
