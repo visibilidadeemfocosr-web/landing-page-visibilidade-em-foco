@@ -1539,15 +1539,15 @@ export default function AdminModeratePreviewClient() {
               
               {/* Botão de publicar no Instagram */}
               <Button 
-                className="w-full" 
-                variant="default"
+                className="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 text-white font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]" 
+                size="lg"
                 onClick={handlePublishToInstagram}
                 disabled={loading || !submissionId}
               >
-                <Instagram className="w-4 h-4 mr-2" />
-                {loading ? 'Publicando...' : 'Publicar no Instagram'}
+                <Instagram className="w-5 h-5 mr-2" />
+                {loading ? '📤 Publicando...' : '📸 Publicar no Instagram'}
               </Button>
-              <p className="text-xs text-muted-foreground text-center">
+              <p className="text-xs text-center text-purple-600 dark:text-purple-400 font-medium">
                 📱 Publica automaticamente o carousel (2 posts) no Instagram
               </p>
             </div>
