@@ -31,7 +31,7 @@ export function PhotoCropEditor({
   initialCrop 
 }: PhotoCropEditorProps) {
   const [crop, setCrop] = useState({ x: initialCrop?.x || 0, y: initialCrop?.y || 0 })
-  const [zoom, setZoom] = useState(initialCrop?.zoom || 1)
+  const [zoom, setZoom] = useState(initialCrop?.zoom || 0.5)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null)
 
   const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {
@@ -54,7 +54,7 @@ export function PhotoCropEditor({
 
   const handleReset = () => {
     setCrop({ x: 0, y: 0 })
-    setZoom(1)
+    setZoom(0.5)
   }
 
   return (
@@ -93,9 +93,9 @@ export function PhotoCropEditor({
             </div>
             <Slider
               value={[zoom]}
-              min={1}
+              min={0.5}
               max={3}
-              step={0.1}
+              step={0.05}
               onValueChange={(values) => setZoom(values[0])}
               className="w-full"
             />
@@ -104,8 +104,8 @@ export function PhotoCropEditor({
           {/* Instruções */}
           <div className="bg-blue-50 dark:bg-blue-950/20 p-4 rounded-lg">
             <p className="text-sm text-blue-700 dark:text-blue-400">
-              <strong>Como usar:</strong> Arraste a foto para reposicionar. Use o controle de zoom para aproximar ou afastar. 
-              A área circular mostra como a foto aparecerá no Post 1.
+              <strong>Como usar:</strong> Arraste a foto para reposicionar. Use o controle de zoom (0.5x a 3x) para aproximar ou afastar. 
+              A área circular mostra como a foto aparecerá no Post 1. Comece com zoom reduzido para ver a foto completa.
             </p>
           </div>
         </div>
