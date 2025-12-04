@@ -1,16 +1,11 @@
-import { requireAdmin } from '@/lib/auth'
-import AdminNavLayout from '../../admin-nav-layout'
-import NewPostClient from './new-post-client'
+'use client'
 
-export default async function NewPostPage() {
-  await requireAdmin()
-  
-  return (
-    <AdminNavLayout>
-      <NewPostClient />
-    </AdminNavLayout>
-  )
-}
+import { useState } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { ArrowLeft, Megaphone, Palette, Calendar, Quote, Image as ImageIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import type { InstagramPostTemplateType } from '@/lib/supabase/types'
 
 const templates: Array<{
   type: InstagramPostTemplateType
@@ -56,7 +51,7 @@ const templates: Array<{
   },
 ]
 
-export default function NewPostPage() {
+export default function NewPostClient() {
   const router = useRouter()
   const [selectedTemplate, setSelectedTemplate] = useState<InstagramPostTemplateType | null>(null)
 

@@ -1,16 +1,7 @@
-import { requireAdmin } from '@/lib/auth'
-import AdminNavLayout from '../../admin-nav-layout'
-import PostDetailClient from './post-detail-client'
+'use client'
 
-export default async function PostDetailPage() {
-  await requireAdmin()
-  
-  return (
-    <AdminNavLayout>
-      <PostDetailClient />
-    </AdminNavLayout>
-  )
-}
+import { useEffect, useState } from 'react'
+import { useRouter, useParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -20,13 +11,11 @@ import {
   Trash2,
   Loader2,
   Calendar,
-  Eye,
-  Send
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { InstagramPost } from '@/lib/supabase/types'
 
-export default function PostDetailPage() {
+export default function PostDetailClient() {
   const router = useRouter()
   const params = useParams()
   const postId = params.id as string
