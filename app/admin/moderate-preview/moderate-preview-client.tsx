@@ -99,24 +99,10 @@ export default function AdminModeratePreviewClient() {
     }
 
     try {
-      // Converter blob URL para File
-      const blob = await fetch(result.croppedImageUrl).then(r => r.blob())
-      const file = new File([blob], 'cropped-photo.jpg', { type: 'image/jpeg' })
-      
-      // Fazer upload da imagem cropada
-      const formData = new FormData()
-      formData.append('file', file)
+      // A API /crop-image já retorna a URL da foto cropada e faz o upload
+      const croppedPhotoUrl = result.croppedImageUrl
 
-      const uploadResponse = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!uploadResponse.ok) throw new Error('Erro no upload')
-
-      const { url: croppedPhotoUrl } = await uploadResponse.json()
-
-      // Salvar crop data e URL da foto cropada
+      // Salvar crop data e URL da foto cropada no banco
       const response = await fetch(`/api/admin/submissions/${submissionId}/crop`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },

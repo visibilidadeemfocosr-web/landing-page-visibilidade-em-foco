@@ -15,58 +15,6 @@ interface PhotoCropEditorProps {
   initialCrop?: CropData
 }
 
-// Função para processar a imagem cropada
-async function getCroppedImg(
-  imageSrc: string,
-  pixelCrop: { x: number; y: number; width: number; height: number }
-): Promise<string> {
-  const image = new Image()
-  image.crossOrigin = 'anonymous' // Permitir processar imagens de outros domínios
-  image.src = imageSrc
-  await new Promise((resolve) => {
-    image.onload = resolve
-  })
-
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
-
-  if (!ctx) {
-    throw new Error('Não foi possível criar canvas')
-  }
-
-  // Definir tamanho do canvas para 1000x1000 (tamanho do círculo)
-  canvas.width = 1000
-  canvas.height = 1000
-
-  // Preencher com branco
-  ctx.fillStyle = '#FFFFFF'
-  ctx.fillRect(0, 0, 1000, 1000)
-
-  // Desenhar a imagem cropada
-  ctx.drawImage(
-    image,
-    pixelCrop.x,
-    pixelCrop.y,
-    pixelCrop.width,
-    pixelCrop.height,
-    0,
-    0,
-    1000,
-    1000
-  )
-
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        reject(new Error('Erro ao criar blob'))
-        return
-      }
-      const url = URL.createObjectURL(blob)
-      resolve(url)
-    }, 'image/jpeg', 0.95)
-  })
-}
-
 export interface CropData {
   x: number
   y: number
@@ -98,9 +46,6 @@ export function PhotoCropEditor({
   const handleSave = async () => {
     if (croppedAreaPixels) {
       try {
-        // Processar imagem cropada
-        const croppedImageUrl = await getCroppedImg(photoUrl, croppedAreaPixels)
-        
         const cropData: CropData = {
           x: crop.x,
           y: crop.y,
@@ -108,6 +53,27 @@ export function PhotoCropEditor({
           width: croppedAreaPixels.width,
           height: croppedAreaPixels.height
         }
+        
+        // Processar imagem no servidor (evita problema de CORS)
+        const response = await fetch('/api/admin/crop-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageUrl: photoUrl,
+            cropData: {
+              x: croppedAreaPixels.x,
+              y: croppedAreaPixels.y,
+              width: croppedAreaPixels.width,
+              height: croppedAreaPixels.height
+            }
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Erro ao processar imagem')
+        }
+
+        const { url: croppedImageUrl } = await response.json()
         
         onSave({
           croppedImageUrl,
