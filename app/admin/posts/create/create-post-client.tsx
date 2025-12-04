@@ -314,9 +314,10 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
       const successMessage = editPostId ? 'Post atualizado com sucesso!' : 'Rascunho salvo com sucesso!'
       toast.success(successMessage)
       router.push(`/admin/posts/${editPostId || data.id}`)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar:', error)
-      toast.error('Erro ao salvar rascunho')
+      const errorMessage = error?.message || 'Erro ao salvar rascunho'
+      toast.error(errorMessage)
     } finally {
       setSaving(false)
     }
