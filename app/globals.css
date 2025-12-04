@@ -29,7 +29,7 @@
   
   --destructive: 239 68 68;
   --destructive-foreground: 255 255 255;
-  --border: 226 232 240;
+  --border: 229 231 235;
   --input: 241 245 249;
   --ring: 249 115 22;
   --radius: 0.75rem;
@@ -52,7 +52,7 @@
   --muted-foreground: 148 163 184;
   --destructive: 220 38 38;
   --destructive-foreground: 248 250 252;
-  --border: 51 65 85;
+  --border: 71 85 105;
   --input: 51 65 85;
   --ring: 249 115 22;
 }
