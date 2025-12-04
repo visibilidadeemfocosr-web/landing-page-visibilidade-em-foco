@@ -50,6 +50,31 @@ export type LogoSize = 'pequena' | 'media' | 'grande'
 export type LogoVariant = 'black' | 'color' | 'gradient' | 'white'
 export type DecorativeEffect = 'none' | 'blobs' | 'grid' | 'gradient'
 
+export type DecorativeElement = 
+  | 'none' 
+  | 'pride-flag-3d' 
+  | 'raised-fist' 
+  | 'geometric-heart' 
+  | 'pride-stripes' 
+  | 'concentric-circles' 
+  | 'organic-blob' 
+  | 'pink-triangle' 
+  | 'ink-splash'
+
+export type ElementPosition = 
+  | 'topo-esquerda' 
+  | 'topo-centro' 
+  | 'topo-direita' 
+  | 'centro-esquerda' 
+  | 'centro' 
+  | 'centro-direita' 
+  | 'base-esquerda' 
+  | 'base-centro' 
+  | 'base-direita'
+
+export type ElementSize = 'pequeno' | 'medio' | 'grande'
+export type ElementLayer = 'background' | 'foreground'
+
 export interface InstagramPostSlide {
   order: number
   title?: string
@@ -59,6 +84,12 @@ export interface InstagramPostSlide {
   ctaLink?: string
   periodText?: string
   tagText?: string
+  // Elementos decorativos
+  decorativeElement?: DecorativeElement
+  elementPosition?: ElementPosition
+  elementSize?: ElementSize
+  elementOpacity?: number
+  elementLayer?: ElementLayer
 }
 
 export interface InstagramPostContent {

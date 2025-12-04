@@ -21,8 +21,10 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import html2canvas from 'html2canvas'
-import type { LogoPosition, LogoSize, LogoVariant, DecorativeEffect, InstagramPost, InstagramPostSlide } from '@/lib/supabase/types'
+import type { LogoPosition, LogoSize, LogoVariant, DecorativeEffect, InstagramPost, InstagramPostSlide, DecorativeElement, ElementPosition, ElementSize, ElementLayer } from '@/lib/supabase/types'
 import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { decorativeElementsMap, decorativeElementsLabels } from '@/components/decorative-elements'
 
 interface PostData {
   isCarousel: boolean
@@ -59,6 +61,11 @@ export function CreatePostClient() {
         ctaLink: '',
         periodText: '08/12/2025 até 08/02/2026',
         tagText: 'VFSR • São Roque',
+        decorativeElement: 'none',
+        elementPosition: 'topo-direita',
+        elementSize: 'medio',
+        elementOpacity: 30,
+        elementLayer: 'background',
       }
     ],
     currentSlideIndex: 0,
@@ -666,6 +673,129 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
             </CardContent>
           </Card>
 
+          {/* Elementos Decorativos */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Elementos Decorativos</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Seleção do Elemento */}
+              <div className="space-y-2">
+                <Label htmlFor="decorativeElement">Elemento</Label>
+                <Select
+                  value={currentSlide.decorativeElement || 'none'}
+                  onValueChange={(value) => updateSlide('decorativeElement', value as DecorativeElement)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um elemento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(decorativeElementsLabels).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Adicione elementos LGBT e artísticos modernos ao slide
+                </p>
+              </div>
+
+              {currentSlide.decorativeElement && currentSlide.decorativeElement !== 'none' && (
+                <>
+                  {/* Posição do Elemento */}
+                  <div className="space-y-3">
+                    <Label>Posição</Label>
+                    <RadioGroup
+                      value={currentSlide.elementPosition || 'topo-direita'}
+                      onValueChange={(value) => updateSlide('elementPosition', value as ElementPosition)}
+                    >
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { value: 'topo-esquerda', label: '↖️' },
+                          { value: 'topo-centro', label: '⬆️' },
+                          { value: 'topo-direita', label: '↗️' },
+                          { value: 'centro-esquerda', label: '⬅️' },
+                          { value: 'centro', label: '⚫' },
+                          { value: 'centro-direita', label: '➡️' },
+                          { value: 'base-esquerda', label: '↙️' },
+                          { value: 'base-centro', label: '⬇️' },
+                          { value: 'base-direita', label: '↘️' },
+                        ].map((option) => (
+                          <div key={option.value} className="flex items-center space-x-2 border rounded-lg p-2 hover:bg-muted/50 cursor-pointer">
+                            <RadioGroupItem value={option.value} id={`pos-${option.value}`} />
+                            <Label htmlFor={`pos-${option.value}`} className="text-2xl cursor-pointer flex-1 text-center">
+                              {option.label}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* Tamanho */}
+                  <div className="space-y-3">
+                    <Label>Tamanho</Label>
+                    <RadioGroup
+                      value={currentSlide.elementSize || 'medio'}
+                      onValueChange={(value) => updateSlide('elementSize', value as ElementSize)}
+                      className="flex gap-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="pequeno" id="size-pequeno" />
+                        <Label htmlFor="size-pequeno" className="cursor-pointer">Pequeno</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="medio" id="size-medio" />
+                        <Label htmlFor="size-medio" className="cursor-pointer">Médio</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="grande" id="size-grande" />
+                        <Label htmlFor="size-grande" className="cursor-pointer">Grande</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* Opacidade */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label>Opacidade</Label>
+                      <span className="text-sm text-muted-foreground">{currentSlide.elementOpacity || 30}%</span>
+                    </div>
+                    <Slider
+                      value={[currentSlide.elementOpacity || 30]}
+                      onValueChange={([value]) => updateSlide('elementOpacity', value)}
+                      min={0}
+                      max={100}
+                      step={5}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Camada */}
+                  <div className="space-y-3">
+                    <Label>Camada</Label>
+                    <RadioGroup
+                      value={currentSlide.elementLayer || 'background'}
+                      onValueChange={(value) => updateSlide('elementLayer', value as ElementLayer)}
+                      className="flex gap-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="background" id="layer-bg" />
+                        <Label htmlFor="layer-bg" className="cursor-pointer">Atrás do texto</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="foreground" id="layer-fg" />
+                        <Label htmlFor="layer-fg" className="cursor-pointer">Na frente do texto</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Design */}
           <Card>
             <CardHeader>
@@ -989,6 +1119,48 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
     }
   }
   
+  // Tamanhos dos elementos decorativos
+  const elementSizes = {
+    pequeno: 100,
+    medio: 180,
+    grande: 280,
+  }
+  
+  // Determinar posição e estilo do elemento decorativo
+  const getElementStyle = (): React.CSSProperties => {
+    if (!slide.decorativeElement || slide.decorativeElement === 'none') return {}
+    
+    const size = elementSizes[slide.elementSize || 'medio']
+    const baseStyle: React.CSSProperties = {
+      position: 'absolute',
+      width: `${size}px`,
+      height: `${size}px`,
+    }
+    
+    switch (slide.elementPosition) {
+      case 'topo-esquerda':
+        return { ...baseStyle, top: '20px', left: '20px' }
+      case 'topo-centro':
+        return { ...baseStyle, top: '20px', left: '50%', transform: 'translateX(-50%)' }
+      case 'topo-direita':
+        return { ...baseStyle, top: '20px', right: '20px' }
+      case 'centro-esquerda':
+        return { ...baseStyle, top: '50%', left: '20px', transform: 'translateY(-50%)' }
+      case 'centro':
+        return { ...baseStyle, top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
+      case 'centro-direita':
+        return { ...baseStyle, top: '50%', right: '20px', transform: 'translateY(-50%)' }
+      case 'base-esquerda':
+        return { ...baseStyle, bottom: '80px', left: '20px' }
+      case 'base-centro':
+        return { ...baseStyle, bottom: '80px', left: '50%', transform: 'translateX(-50%)' }
+      case 'base-direita':
+        return { ...baseStyle, bottom: '80px', right: '20px' }
+      default:
+        return { ...baseStyle, top: '20px', right: '20px' }
+    }
+  }
+  
   // Renderizar efeitos decorativos
   const renderDecorativeEffect = () => {
     switch (globalSettings.decorativeEffect) {
@@ -1102,6 +1274,21 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
     >
       {/* Efeitos decorativos de fundo */}
       {renderDecorativeEffect()}
+      
+      {/* Elemento Decorativo (Background) */}
+      {slide.decorativeElement && slide.decorativeElement !== 'none' && slide.elementLayer === 'background' && (() => {
+        const ElementComponent = decorativeElementsMap[slide.decorativeElement]
+        if (!ElementComponent) return null
+        const size = elementSizes[slide.elementSize || 'medio']
+        return (
+          <div style={{...getElementStyle(), zIndex: 5}}>
+            <ElementComponent 
+              size={size} 
+              opacity={(slide.elementOpacity || 30) / 100}
+            />
+          </div>
+        )
+      })()}
       
       {/* Logo */}
       <div style={{...getLogoStyle(), zIndex: 10}}>
@@ -1232,6 +1419,21 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
           {slide.tagText}
         </div>
       )}
+
+      {/* Elemento Decorativo (Foreground) */}
+      {slide.decorativeElement && slide.decorativeElement !== 'none' && slide.elementLayer === 'foreground' && (() => {
+        const ElementComponent = decorativeElementsMap[slide.decorativeElement]
+        if (!ElementComponent) return null
+        const size = elementSizes[slide.elementSize || 'medio']
+        return (
+          <div style={{...getElementStyle(), zIndex: 15}}>
+            <ElementComponent 
+              size={size} 
+              opacity={(slide.elementOpacity || 30) / 100}
+            />
+          </div>
+        )
+      })()}
 
       {/* Logos de Apoio e Realização - Rodapé Fixo */}
       <div 
