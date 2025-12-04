@@ -1438,7 +1438,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                               </p>
                               <p className="text-foreground">
                                 {currentRedeSocialAnswer === 'nao' 
-                                  ? 'Você pode finalizar seu cadastro mesmo sem participar da rede social. Role até o final e clique em "Enviar Cadastro".'
+                                  ? 'Você pode finalizar sua participação mesmo sem participar da rede social. Role até o final, marque a flag de consentimento e clique em "Enviar Participação".'
                                   : 'Selecione "Sim" para preencher os demais campos e participar da rede social de artistas.'}
                               </p>
                             </AlertDescription>
@@ -1669,7 +1669,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
         className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98] rounded-full"
         disabled={loading || !watch('consent') || isCepInvalid || previewMode}
       >
-            {previewMode ? 'Preview - Envio Desabilitado' : loading ? 'Enviando...' : 'Enviar Cadastro'}
+            {previewMode ? 'Preview - Envio Desabilitado' : loading ? 'Enviando...' : 'Enviar Participação'}
           </Button>
 
           <p className="text-xs text-center text-muted-foreground pb-safe sm:pb-0">
