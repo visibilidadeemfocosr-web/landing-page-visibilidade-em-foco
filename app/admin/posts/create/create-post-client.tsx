@@ -672,6 +672,7 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
             <Button
               onClick={handlePublish}
               disabled={saving || publishing || generating}
+              className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               {publishing ? (
                 <>

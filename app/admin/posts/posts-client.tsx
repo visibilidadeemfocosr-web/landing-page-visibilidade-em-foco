@@ -172,7 +172,11 @@ export function PostsClient() {
               Crie e gerencie posts para o Instagram
             </p>
           </div>
-          <Button onClick={() => router.push('/admin/posts/new')} size="lg">
+          <Button 
+            onClick={() => router.push('/admin/posts/new')} 
+            size="lg"
+            className="bg-orange-500 hover:bg-orange-600 text-white"
+          >
             <Plus className="w-4 h-4 mr-2" />
             Novo Post
           </Button>
@@ -276,7 +280,7 @@ export function PostsClient() {
                   <div className="space-y-2 pt-2">
                     {post.status === 'draft' && (
                       <Button
-                        className="w-full"
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white"
                         size="sm"
                         onClick={() => handlePublish(post)}
                         disabled={publishing === post.id}
