@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getInstagramAccountId } from '@/lib/instagram'
 
 // POST - Publicar post no Instagram
 export async function POST(
@@ -19,11 +20,21 @@ export async function POST(
     
     // Buscar credenciais do Instagram
     const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN
-    const instagramAccountId = process.env.INSTAGRAM_ACCOUNT_ID
     
-    if (!accessToken || !instagramAccountId) {
+    if (!accessToken) {
       return NextResponse.json(
-        { error: 'Credenciais do Instagram não configuradas' },
+        { error: 'INSTAGRAM_ACCESS_TOKEN não configurado no .env.local' },
+        { status: 500 }
+      )
+    }
+    
+    // Obter ID da conta automaticamente
+    let instagramAccountId: string
+    try {
+      instagramAccountId = await getInstagramAccountId(accessToken)
+    } catch (error: any) {
+      return NextResponse.json(
+        { error: 'Erro ao obter ID da conta do Instagram: ' + error.message },
         { status: 500 }
       )
     }
