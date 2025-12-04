@@ -389,11 +389,19 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
             if (originalEl) {
               const cs = window.getComputedStyle(originalEl)
               
-              // Copiar cssText completo preserva TUDO
+              // PRESERVAR estilos inline ANTES de copiar (crítico!)
+              const inlineDisplay = htmlEl.style.display
+              const inlineVerticalAlign = htmlEl.style.verticalAlign
+              const inlineHeight = htmlEl.style.height
+              const inlineLineHeight = htmlEl.style.lineHeight
+              const inlinePaddingLeft = htmlEl.style.paddingLeft
+              const inlinePaddingRight = htmlEl.style.paddingRight
+              
+              // Copiar cssText completo
               try {
                 htmlEl.style.cssText = cs.cssText
               } catch (e) {
-                // Se falhar, copiar propriedades importantes individualmente
+                // Se falhar, copiar propriedades importantes
                 htmlEl.style.color = cs.color
                 htmlEl.style.backgroundColor = cs.backgroundColor
                 htmlEl.style.background = cs.background
@@ -403,6 +411,14 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
                 htmlEl.style.position = cs.position
                 htmlEl.style.display = cs.display
               }
+              
+              // RESTAURAR estilos inline preservados (sobrescreve computados)
+              if (inlineDisplay) htmlEl.style.display = inlineDisplay
+              if (inlineVerticalAlign) htmlEl.style.verticalAlign = inlineVerticalAlign
+              if (inlineHeight) htmlEl.style.height = inlineHeight
+              if (inlineLineHeight) htmlEl.style.lineHeight = inlineLineHeight
+              if (inlinePaddingLeft) htmlEl.style.paddingLeft = inlinePaddingLeft
+              if (inlinePaddingRight) htmlEl.style.paddingRight = inlinePaddingRight
             }
           })
         }
