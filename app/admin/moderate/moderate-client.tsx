@@ -260,10 +260,10 @@ export default function AdminModerateClient() {
           artists.map((artist) => (
             <Card key={artist.submission_id}>
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-4">
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div className="flex items-center gap-4 min-w-0 flex-1">
                     {artist.photo && (
-                      <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-border">
+                      <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-border shrink-0">
                         <img
                           src={artist.photo}
                           alt={artist.name}
@@ -271,17 +271,17 @@ export default function AdminModerateClient() {
                         />
                       </div>
                     )}
-                    <div>
-                      <CardTitle className="text-xl">{artist.name}</CardTitle>
-                      <div className="flex items-center gap-2 mt-2">
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-xl truncate">{artist.name}</CardTitle>
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
                         {getStatusBadge(artist.status)}
                         {artist.main_artistic_language && (
-                          <Badge variant="outline">{artist.main_artistic_language}</Badge>
+                          <Badge variant="outline" className="truncate max-w-[200px]">{artist.main_artistic_language}</Badge>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <Link href={`/admin/moderate-preview?submission_id=${artist.submission_id}`}>
                       <Button variant="outline" size="sm">
                         <Eye className="w-4 h-4 mr-2" />
