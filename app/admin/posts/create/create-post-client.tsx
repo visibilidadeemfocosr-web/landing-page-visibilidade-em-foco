@@ -471,33 +471,83 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     try {
       setPublishing(true)
       
-      // 1. Gerar imagem
-      toast.info('Gerando imagem...')
-      const imageDataUrl = await generateImage()
+      const imageUrls: string[] = []
       
-      if (!imageDataUrl) {
-        toast.error('Use o botão "Baixar" para gerar a imagem e depois publique pela lista de posts.')
-        return
+      // Se for carrossel, gerar imagem de CADA slide
+      if (postData.isCarousel && postData.slides.length > 1) {
+        toast.info(`Gerando ${postData.slides.length} imagens do carrossel...`)
+        
+        const currentIndex = postData.currentSlideIndex
+        
+        for (let i = 0; i < postData.slides.length; i++) {
+          // Mudar para o slide atual
+          setPostData(prev => ({ ...prev, currentSlideIndex: i }))
+          
+          // Aguardar React atualizar o preview
+          await new Promise(resolve => setTimeout(resolve, 500))
+          
+          // Gerar imagem do slide
+          const imageDataUrl = await generateImage()
+          if (!imageDataUrl) {
+            throw new Error(`Erro ao gerar imagem do slide ${i + 1}`)
+          }
+          
+          // Converter para blob
+          const response = await fetch(imageDataUrl)
+          const blob = await response.blob()
+          
+          // Upload para Supabase
+          const fileName = `post-carousel-${Date.now()}-slide-${i + 1}.png`
+          const formData = new FormData()
+          formData.append('file', blob, fileName)
+          
+          const uploadResponse = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          })
+          
+          if (!uploadResponse.ok) throw new Error(`Erro no upload do slide ${i + 1}`)
+          
+          const { url } = await uploadResponse.json()
+          imageUrls.push(url)
+        }
+        
+        // Restaurar slide original
+        setPostData(prev => ({ ...prev, currentSlideIndex: currentIndex }))
+        
+        toast.info('Criando carrossel...')
+      } else {
+        // Post único
+        toast.info('Gerando imagem...')
+        const imageDataUrl = await generateImage()
+        
+        if (!imageDataUrl) {
+          toast.error('Use o botão "Baixar" para gerar a imagem e depois publique pela lista de posts.')
+          return
+        }
+        
+        // Converter para blob
+        const response = await fetch(imageDataUrl)
+        const blob = await response.blob()
+        
+        // Upload para Supabase
+        toast.info('Fazendo upload...')
+        const fileName = `post-${Date.now()}.png`
+        const formData = new FormData()
+        formData.append('file', blob, fileName)
+        
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+        
+        if (!uploadResponse.ok) throw new Error('Erro no upload')
+        
+        const { url } = await uploadResponse.json()
+        imageUrls.push(url)
       }
       
-      // 2. Converter para blob
-      const response = await fetch(imageDataUrl)
-      const blob = await response.blob()
-      
-      // 3. Upload para Supabase
-      toast.info('Fazendo upload...')
-      const fileName = `post-${Date.now()}.png`
-      const formData = new FormData()
-      formData.append('file', blob, fileName)
-      
-      const uploadResponse = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-      
-      if (!uploadResponse.ok) throw new Error('Erro no upload')
-      
-      const { url: imageUrl } = await uploadResponse.json()
+      const imageUrl = imageUrls[0]
       
       // 4. Criar post no banco
       toast.info('Criando post...')
@@ -542,7 +592,8 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          imageUrl,
+          imageUrl: postData.isCarousel ? imageUrls : imageUrl,
+          isCarousel: postData.isCarousel,
           caption: postData.caption,
         }),
       })
@@ -552,7 +603,14 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
         throw new Error(error.error || 'Erro ao publicar')
       }
       
-      toast.success('Post publicado com sucesso no Instagram!')
+      const publishResult = await publishResponse.json()
+      toast.success('Post publicado com sucesso no Instagram! 🎉')
+      
+      // Abrir post no Instagram se tiver permalink
+      if (publishResult.permalink) {
+        window.open(publishResult.permalink, '_blank')
+      }
+      
       router.push('/admin/posts')
     } catch (error: any) {
       console.error('Erro ao publicar:', error)

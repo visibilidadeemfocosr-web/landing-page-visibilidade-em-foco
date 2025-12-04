@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { publishInstagramPost } from '@/lib/instagram'
+import { publishInstagramPost, publishInstagramCarousel } from '@/lib/instagram'
 
 // POST - Publicar post no Instagram
 export async function POST(
@@ -12,7 +12,7 @@ export async function POST(
     const supabase = await createClient()
     const body = await request.json()
     
-    const { imageUrl, caption } = body
+    const { imageUrl, isCarousel, caption } = body
     
     if (!imageUrl) {
       return NextResponse.json({ error: 'URL da imagem é obrigatória' }, { status: 400 })
@@ -21,7 +21,14 @@ export async function POST(
     // Publicar usando a função da lib (mesma que moderação usa)
     let publishData
     try {
-      publishData = await publishInstagramPost(imageUrl, caption || '')
+      if (isCarousel && Array.isArray(imageUrl)) {
+        // Carrossel
+        publishData = await publishInstagramCarousel(imageUrl, caption || '')
+      } else {
+        // Post único
+        const singleImageUrl = Array.isArray(imageUrl) ? imageUrl[0] : imageUrl
+        publishData = await publishInstagramPost(singleImageUrl, caption || '')
+      }
     } catch (error: any) {
       console.error('Erro ao publicar no Instagram:', error)
       return NextResponse.json(
@@ -58,6 +65,7 @@ export async function POST(
       success: true,
       post: updatedPost,
       instagramPostId: publishData.id,
+      permalink: publishData.permalink,
     })
   } catch (error: any) {
     console.error('Erro ao publicar post:', error)
