@@ -244,36 +244,44 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     updateField('caption', caption.trim())
   }, [postData.slides[0]?.title, postData.slides[0]?.subtitle, postData.slides[0]?.description, postData.slides[0]?.periodText, postData.slides[0]?.ctaLink])
   
-  // Salvar como rascunho (criar ou atualizar) com geração de imagem
+  // Salvar como rascunho (criar ou atualizar) com tentativa de geração de imagem
   const handleSaveDraft = async () => {
     try {
       setSaving(true)
       
-      // 1. Gerar e fazer upload da imagem
-      toast.info('Gerando imagem...')
-      const imageDataUrl = await generateImage()
+      let imageUrl = null
       
-      // 2. Converter para blob
-      const response = await fetch(imageDataUrl)
-      const blob = await response.blob()
+      // Tentar gerar e fazer upload da imagem (opcional)
+      try {
+        toast.info('Gerando imagem...')
+        const imageDataUrl = await generateImage()
+        
+        // Converter para blob
+        const response = await fetch(imageDataUrl)
+        const blob = await response.blob()
+        
+        // Upload para Supabase
+        toast.info('Fazendo upload...')
+        const fileName = `post-${Date.now()}.png`
+        const formData = new FormData()
+        formData.append('file', blob, fileName)
+        
+        const uploadResponse = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+        
+        if (uploadResponse.ok) {
+          const uploadData = await uploadResponse.json()
+          imageUrl = uploadData.url
+        }
+      } catch (imageError) {
+        console.warn('Não foi possível gerar imagem automaticamente:', imageError)
+        // Continua salvando mesmo sem imagem
+      }
       
-      // 3. Upload para Supabase
-      toast.info('Fazendo upload...')
-      const fileName = `post-${Date.now()}.png`
-      const formData = new FormData()
-      formData.append('file', blob, fileName)
-      
-      const uploadResponse = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-      
-      if (!uploadResponse.ok) throw new Error('Erro no upload')
-      
-      const { url: imageUrl } = await uploadResponse.json()
-      
-      // 4. Salvar post
-      toast.info('Salvando...')
+      // Salvar post (com ou sem imagem)
+      toast.info('Salvando post...')
       const url = editPostId ? `/api/instagram-posts/${editPostId}` : '/api/instagram-posts'
       const method = editPostId ? 'PUT' : 'POST'
       
@@ -312,7 +320,13 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
       
       const data = await saveResponse.json()
       const successMessage = editPostId ? 'Post atualizado com sucesso!' : 'Rascunho salvo com sucesso!'
-      toast.success(successMessage)
+      
+      if (!imageUrl) {
+        toast.success(`${successMessage} Use o botão "Baixar" para gerar a imagem.`)
+      } else {
+        toast.success(successMessage)
+      }
+      
       router.push(`/admin/posts/${editPostId || data.id}`)
     } catch (error: any) {
       console.error('Erro ao salvar:', error)
