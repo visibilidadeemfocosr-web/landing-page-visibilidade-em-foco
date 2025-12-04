@@ -327,23 +327,8 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       return
     }
     
-    // Validar pergunta sobre rede social: se resposta for "Não", não permitir finalizar
-    const redeSocialQuestion = questions.find(q => {
-      const sectionLower = q.section?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') || ''
-      const questionTextLower = q.text.toLowerCase()
-      return (sectionLower.includes('divulgacao') || sectionLower.includes('divulga')) && 
-             questionTextLower.includes('rede social') && 
-             questionTextLower.includes('lgbtqia+')
-    })
-    
-    if (redeSocialQuestion) {
-      const redeSocialValue = data[redeSocialQuestion.id as keyof FormData] as string
-      if (redeSocialValue === 'nao') {
-        toast.error('Para finalizar o cadastro, é necessário aceitar os termos e Enviar o Cadastro de participação.')
-        setLoading(false)
-        return
-      }
-    }
+    // Se responde "NÃO" para rede social, permite enviar cadastro básico
+    // Se responde "SIM", exige que preencha os campos adicionais (já validados pelo schema)
     
     setLoading(true)
     try {
@@ -1430,13 +1415,15 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                         
                         {/* Mostrar mensagem se a resposta for "Não" ou se não houver resposta ainda */}
                         {(currentRedeSocialAnswer === 'nao' || (!currentRedeSocialAnswer && redeSocialQuestion)) && (
-                          <Alert variant="default" className="bg-orange-500/5 border-orange-500/20 mt-4">
+                          <Alert variant="default" className="bg-blue-500/5 border-blue-500/20 mt-4">
                             <AlertDescription className="text-base text-center py-4">
-                              <p className="font-semibold text-orange-500 mb-2">Atenção</p>
+                              <p className="font-semibold text-blue-600 mb-2">
+                                {currentRedeSocialAnswer === 'nao' ? 'Tudo bem!' : 'Atenção'}
+                              </p>
                               <p className="text-foreground">
                                 {currentRedeSocialAnswer === 'nao' 
-                                  ? 'Para finalizar o cadastro, é necessário aceitar os termos e Enviar o Cadastro de participação.'
-                                  : 'Selecione "Sim" para continuar com o cadastro e preencher os demais campos.'}
+                                  ? 'Você pode finalizar seu cadastro mesmo sem participar da rede social. Role até o final e clique em "Enviar Cadastro".'
+                                  : 'Selecione "Sim" para preencher os demais campos e participar da rede social de artistas.'}
                               </p>
                             </AlertDescription>
                           </Alert>
