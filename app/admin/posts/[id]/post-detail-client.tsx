@@ -96,10 +96,8 @@ export default function PostDetailClient() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     )
   }
@@ -109,8 +107,7 @@ export default function PostDetailClient() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -238,7 +235,6 @@ export default function PostDetailClient() {
           </Button>
         </div>
       </div>
-    </div>
   )
 }
 
