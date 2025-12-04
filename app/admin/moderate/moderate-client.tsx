@@ -442,16 +442,17 @@ export default function AdminModerateClient() {
 
                 {/* Ações */}
                 {artist.status === 'pending' && (
-                  <div className="flex gap-2 pt-4 border-t">
+                  <div className="flex gap-3 pt-4 border-t">
                     <Button
                       onClick={() => handleStatusChange(artist.submission_id, 'approved', artist.bio || artist.original_bio)}
                       disabled={saving === artist.submission_id}
-                      className="flex-1"
+                      size="lg"
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
                     >
                       {saving === artist.submission_id ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                       ) : (
-                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        <CheckCircle2 className="w-5 h-5 mr-2" />
                       )}
                       Aprovar
                     </Button>
@@ -459,12 +460,13 @@ export default function AdminModerateClient() {
                       variant="destructive"
                       onClick={() => handleStatusChange(artist.submission_id, 'rejected')}
                       disabled={saving === artist.submission_id}
-                      className="flex-1"
+                      size="lg"
+                      className="flex-1 bg-red-600 hover:bg-red-700 font-semibold shadow-md hover:shadow-lg transition-all"
                     >
                       {saving === artist.submission_id ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                       ) : (
-                        <XCircle className="w-4 h-4 mr-2" />
+                        <XCircle className="w-5 h-5 mr-2" />
                       )}
                       Rejeitar
                     </Button>
