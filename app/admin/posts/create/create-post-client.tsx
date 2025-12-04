@@ -344,22 +344,21 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     if (!previewRef.current) return null
     
     setGenerating(true)
+    let useServerFallback = false
     
     // Suprimir TODOS os erros e avisos durante a geração
     const originalError = console.error
     const originalWarn = console.warn
-    const errorQueue: any[] = []
     
     console.error = (...args: any[]) => {
       const msg = String(args.join(' ')).toLowerCase()
-      // Suprimir oklch, parse, unsupported color
       if (msg.includes('oklch') || msg.includes('unsupported color') || msg.includes('attempting to parse')) {
+        useServerFallback = true
         return
       }
-      errorQueue.push(args)
     }
     
-    console.warn = () => {} // Suprimir todos os avisos durante geração
+    console.warn = () => {}
     
     try {
       const canvas = await html2canvas(previewRef.current, {
@@ -370,30 +369,30 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
         allowTaint: false,
         foreignObjectRendering: false,
         onclone: (clonedDoc, element) => {
-          // Ocultar toasts
           const toasts = clonedDoc.querySelectorAll('[data-sonner-toast], [data-sonner-toaster]')
           toasts.forEach((el) => (el as HTMLElement).style.display = 'none')
           
-          // Aplicar background explícito
           const clonedEl = element as HTMLElement
           clonedEl.style.backgroundColor = postData.backgroundColor
         }
       })
       
-      // Restaurar console
       console.error = originalError
       console.warn = originalWarn
       
-      // Mostrar apenas erros reais (não oklch)
-      errorQueue.forEach(args => originalError(...args))
+      // Se teve erro oklch mas canvas foi gerado, ainda assim funciona
+      if (useServerFallback) {
+        // Mas se realmente não conseguiu gerar, não retornar canvas vazio
+        if (canvas.width === 0 || canvas.height === 0) {
+          return null
+        }
+      }
       
       return canvas.toDataURL('image/png')
     } catch (error: any) {
-      // Restaurar console
       console.error = originalError
       console.warn = originalWarn
       
-      // Não logar erro oklch
       const errorMsg = String(error?.message || '').toLowerCase()
       if (!errorMsg.includes('oklch') && !errorMsg.includes('unsupported')) {
         console.error('Erro ao gerar imagem:', error)
