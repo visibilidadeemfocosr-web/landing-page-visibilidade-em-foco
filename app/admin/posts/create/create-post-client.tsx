@@ -249,9 +249,10 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     try {
       setSaving(true)
       
-      let imageUrl = null
+      let imageUrl: string | string[] | null = null
       
       // Tentar gerar e fazer upload da imagem (opcional)
+      // Para carrossel, só gera do slide atual ao salvar rascunho (usa Publicar para gerar todos)
       try {
         toast.info('Gerando imagem...')
         const imageDataUrl = await generateImage()
@@ -274,7 +275,8 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
           
           if (uploadResponse.ok) {
             const uploadData = await uploadResponse.json()
-            imageUrl = uploadData.url
+            // Se for carrossel, salvar como array (mesmo que seja 1 imagem por enquanto)
+            imageUrl = postData.isCarousel ? [uploadData.url] : uploadData.url
           }
         }
       } catch (imageError) {
@@ -566,7 +568,7 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
           period_text: postData.slides[0]?.periodText,
           tag_text: postData.slides[0]?.tagText,
           caption: postData.caption,
-          image_url: imageUrl,
+          image_url: postData.isCarousel ? imageUrls : imageUrl,
           content: {
             backgroundColor: postData.backgroundColor,
             textColor: postData.textColor,

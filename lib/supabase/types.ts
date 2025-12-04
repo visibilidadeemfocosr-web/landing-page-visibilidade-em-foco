@@ -123,7 +123,7 @@ export interface InstagramPost {
   is_carousel?: boolean
   slides?: InstagramPostSlide[]
   content?: InstagramPostContent
-  image_url?: string
+  image_url?: string | string[] // String para post único, array para carrossel
   caption?: string
   hashtags?: string[]
   status: InstagramPostStatus

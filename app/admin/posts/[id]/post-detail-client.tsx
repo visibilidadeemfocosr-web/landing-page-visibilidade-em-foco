@@ -164,16 +164,35 @@ export default function PostDetailClient() {
         {post.image_url && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Preview</CardTitle>
+              <CardTitle className="text-base">
+                Preview {post.is_carousel && Array.isArray(post.image_url) && `(${post.image_url.length} imagens)`}
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="aspect-square bg-muted rounded-lg overflow-hidden">
-                <img
-                  src={post.image_url}
-                  alt={post.title || 'Post preview'}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              {Array.isArray(post.image_url) ? (
+                <div className="grid grid-cols-2 gap-4">
+                  {post.image_url.map((url, idx) => (
+                    <div key={idx} className="aspect-square bg-muted rounded-lg overflow-hidden relative">
+                      <img
+                        src={url}
+                        alt={`Slide ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                        Slide {idx + 1}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="aspect-square bg-muted rounded-lg overflow-hidden">
+                  <img
+                    src={post.image_url}
+                    alt={post.title || 'Post preview'}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
