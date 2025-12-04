@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -64,8 +64,25 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   const createSchema = () => {
     const schemaFields: Record<string, z.ZodTypeAny> = {}
     
+    // Encontrar pergunta de rede social para verificar resposta
+    const redeSocialQuestion = questions.find(q => {
+      const sectionLower = q.section?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') || ''
+      const questionTextLower = q.text.toLowerCase()
+      return (sectionLower.includes('divulgacao') || sectionLower.includes('divulga')) && 
+             questionTextLower.includes('rede social') && 
+             questionTextLower.includes('lgbtqia+')
+    })
+    
+    const redeSocialValue = redeSocialQuestion ? watch(redeSocialQuestion.id as keyof FormData) : null
+    
     questions.forEach((question) => {
       let fieldSchema: z.ZodTypeAny
+      
+      // Se respondeu "Não" para rede social, campos dessa seção viram opcionais
+      const isDivulgacaoSection = question.section?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes('divulgacao') ||
+                                  question.section?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes('divulga')
+      const isRedeSocialNo = redeSocialValue === 'nao'
+      const makeOptional = isDivulgacaoSection && isRedeSocialNo && question.id !== redeSocialQuestion?.id
 
       switch (question.field_type) {
         case 'text':
@@ -78,7 +95,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
           
           if (isEmailField) {
             // Validação de e-mail
-            if (question.required) {
+            if (question.required && !makeOptional) {
               fieldSchema = z.string()
                 .min(1, 'Esta pergunta é obrigatória')
                 .email('Por favor, informe um e-mail válido')
@@ -90,16 +107,16 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
               ]).optional()
             }
           } else {
-            fieldSchema = question.required ? z.string().min(1, 'Esta pergunta é obrigatória') : z.string().optional()
+            fieldSchema = (question.required && !makeOptional) ? z.string().min(1, 'Esta pergunta é obrigatória') : z.string().optional()
           }
           break
         case 'number':
-          fieldSchema = question.required 
+          fieldSchema = (question.required && !makeOptional)
             ? z.number({ required_error: 'Esta pergunta é obrigatória', invalid_type_error: 'Por favor, informe um número válido' })
             : z.number().optional()
           break
         case 'yesno':
-          fieldSchema = question.required
+          fieldSchema = (question.required && !makeOptional)
             ? z.enum(['sim', 'nao'], {
                 required_error: 'Esta pergunta é obrigatória',
                 invalid_type_error: 'Por favor, selecione uma opção'
@@ -109,10 +126,8 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
               }).optional()
           break
         case 'checkbox':
-          // Se tem opções, é múltipla seleção (array de strings)
-          // Se não tem opções, é checkbox simples (boolean)
           if (question.options && question.options.length > 0) {
-            fieldSchema = question.required
+            fieldSchema = (question.required && !makeOptional)
               ? z.array(z.string()).min(1, 'Esta pergunta é obrigatória')
               : z.array(z.string()).optional()
           } else {
@@ -123,29 +138,28 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
           }
           break
         case 'scale':
-          fieldSchema = z.number({
-            required_error: 'Esta pergunta é obrigatória',
-            invalid_type_error: 'Por favor, selecione um valor'
-          }).min(question.min_value || 1, 'Valor mínimo não atingido').max(question.max_value || 5, 'Valor máximo excedido')
+          fieldSchema = (question.required && !makeOptional)
+            ? z.number({
+                required_error: 'Esta pergunta é obrigatória',
+                invalid_type_error: 'Por favor, selecione um valor'
+              }).min(question.min_value || 1, 'Valor mínimo não atingido').max(question.max_value || 5, 'Valor máximo excedido')
+            : z.number().optional()
           break
         case 'image':
-          fieldSchema = question.required ? z.string().min(1, 'Esta pergunta é obrigatória') : z.string().optional()
+          fieldSchema = (question.required && !makeOptional) ? z.string().min(1, 'Esta pergunta é obrigatória') : z.string().optional()
           break
         case 'cep':
-          fieldSchema = question.required 
+          fieldSchema = (question.required && !makeOptional)
             ? z.string().min(8, 'CEP inválido').max(9, 'CEP inválido')
             : z.string().optional()
           break
         case 'social_media':
-          // Para redes sociais, criar um objeto com Instagram, Facebook e LinkedIn
-          // Cada campo é opcional, mas se a pergunta for obrigatória, pelo menos um deve ser preenchido
-          if (question.required) {
+          if ((question.required && !makeOptional)) {
             fieldSchema = z.object({
               instagram: z.string().optional(),
               facebook: z.string().optional(),
               linkedin: z.string().optional()
             }).refine((data) => {
-              // Pelo menos um campo deve ser preenchido
               return data.instagram || data.facebook || data.linkedin
             }, {
               message: 'Informe pelo menos uma rede social'
@@ -160,7 +174,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
           break
         case 'select':
         case 'radio':
-          fieldSchema = question.required 
+          fieldSchema = (question.required && !makeOptional)
             ? z.string({ required_error: 'Esta pergunta é obrigatória', invalid_type_error: 'Por favor, selecione uma opção' }).min(1, 'Esta pergunta é obrigatória')
             : z.string().optional()
           break
@@ -185,7 +199,8 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
     return z.object(schemaFields)
   }
 
-  const schema = createSchema()
+  // Schema reativo - recria quando resposta de rede social muda
+  const schema = useMemo(() => createSchema(), [redeSocialAnswer, questions])
   type FormData = z.infer<typeof schema>
 
   const {
