@@ -1033,11 +1033,11 @@ export default function AdminModeratePreviewClient() {
                   <div className="flex-1 flex flex-col items-center justify-center space-y-6 mt-16">
                     {/* Foto do artista */}
                     <div className="relative">
-                      <div className="w-80 h-80 rounded-full overflow-hidden border-4 border-orange-500/20 shadow-2xl bg-white/10">
+                      <div className="w-80 h-80 rounded-full overflow-hidden border-4 border-orange-500/20 shadow-2xl bg-white">
                         <img
                           src={previewData.photo}
                           alt={previewData.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain"
                           onError={(e) => {
                             e.currentTarget.src = 'https://via.placeholder.com/400x400?text=Foto'
                           }}
