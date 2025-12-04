@@ -341,54 +341,9 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     }
   }
   
-  // Gerar HTML do preview para enviar ao servidor
-  const getPreviewHTML = (): string => {
-    if (!previewRef.current) return ''
-    return previewRef.current.outerHTML
-  }
-  
   // Gerar imagem
   const generateImage = async (): Promise<string | null> => {
     if (!previewRef.current) return null
-    
-    setGenerating(true)
-    
-    // USAR API SERVER-SIDE (Puppeteer) ao invés de html2canvas
-    try {
-      const html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-  </style>
-</head>
-<body>
-  ${previewRef.current.outerHTML}
-</body>
-</html>`
-      
-      const response = await fetch('/api/admin/generate-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ html, width: 1080, height: 1080 })
-      })
-      
-      if (!response.ok) {
-        throw new Error('Erro na API de geração')
-      }
-      
-      const blob = await response.blob()
-      const url = URL.createObjectURL(blob)
-      
-      setGenerating(false)
-      return url
-    } catch (error) {
-      console.error('Erro ao gerar com puppeteer, tentando html2canvas:', error)
-      // Fallback para html2canvas se puppeteer falhar
-    }
     
     setGenerating(true)
     
