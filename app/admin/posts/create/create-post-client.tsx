@@ -256,24 +256,26 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
         toast.info('Gerando imagem...')
         const imageDataUrl = await generateImage()
         
-        // Converter para blob
-        const response = await fetch(imageDataUrl)
-        const blob = await response.blob()
-        
-        // Upload para Supabase
-        toast.info('Fazendo upload...')
-        const fileName = `post-${Date.now()}.png`
-        const formData = new FormData()
-        formData.append('file', blob, fileName)
-        
-        const uploadResponse = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        })
-        
-        if (uploadResponse.ok) {
-          const uploadData = await uploadResponse.json()
-          imageUrl = uploadData.url
+        if (imageDataUrl) {
+          // Converter para blob
+          const response = await fetch(imageDataUrl)
+          const blob = await response.blob()
+          
+          // Upload para Supabase
+          toast.info('Fazendo upload...')
+          const fileName = `post-${Date.now()}.png`
+          const formData = new FormData()
+          formData.append('file', blob, fileName)
+          
+          const uploadResponse = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          })
+          
+          if (uploadResponse.ok) {
+            const uploadData = await uploadResponse.json()
+            imageUrl = uploadData.url
+          }
         }
       } catch (imageError) {
         console.warn('Não foi possível gerar imagem automaticamente:', imageError)
@@ -338,64 +340,43 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
   }
   
   // Gerar imagem
-  const generateImage = async (): Promise<string> => {
-    if (!previewRef.current) throw new Error('Preview não encontrado')
+  const generateImage = async (): Promise<string | null> => {
+    if (!previewRef.current) return null
     
     setGenerating(true)
     
+    // Suprimir TODOS os erros e avisos durante a geração
+    const originalError = console.error
+    const originalWarn = console.warn
+    const errorQueue: any[] = []
+    
+    console.error = (...args: any[]) => {
+      const msg = String(args.join(' ')).toLowerCase()
+      // Suprimir oklch, parse, unsupported color
+      if (msg.includes('oklch') || msg.includes('unsupported color') || msg.includes('attempting to parse')) {
+        return
+      }
+      errorQueue.push(args)
+    }
+    
+    console.warn = () => {} // Suprimir todos os avisos durante geração
+    
     try {
-      // Suprimir erros de oklch no console
-      const originalError = console.error
-      const originalWarn = console.warn
-      
-      console.error = (...args: any[]) => {
-        const msg = String(args.join(' ')).toLowerCase()
-        if (msg.includes('oklch') || msg.includes('unsupported color')) {
-          return // Ignorar erros de oklch
-        }
-        originalError(...args)
-      }
-      
-      console.warn = (...args: any[]) => {
-        const msg = String(args.join(' ')).toLowerCase()
-        if (msg.includes('oklch') || msg.includes('unsupported color')) {
-          return // Ignorar avisos de oklch
-        }
-        originalWarn(...args)
-      }
-      
-      // Gerar imagem com html2canvas
       const canvas = await html2canvas(previewRef.current, {
         scale: 2,
-        backgroundColor: null,
+        backgroundColor: postData.backgroundColor,
         logging: false,
         useCORS: true,
         allowTaint: false,
         foreignObjectRendering: false,
         onclone: (clonedDoc, element) => {
-          // Garantir que estilos sejam aplicados corretamente
-          const clonedElement = element as HTMLElement
-          
-          // Ocultar toasts e modais
+          // Ocultar toasts
           const toasts = clonedDoc.querySelectorAll('[data-sonner-toast], [data-sonner-toaster]')
-          toasts.forEach((el) => {
-            (el as HTMLElement).style.display = 'none'
-          })
+          toasts.forEach((el) => (el as HTMLElement).style.display = 'none')
           
-          // Garantir que elementos com cor oklch sejam convertidos
-          const allElements = clonedDoc.querySelectorAll('*')
-          allElements.forEach((el) => {
-            const htmlEl = el as HTMLElement
-            const computedStyle = window.getComputedStyle(htmlEl)
-            
-            // Copiar cores importantes como inline styles para garantir renderização
-            if (computedStyle.color && computedStyle.color !== 'rgba(0, 0, 0, 0)') {
-              htmlEl.style.color = computedStyle.color
-            }
-            if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
-              htmlEl.style.backgroundColor = computedStyle.backgroundColor
-            }
-          })
+          // Aplicar background explícito
+          const clonedEl = element as HTMLElement
+          clonedEl.style.backgroundColor = postData.backgroundColor
         }
       })
       
@@ -403,10 +384,22 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
       console.error = originalError
       console.warn = originalWarn
       
+      // Mostrar apenas erros reais (não oklch)
+      errorQueue.forEach(args => originalError(...args))
+      
       return canvas.toDataURL('image/png')
-    } catch (error) {
-      console.error('Erro ao gerar imagem:', error)
-      throw error
+    } catch (error: any) {
+      // Restaurar console
+      console.error = originalError
+      console.warn = originalWarn
+      
+      // Não logar erro oklch
+      const errorMsg = String(error?.message || '').toLowerCase()
+      if (!errorMsg.includes('oklch') && !errorMsg.includes('unsupported')) {
+        console.error('Erro ao gerar imagem:', error)
+      }
+      
+      return null
     } finally {
       setGenerating(false)
     }
@@ -416,6 +409,10 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
   const handleDownload = async () => {
     try {
       const dataUrl = await generateImage()
+      if (!dataUrl) {
+        toast.error('Não foi possível gerar a imagem')
+        return
+      }
       const link = document.createElement('a')
       link.download = `post-${Date.now()}.png`
       link.href = dataUrl
@@ -440,6 +437,10 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
       // 1. Gerar imagem
       toast.info('Gerando imagem...')
       const imageDataUrl = await generateImage()
+      
+      if (!imageDataUrl) {
+        throw new Error('Não foi possível gerar a imagem')
+      }
       
       // 2. Converter para blob
       const response = await fetch(imageDataUrl)
