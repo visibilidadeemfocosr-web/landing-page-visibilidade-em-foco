@@ -11,7 +11,8 @@ import {
   Trash2,
   Edit,
   Eye,
-  Loader2
+  Loader2,
+  Send
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -34,6 +35,7 @@ export function PostsClient() {
   const [filter, setFilter] = useState<'all' | 'draft' | 'published'>('all')
   const [postToDelete, setPostToDelete] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [publishing, setPublishing] = useState<string | null>(null)
 
   useEffect(() => {
     fetchPosts()
@@ -76,6 +78,42 @@ export function PostsClient() {
       toast.error('Erro ao deletar post')
     } finally {
       setDeleting(false)
+    }
+  }
+
+  const handlePublish = async (post: InstagramPost) => {
+    if (!post.image_url) {
+      toast.error('Post sem imagem! Edite e gere a imagem primeiro.')
+      return
+    }
+    
+    if (!confirm('Deseja publicar este post no Instagram agora?')) return
+    
+    try {
+      setPublishing(post.id)
+      toast.info('Publicando no Instagram...')
+      
+      const response = await fetch(`/api/instagram-posts/${post.id}/publish`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: post.image_url,
+          caption: post.caption || '',
+        }),
+      })
+      
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Erro ao publicar')
+      }
+      
+      toast.success('Post publicado no Instagram com sucesso!')
+      fetchPosts()
+    } catch (error: any) {
+      console.error('Erro ao publicar:', error)
+      toast.error(error.message || 'Erro ao publicar post')
+    } finally {
+      setPublishing(null)
     }
   }
 
@@ -228,34 +266,56 @@ export function PostsClient() {
                   </div>
                   
                   {/* Ações */}
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => router.push(`/admin/posts/${post.id}`)}
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      Ver
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => router.push(`/admin/posts/${post.id}/edit`)}
-                      disabled={post.status === 'published'}
-                    >
-                      <Edit className="w-4 h-4 mr-1" />
-                      Editar
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPostToDelete(post.id)}
-                      disabled={post.status === 'published'}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                  <div className="space-y-2 pt-2">
+                    {post.status === 'draft' && post.image_url && (
+                      <Button
+                        className="w-full"
+                        size="sm"
+                        onClick={() => handlePublish(post)}
+                        disabled={publishing === post.id}
+                      >
+                        {publishing === post.id ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Publicando...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4 mr-2" />
+                            Publicar no Instagram
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => router.push(`/admin/posts/${post.id}`)}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        Ver
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => router.push(`/admin/posts/${post.id}/edit`)}
+                        disabled={post.status === 'published'}
+                      >
+                        <Edit className="w-4 h-4 mr-1" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPostToDelete(post.id)}
+                        disabled={post.status === 'published'}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
