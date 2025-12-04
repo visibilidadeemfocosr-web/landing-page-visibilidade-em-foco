@@ -1742,7 +1742,10 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
               border: `2px solid ${globalSettings.textColor}`,
               color: globalSettings.textColor,
               display: 'inline-block',
-              padding: '8px 16px',
+              paddingLeft: '16px',
+              paddingRight: '16px',
+              height: '36px',
+              lineHeight: '36px',
               borderRadius: '9999px',
               fontSize: '14px',
               fontWeight: 500,
@@ -1758,14 +1761,14 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
               strokeWidth="2" 
               strokeLinecap="round" 
               strokeLinejoin="round"
-              style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '8px' }}
+              style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '8px', marginTop: '-2px' }}
             >
               <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
               <line x1="16" x2="16" y1="2" y2="6"/>
               <line x1="8" x2="8" y1="2" y2="6"/>
               <line x1="3" x2="21" y1="10" y2="10"/>
             </svg>
-            <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>{slide.periodText}</span>
+            <span style={{ display: 'inline', verticalAlign: 'middle' }}>{slide.periodText}</span>
           </div>
         )}
         
@@ -1777,7 +1780,10 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
               backgroundColor: globalSettings.textColor,
               color: globalSettings.backgroundColor,
               display: 'inline-block',
-              padding: '16px 32px',
+              paddingLeft: '32px',
+              paddingRight: '32px',
+              height: '56px',
+              lineHeight: '56px',
               borderRadius: '9999px',
               fontSize: '18px',
               fontWeight: 700,
@@ -1785,7 +1791,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
               textAlign: 'center',
             }}
           >
-            <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>{slide.ctaText}</span>
+            <span style={{ display: 'inline', verticalAlign: 'middle' }}>{slide.ctaText}</span>
           </div>
         )}
       </div>
@@ -1798,14 +1804,17 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
             backgroundColor: `${globalSettings.textColor}20`,
             color: globalSettings.textColor,
             display: 'inline-block',
-            padding: '6px 12px',
+            paddingLeft: '12px',
+            paddingRight: '12px',
+            height: '28px',
+            lineHeight: '28px',
             borderRadius: '4px',
             fontSize: '12px',
             fontWeight: 600,
             textAlign: 'center',
           }}
         >
-          <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>{slide.tagText}</span>
+          <span style={{ display: 'inline', verticalAlign: 'middle' }}>{slide.tagText}</span>
         </div>
       )}
       {slide.tagText && globalSettings.logoPosition.includes('rodape') && (
@@ -1815,14 +1824,17 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
             backgroundColor: `${globalSettings.textColor}20`,
             color: globalSettings.textColor,
             display: 'inline-block',
-            padding: '6px 12px',
+            paddingLeft: '12px',
+            paddingRight: '12px',
+            height: '28px',
+            lineHeight: '28px',
             borderRadius: '4px',
             fontSize: '12px',
             fontWeight: 600,
             textAlign: 'center',
           }}
         >
-          <span style={{ display: 'inline-block', verticalAlign: 'middle' }}>{slide.tagText}</span>
+          <span style={{ display: 'inline', verticalAlign: 'middle' }}>{slide.tagText}</span>
         </div>
       )}
 
