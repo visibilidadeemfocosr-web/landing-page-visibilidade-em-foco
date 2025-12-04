@@ -798,14 +798,15 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
             <CardHeader className="bg-primary/5">
               <CardTitle className="text-lg flex items-center justify-between">
                 📝 Conteúdo do Slide
-                <div className="flex items-center gap-2 text-sm font-normal">
-                  <Label htmlFor="carousel-toggle" className="cursor-pointer">
+                <div className="flex items-center gap-3 bg-muted/50 px-4 py-2 rounded-lg border">
+                  <Label htmlFor="carousel-toggle" className="cursor-pointer font-semibold text-base">
                     {postData.isCarousel ? '🎠 Carrossel' : '📄 Post Único'}
                   </Label>
                   <Switch
                     id="carousel-toggle"
                     checked={postData.isCarousel}
                     onCheckedChange={toggleCarousel}
+                    className="data-[state=checked]:bg-primary"
                   />
                 </div>
               </CardTitle>
