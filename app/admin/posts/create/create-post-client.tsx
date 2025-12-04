@@ -361,84 +361,83 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
     
     console.warn = () => {}
     
-    let canvas = null
-    let oklchError = false
-    
     try {
-      canvas = await html2canvas(previewRef.current, {
+      // Tentar gerar com html2canvas
+      const canvas = await html2canvas(previewRef.current, {
         scale: 2,
         backgroundColor: postData.backgroundColor,
         logging: false,
         useCORS: true,
-        allowTaint: false,
+        allowTaint: true, // Permite renderizar mesmo com CORS
         foreignObjectRendering: false,
         ignoreElements: (element) => {
           return element.hasAttribute('data-sonner-toast') || element.hasAttribute('data-sonner-toaster')
         },
         onclone: (clonedDoc, element) => {
-          // Ocultar toasts e modais
+          // Ocultar toasts
           const toasts = clonedDoc.querySelectorAll('[data-sonner-toast], [data-sonner-toaster]')
           toasts.forEach((el) => (el as HTMLElement).style.display = 'none')
           
-          // Copiar TODOS os estilos computados como inline para garantir renderização
+          // Copiar estilos computados como inline
           const allElements = clonedDoc.querySelectorAll('*')
+          const originalElements = previewRef.current?.querySelectorAll('*') || []
+          
           allElements.forEach((el, index) => {
             const htmlEl = el as HTMLElement
-            
-            // Pegar elemento original pelo índice
-            const originalElements = previewRef.current?.querySelectorAll('*')
-            const originalEl = originalElements?.[index]
+            const originalEl = originalElements[index]
             
             if (originalEl) {
-              const computedStyle = window.getComputedStyle(originalEl)
+              const cs = window.getComputedStyle(originalEl)
               
-              // Copiar TODOS os estilos importantes como inline
-              // Isso garante que Blobs, gradientes, transforms, tudo seja preservado
-              htmlEl.style.cssText = computedStyle.cssText
-              
-              // Garantir cores específicas (converte oklch para rgb)
-              if (computedStyle.color) htmlEl.style.color = computedStyle.color
-              if (computedStyle.backgroundColor) htmlEl.style.backgroundColor = computedStyle.backgroundColor
-              if (computedStyle.borderColor) htmlEl.style.borderColor = computedStyle.borderColor
-              if (computedStyle.background) htmlEl.style.background = computedStyle.background
-              
-              // Preservar transforms, blur, opacity
-              if (computedStyle.transform) htmlEl.style.transform = computedStyle.transform
-              if (computedStyle.filter) htmlEl.style.filter = computedStyle.filter
-              if (computedStyle.opacity) htmlEl.style.opacity = computedStyle.opacity
+              // Copiar cssText completo preserva TUDO
+              try {
+                htmlEl.style.cssText = cs.cssText
+              } catch (e) {
+                // Se falhar, copiar propriedades importantes individualmente
+                htmlEl.style.color = cs.color
+                htmlEl.style.backgroundColor = cs.backgroundColor
+                htmlEl.style.background = cs.background
+                htmlEl.style.transform = cs.transform
+                htmlEl.style.filter = cs.filter
+                htmlEl.style.opacity = cs.opacity
+                htmlEl.style.position = cs.position
+                htmlEl.style.display = cs.display
+              }
             }
           })
         }
       })
       
-      console.log('html2canvas completou!')
+      // Restaurar console
+      console.error = originalError
+      console.warn = originalWarn
+      
+      // Se canvas foi gerado, retorna
+      if (canvas && canvas.width > 0 && canvas.height > 0) {
+        setGenerating(false)
+        return canvas.toDataURL('image/png')
+      }
+      
+      setGenerating(false)
+      return null
     } catch (error: any) {
+      // Restaurar console
+      console.error = originalError
+      console.warn = originalWarn
+      
+      // Se for erro oklch, não mostrar mas retornar null
       const errorMsg = String(error?.message || '').toLowerCase()
       if (errorMsg.includes('oklch') || errorMsg.includes('unsupported')) {
-        oklchError = true
-      } else {
-        // Erro real, não oklch
-        console.error = originalError
-        console.warn = originalWarn
-        console.error('Erro ao gerar imagem:', error)
+        // Erro oklch - silencioso mas não conseguimos gerar
         setGenerating(false)
         return null
       }
-    }
-    
-    // Restaurar console
-    console.error = originalError
-    console.warn = originalWarn
-    
-    // Verificar se canvas foi gerado (mesmo com erro oklch)
-    if (canvas && canvas.width > 0 && canvas.height > 0) {
-      const dataUrl = canvas.toDataURL('image/png')
+      
+      // Erro real
+      console.error('Erro ao gerar imagem:', error)
       setGenerating(false)
-      return dataUrl
+      return null
     }
-    
-    setGenerating(false)
-    return null
   }
   
   // Download da imagem
