@@ -108,7 +108,20 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
               ]).optional()
             }
           } else {
-            fieldSchema = (question.required && !makeOptional) ? z.string().min(1, 'Esta pergunta é obrigatória') : z.string().optional()
+            // Validação com limite de caracteres
+            if (question.required && !makeOptional) {
+              let stringSchema = z.string().min(1, 'Esta pergunta é obrigatória')
+              if (question.max_length) {
+                stringSchema = stringSchema.max(question.max_length, `Máximo de ${question.max_length} caracteres`)
+              }
+              fieldSchema = stringSchema
+            } else {
+              if (question.max_length) {
+                fieldSchema = z.string().max(question.max_length, `Máximo de ${question.max_length} caracteres`).optional()
+              } else {
+                fieldSchema = z.string().optional()
+              }
+            }
           }
           break
         case 'number':
@@ -576,6 +589,10 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                              question.placeholder?.toLowerCase().includes('email') ||
                              question.placeholder?.toLowerCase().includes('e-mail')
         
+        const textValue = watch(fieldId as keyof FormData) as string || ''
+        const textCharCount = textValue.length
+        const textCharLimit = question.max_length
+        
         return (
           <div key={fieldId} className="space-y-3">
             <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed">
@@ -585,14 +602,22 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             <Label htmlFor={fieldId} className="sr-only">
               {question.text.replace(/<[^>]+>/g, '')}
             </Label>
-            <Input
-              id={fieldId}
-              type={isEmailInput ? 'email' : 'text'}
-              {...register(fieldId as keyof FormData)}
-              placeholder={question.placeholder || ''}
-              className="min-h-[48px] text-base sm:text-sm touch-manipulation"
-              autoComplete={isEmailInput ? 'email' : 'off'}
-            />
+            <div>
+              <Input
+                id={fieldId}
+                type={isEmailInput ? 'email' : 'text'}
+                {...register(fieldId as keyof FormData)}
+                placeholder={question.placeholder || ''}
+                maxLength={textCharLimit || undefined}
+                className="min-h-[48px] text-base sm:text-sm touch-manipulation"
+                autoComplete={isEmailInput ? 'email' : 'off'}
+              />
+              {textCharLimit && (
+                <div className={`text-xs mt-1 ${textCharCount > textCharLimit ? 'text-red-500' : 'text-muted-foreground'}`}>
+                  {textCharCount} / {textCharLimit} caracteres
+                </div>
+              )}
+            </div>
             {error && (
               <p className="text-sm text-red-500">{error.message as string}</p>
             )}
@@ -600,6 +625,9 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
         )
 
       case 'textarea':
+        const textareaValue = watch(fieldId as keyof FormData) as string || ''
+        const charCount = textareaValue.length
+        const charLimit = question.max_length
         return (
           <div key={fieldId} className="space-y-3">
             <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed">
@@ -609,12 +637,20 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             <Label htmlFor={fieldId} className="sr-only">
               {question.text.replace(/<[^>]+>/g, '')}
             </Label>
-            <Textarea
-              id={fieldId}
-              {...register(fieldId as keyof FormData)}
-              placeholder={question.placeholder || ''}
-              className="min-h-32 text-base sm:text-sm touch-manipulation resize-y"
-            />
+            <div className="relative">
+              <Textarea
+                id={fieldId}
+                {...register(fieldId as keyof FormData)}
+                placeholder={question.placeholder || ''}
+                maxLength={charLimit || undefined}
+                className="min-h-32 text-base sm:text-sm touch-manipulation resize-y"
+              />
+              {charLimit && (
+                <div className={`text-xs mt-1 ${charCount > charLimit ? 'text-red-500' : 'text-muted-foreground'}`}>
+                  {charCount} / {charLimit} caracteres
+                </div>
+              )}
+            </div>
             {error && (
               <p className="text-sm text-red-500">{error.message as string}</p>
             )}
