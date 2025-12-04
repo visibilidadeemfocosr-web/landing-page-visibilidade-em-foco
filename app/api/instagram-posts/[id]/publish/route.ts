@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getInstagramAccountId } from '@/lib/instagram'
+import { publishInstagramPost } from '@/lib/instagram'
 
 // POST - Publicar post no Instagram
 export async function POST(
@@ -18,114 +18,29 @@ export async function POST(
       return NextResponse.json({ error: 'URL da imagem é obrigatória' }, { status: 400 })
     }
     
-    // Buscar credenciais do Instagram
-    const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN
-    
-    if (!accessToken) {
-      return NextResponse.json(
-        { error: 'INSTAGRAM_ACCESS_TOKEN não configurado no .env.local' },
-        { status: 500 }
-      )
-    }
-    
-    // Obter ID da conta automaticamente
-    let instagramAccountId: string
+    // Publicar usando a função da lib (mesma que moderação usa)
+    let publishData
     try {
-      instagramAccountId = await getInstagramAccountId(accessToken)
+      publishData = await publishInstagramPost(imageUrl, caption || '')
     } catch (error: any) {
-      return NextResponse.json(
-        { error: 'Erro ao obter ID da conta do Instagram: ' + error.message },
-        { status: 500 }
-      )
-    }
-    
-    // Fazer upload da imagem para o bucket público do Supabase
-    // (a imagem já deve estar no bucket neste ponto)
-    const publicImageUrl = imageUrl
-    
-    // 1. Criar container de mídia no Instagram
-    const createMediaResponse = await fetch(
-      `https://graph.facebook.com/v18.0/${instagramAccountId}/media`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          image_url: publicImageUrl,
-          caption: caption || '',
-          access_token: accessToken,
-        }),
-      }
-    )
-    
-    const createMediaData = await createMediaResponse.json()
-    
-    if (!createMediaResponse.ok || createMediaData.error) {
-      console.error('Erro ao criar container de mídia:', createMediaData)
-      
-      // Mensagem de erro mais detalhada
-      let errorMessage = 'Erro ao criar container de mídia no Instagram'
-      if (createMediaData.error?.message) {
-        errorMessage += ': ' + createMediaData.error.message
-      }
-      if (createMediaData.error?.error_user_title) {
-        errorMessage += ' - ' + createMediaData.error.error_user_title
-      }
-      if (createMediaData.error?.error_user_msg) {
-        errorMessage += ' - ' + createMediaData.error.error_user_msg
-      }
-      
+      console.error('Erro ao publicar no Instagram:', error)
       return NextResponse.json(
         { 
-          error: errorMessage, 
-          details: createMediaData 
+          error: error.message || 'Erro ao publicar no Instagram', 
+          details: error 
         },
         { status: 500 }
       )
     }
     
-    const creationId = createMediaData.id
-    
-    // 2. Aguardar alguns segundos para o Instagram processar
-    await new Promise(resolve => setTimeout(resolve, 3000))
-    
-    // 3. Publicar o container
-    const publishResponse = await fetch(
-      `https://graph.facebook.com/v18.0/${instagramAccountId}/media_publish`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          creation_id: creationId,
-          access_token: accessToken,
-        }),
-      }
-    )
-    
-    const publishData = await publishResponse.json()
-    
-    if (!publishResponse.ok || publishData.error) {
-      console.error('Erro ao publicar mídia:', publishData)
-      return NextResponse.json(
-        { 
-          error: 'Erro ao publicar no Instagram', 
-          details: publishData.error?.message || publishData 
-        },
-        { status: 500 }
-      )
-    }
-    
-    // 4. Atualizar post no banco de dados
+    // 2. Atualizar post no banco de dados
     const { data: updatedPost, error: updateError } = await supabase
       .from('instagram_posts')
       .update({
         status: 'published',
         instagram_post_id: publishData.id,
         published_at: new Date().toISOString(),
-        image_url: publicImageUrl,
+        image_url: imageUrl,
       })
       .eq('id', id)
       .select()
@@ -144,10 +59,10 @@ export async function POST(
       post: updatedPost,
       instagramPostId: publishData.id,
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao publicar post:', error)
     return NextResponse.json(
-      { error: 'Erro interno do servidor', details: String(error) },
+      { error: error.message || 'Erro interno do servidor', details: String(error) },
       { status: 500 }
     )
   }
