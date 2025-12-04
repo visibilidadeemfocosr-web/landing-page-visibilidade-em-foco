@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Instagram, Facebook, Linkedin, Download, Edit2, Check, X, ChevronRight, Copy, Camera, FileText, Guitar, Palette, Film, BookOpen, Shirt, PersonStanding, Theater, Sparkles, MicVocal } from 'lucide-react'
+import { Instagram, Facebook, Linkedin, Download, Edit2, Check, X, ChevronRight, Copy, Camera, FileText, Guitar, Palette, Film, BookOpen, Shirt, PersonStanding, Theater, Sparkles, MicVocal, Crop } from 'lucide-react'
 import Image from 'next/image'
 import { toast } from 'sonner'
 import html2canvas from 'html2canvas'
+import { PhotoCropEditor, CropData } from '@/components/photo-crop-editor'
 
 interface ArtistData {
   submission_id?: string
@@ -83,6 +84,29 @@ export default function AdminModeratePreviewClient() {
     }
   }
 
+  const handleSaveCrop = async (cropData: CropData) => {
+    if (!submissionId) {
+      toast.error('ID da submissão não encontrado')
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/admin/submissions/${submissionId}/crop`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photo_crop: cropData })
+      })
+
+      if (!response.ok) throw new Error('Erro ao salvar crop')
+
+      setPhotoCrop(cropData)
+      toast.success('Ajuste de foto salvo com sucesso!')
+    } catch (error: any) {
+      console.error('Erro ao salvar crop:', error)
+      toast.error('Erro ao salvar ajuste: ' + error.message)
+    }
+  }
+
   const [editedBio, setEditedBio] = useState(previewData.bio)
   const [isEditingSocialMedia, setIsEditingSocialMedia] = useState(false)
   const [editedSocialMedia, setEditedSocialMedia] = useState({
@@ -91,6 +115,8 @@ export default function AdminModeratePreviewClient() {
     linkedin: previewData.linkedin || ''
   })
   const [activePost, setActivePost] = useState<'first' | 'second'>('first')
+  const [cropEditorOpen, setCropEditorOpen] = useState(false)
+  const [photoCrop, setPhotoCrop] = useState<CropData | null>(null)
 
   // Função helper para pegar apenas a primeira parte antes do parêntese
   const getShortLanguage = (language: string | undefined): string => {
@@ -975,14 +1001,29 @@ export default function AdminModeratePreviewClient() {
         {/* Preview do Post */}
         <Card>
           <CardHeader>
-            <CardTitle>
-              {activePost === 'first' ? 'Post 1: Apresentação (1080x1080px)' : 'Post 2: Biografia + Redes (1080x1080px)'}
-            </CardTitle>
-            <CardDescription>
-              {activePost === 'first' 
-                ? 'Primeira imagem do carousel - chama atenção com foto e linguagens'
-                : 'Segunda imagem do carousel - biografia completa e redes sociais'}
-            </CardDescription>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle>
+                  {activePost === 'first' ? 'Post 1: Apresentação (1080x1080px)' : 'Post 2: Biografia + Redes (1080x1080px)'}
+                </CardTitle>
+                <CardDescription>
+                  {activePost === 'first' 
+                    ? 'Primeira imagem do carousel - chama atenção com foto e linguagens'
+                    : 'Segunda imagem do carousel - biografia completa e redes sociais'}
+                </CardDescription>
+              </div>
+              {activePost === 'first' && previewData.photo && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCropEditorOpen(true)}
+                  className="shrink-0"
+                >
+                  <Crop className="w-4 h-4 mr-2" />
+                  Ajustar Foto
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div 
@@ -1517,6 +1558,17 @@ export default function AdminModeratePreviewClient() {
           </p>
         </CardContent>
       </Card>
+      
+      {/* Editor de Crop de Foto */}
+      {previewData.photo && (
+        <PhotoCropEditor
+          photoUrl={previewData.photo}
+          open={cropEditorOpen}
+          onClose={() => setCropEditorOpen(false)}
+          onSave={handleSaveCrop}
+          initialCrop={photoCrop || undefined}
+        />
+      )}
     </div>
   )
 }
