@@ -242,12 +242,17 @@ export function PostsClient() {
                 <CardContent className="space-y-4">
                   {/* Preview da imagem */}
                   {post.image_url && (
-                    <div className="aspect-square bg-muted rounded-lg overflow-hidden">
+                    <div className="aspect-square bg-muted rounded-lg overflow-hidden relative">
                       <img
-                        src={post.image_url}
+                        src={Array.isArray(post.image_url) ? post.image_url[0] : post.image_url}
                         alt={post.title || 'Preview'}
                         className="w-full h-full object-cover"
                       />
+                      {post.is_carousel && Array.isArray(post.image_url) && post.image_url.length > 1 && (
+                        <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                          🎠 {post.image_url.length} slides
+                        </div>
+                      )}
                     </div>
                   )}
                   
