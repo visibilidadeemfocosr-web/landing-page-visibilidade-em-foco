@@ -1780,7 +1780,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
       {/* Tag do projeto no canto oposto da logo */}
       {slide.tagText && globalSettings.logoPosition.includes('topo') && (
         <div 
-          className="absolute bottom-24 right-6 text-xs font-semibold px-3 py-1 rounded z-20"
+          className="absolute bottom-6 right-6 text-xs font-semibold px-3 py-1 rounded z-20"
           style={{
             backgroundColor: `${globalSettings.textColor}20`,
             color: globalSettings.textColor,
