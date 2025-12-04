@@ -1741,6 +1741,9 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
               backgroundColor: `${globalSettings.textColor}20`,
               border: `2px solid ${globalSettings.textColor}`,
               color: globalSettings.textColor,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
             <svg 
@@ -1753,13 +1756,14 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
               strokeWidth="2" 
               strokeLinecap="round" 
               strokeLinejoin="round"
+              style={{ flexShrink: 0, display: 'block' }}
             >
               <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
               <line x1="16" x2="16" y1="2" y2="6"/>
               <line x1="8" x2="8" y1="2" y2="6"/>
               <line x1="3" x2="21" y1="10" y2="10"/>
             </svg>
-            <span>{slide.periodText}</span>
+            <span style={{ display: 'block', lineHeight: '16px' }}>{slide.periodText}</span>
           </div>
         )}
         
@@ -1770,9 +1774,13 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
             style={{
               backgroundColor: globalSettings.textColor,
               color: globalSettings.backgroundColor,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              lineHeight: '1',
             }}
           >
-            {slide.ctaText}
+            <span style={{ display: 'block', lineHeight: '1.2' }}>{slide.ctaText}</span>
           </div>
         )}
       </div>
@@ -1784,9 +1792,13 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
           style={{
             backgroundColor: `${globalSettings.textColor}20`,
             color: globalSettings.textColor,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            lineHeight: '1',
           }}
         >
-          {slide.tagText}
+          <span style={{ display: 'block', lineHeight: '1.2' }}>{slide.tagText}</span>
         </div>
       )}
       {slide.tagText && globalSettings.logoPosition.includes('rodape') && (
@@ -1795,9 +1807,13 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
           style={{
             backgroundColor: `${globalSettings.textColor}20`,
             color: globalSettings.textColor,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            lineHeight: '1',
           }}
         >
-          {slide.tagText}
+          <span style={{ display: 'block', lineHeight: '1.2' }}>{slide.tagText}</span>
         </div>
       )}
 
