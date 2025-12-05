@@ -430,7 +430,7 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
                 child.style.alignSelf = 'center'
                 child.style.display = 'inline-block'
                 child.style.verticalAlign = 'middle'
-                child.style.transform = 'translateY(-2px)'
+                child.style.transform = 'translateY(-4px)'
               }
             }
           })
