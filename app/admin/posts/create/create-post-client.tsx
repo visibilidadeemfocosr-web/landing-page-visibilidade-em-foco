@@ -418,19 +418,43 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
             
             // Forçar todos os filhos a ficarem no centro também
             const children = htmlEl.children
+            let hasSpan = false
+            
+            // Verificar se tem SPAN
             for (let i = 0; i < children.length; i++) {
-              const child = children[i] as HTMLElement
-              if (child.tagName === 'svg') {
-                // SVG (ícones) - manter no centro, sem ajuste
-                child.style.alignSelf = 'center'
-                child.style.display = 'inline-block'
-                child.style.verticalAlign = 'middle'
-              } else if (child.tagName === 'SPAN') {
-                // SPAN (texto) - aplicar compensação
-                child.style.alignSelf = 'center'
-                child.style.display = 'inline-block'
-                child.style.verticalAlign = 'middle'
-                child.style.transform = 'translateY(-6px)'
+              if (children[i].tagName === 'SPAN') {
+                hasSpan = true
+                break
+              }
+            }
+            
+            if (hasSpan || children.length > 0) {
+              // Tem filhos - aplicar em cada um
+              for (let i = 0; i < children.length; i++) {
+                const child = children[i] as HTMLElement
+                if (child.tagName === 'svg') {
+                  // SVG (ícones) - manter no centro, sem ajuste
+                  child.style.alignSelf = 'center'
+                  child.style.display = 'inline-block'
+                  child.style.verticalAlign = 'middle'
+                } else if (child.tagName === 'SPAN') {
+                  // SPAN (texto) - aplicar compensação
+                  child.style.alignSelf = 'center'
+                  child.style.display = 'inline-block'
+                  child.style.verticalAlign = 'middle'
+                  child.style.transform = 'translateY(-6px)'
+                }
+              }
+            } else {
+              // SEM filhos (texto direto) - ajustar padding
+              const currentPaddingTop = htmlEl.style.paddingTop
+              const currentPaddingBottom = htmlEl.style.paddingBottom
+              
+              if (currentPaddingTop && currentPaddingBottom) {
+                const topValue = parseInt(currentPaddingTop)
+                const bottomValue = parseInt(currentPaddingBottom)
+                htmlEl.style.paddingTop = `${Math.max(0, topValue - 6)}px`
+                htmlEl.style.paddingBottom = `${bottomValue + 6}px`
               }
             }
           })
