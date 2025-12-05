@@ -405,12 +405,29 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
             }
           })
           
-          // FORÇAR alinhamento nos elementos marcados DEPOIS de copiar estilos
+          // FORÇAR centralização nos elementos marcados
           const centerElements = clonedDoc.querySelectorAll('[data-center-text="true"]')
           centerElements.forEach((el) => {
             const htmlEl = el as HTMLElement
-            // FORÇAR estilos de centralização com !important não funciona, então aplicar diretamente
-            htmlEl.style.cssText += '; display: flex !important; align-items: center !important; justify-content: center !important;'
+            
+            // Resetar TUDO e aplicar estilos do zero
+            htmlEl.style.display = 'flex'
+            htmlEl.style.alignItems = 'center'
+            htmlEl.style.justifyContent = 'center'
+            htmlEl.style.flexDirection = 'row'
+            
+            // Forçar todos os filhos a ficarem no centro também
+            const children = htmlEl.children
+            for (let i = 0; i < children.length; i++) {
+              const child = children[i] as HTMLElement
+              if (child.tagName === 'svg' || child.tagName === 'SPAN') {
+                child.style.alignSelf = 'center'
+                child.style.display = 'inline-block'
+                child.style.verticalAlign = 'middle'
+                // Compensar desalinhamento com transform
+                child.style.transform = 'translateY(-1px)'
+              }
+            }
           })
         }
       })
