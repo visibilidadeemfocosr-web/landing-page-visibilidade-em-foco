@@ -425,7 +425,7 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
                 child.style.display = 'inline-block'
                 child.style.verticalAlign = 'middle'
                 // Compensar desalinhamento com transform
-                child.style.transform = 'translateY(-1px)'
+                child.style.transform = 'translateY(-2px)'
               }
             }
           })
