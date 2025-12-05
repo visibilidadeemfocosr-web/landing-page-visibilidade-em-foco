@@ -387,16 +387,9 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
             const originalEl = originalElements[index]
             
             if (originalEl) {
-              // Se elemento tem data-center-text, NÃO tocar!
-              // Inline styles já estão perfeitos
-              if (htmlEl.getAttribute('data-center-text') === 'true' || 
-                  htmlEl.parentElement?.getAttribute('data-center-text') === 'true') {
-                return // Pular completamente, não alterar NADA
-              }
-              
               const cs = window.getComputedStyle(originalEl)
               
-              // Copiar cssText completo para outros elementos
+              // Copiar cssText completo
               try {
                 htmlEl.style.cssText = cs.cssText
               } catch (e) {
@@ -410,6 +403,14 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
                 htmlEl.style.display = cs.display
               }
             }
+          })
+          
+          // FORÇAR alinhamento nos elementos marcados DEPOIS de copiar estilos
+          const centerElements = clonedDoc.querySelectorAll('[data-center-text="true"]')
+          centerElements.forEach((el) => {
+            const htmlEl = el as HTMLElement
+            // FORÇAR estilos de centralização com !important não funciona, então aplicar diretamente
+            htmlEl.style.cssText += '; display: flex !important; align-items: center !important; justify-content: center !important;'
           })
         }
       })
