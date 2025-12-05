@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { Plus, Trash2, MoveUp, MoveDown } from 'lucide-react'
 import Image from 'next/image'
 
 export default function HomePreviewClient() {
@@ -20,9 +21,11 @@ export default function HomePreviewClient() {
     // About Section
     aboutTag: 'Sobre o Projeto',
     aboutTitle: 'Por que mapear artistas LGBTQIAPN+?',
-    aboutParagraph1: 'O projeto Visibilidade em Foco nasce da urgência de reconhecer, documentar e celebrar a existência e a produção artística da comunidade LGBTQIAPN+ no interior de São Paulo.',
-    aboutParagraph2: 'Historicamente, artistas LGBTQIAPN+ enfrentam o apagamento de suas trajetórias e a invisibilização de suas obras. Em cidades do interior, essa realidade é ainda mais profunda, onde a falta de espaços de representação e o isolamento cultural dificultam o reconhecimento e a circulação de suas produções.',
-    aboutParagraph3: 'Este mapeamento não é apenas um levantamento de dados — é um ato político de resistência e afirmação. Ao registrar essas existências, criamos um arquivo vivo que valida identidades, fortalece redes de apoio e constrói um legado cultural para futuras gerações.',
+    aboutParagraphs: [
+      'O projeto Visibilidade em Foco nasce da urgência de reconhecer, documentar e celebrar a existência e a produção artística da comunidade LGBTQIAPN+ no interior de São Paulo.',
+      'Historicamente, artistas LGBTQIAPN+ enfrentam o apagamento de suas trajetórias e a invisibilização de suas obras. Em cidades do interior, essa realidade é ainda mais profunda, onde a falta de espaços de representação e o isolamento cultural dificultam o reconhecimento e a circulação de suas produções.',
+      'Este mapeamento não é apenas um levantamento de dados — é um ato político de resistência e afirmação. Ao registrar essas existências, criamos um arquivo vivo que valida identidades, fortalece redes de apoio e constrói um legado cultural para futuras gerações.'
+    ],
     
     // Objectives
     objectives: [
@@ -69,9 +72,48 @@ export default function HomePreviewClient() {
     setHomeData({ ...homeData, [field]: value })
   }
 
+  const updateParagraph = (index: number, value: string) => {
+    const newParagraphs = [...homeData.aboutParagraphs]
+    newParagraphs[index] = value
+    setHomeData({ ...homeData, aboutParagraphs: newParagraphs })
+  }
+
+  const addParagraph = () => {
+    setHomeData({ 
+      ...homeData, 
+      aboutParagraphs: [...homeData.aboutParagraphs, 'Novo parágrafo...'] 
+    })
+  }
+
+  const removeParagraph = (index: number) => {
+    const newParagraphs = homeData.aboutParagraphs.filter((_, i) => i !== index)
+    setHomeData({ ...homeData, aboutParagraphs: newParagraphs })
+  }
+
+  const moveParagraph = (index: number, direction: 'up' | 'down') => {
+    const newParagraphs = [...homeData.aboutParagraphs]
+    const newIndex = direction === 'up' ? index - 1 : index + 1
+    if (newIndex >= 0 && newIndex < newParagraphs.length) {
+      [newParagraphs[index], newParagraphs[newIndex]] = [newParagraphs[newIndex], newParagraphs[index]]
+      setHomeData({ ...homeData, aboutParagraphs: newParagraphs })
+    }
+  }
+
   const updateObjective = (index: number, value: string) => {
     const newObjectives = [...homeData.objectives]
     newObjectives[index] = value
+    setHomeData({ ...homeData, objectives: newObjectives })
+  }
+
+  const addObjective = () => {
+    setHomeData({ 
+      ...homeData, 
+      objectives: [...homeData.objectives, 'Novo objetivo...'] 
+    })
+  }
+
+  const removeObjective = (index: number) => {
+    const newObjectives = homeData.objectives.filter((_, i) => i !== index)
     setHomeData({ ...homeData, objectives: newObjectives })
   }
 
@@ -79,6 +121,28 @@ export default function HomePreviewClient() {
     const newImpacts = [...homeData.impacts]
     newImpacts[index] = { ...newImpacts[index], [field]: value }
     setHomeData({ ...homeData, impacts: newImpacts })
+  }
+
+  const addImpactCard = () => {
+    const newNumber = String(homeData.impacts.length + 1).padStart(2, '0')
+    setHomeData({
+      ...homeData,
+      impacts: [...homeData.impacts, {
+        number: newNumber,
+        title: 'Novo Impacto',
+        description: 'Descrição do impacto...'
+      }]
+    })
+  }
+
+  const removeImpactCard = (index: number) => {
+    const newImpacts = homeData.impacts.filter((_, i) => i !== index)
+    // Renumerar
+    const renumbered = newImpacts.map((impact, i) => ({
+      ...impact,
+      number: String(i + 1).padStart(2, '0')
+    }))
+    setHomeData({ ...homeData, impacts: renumbered })
   }
 
   return (
@@ -159,29 +223,61 @@ export default function HomePreviewClient() {
                     onChange={(e) => updateField('aboutTitle', e.target.value)}
                   />
                 </div>
-                <div>
-                  <Label>Parágrafo 1</Label>
-                  <Textarea
-                    value={homeData.aboutParagraph1}
-                    onChange={(e) => updateField('aboutParagraph1', e.target.value)}
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <Label>Parágrafo 2</Label>
-                  <Textarea
-                    value={homeData.aboutParagraph2}
-                    onChange={(e) => updateField('aboutParagraph2', e.target.value)}
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <Label>Parágrafo 3</Label>
-                  <Textarea
-                    value={homeData.aboutParagraph3}
-                    onChange={(e) => updateField('aboutParagraph3', e.target.value)}
-                    rows={3}
-                  />
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Label>Parágrafos</Label>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={addParagraph}
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Adicionar Parágrafo
+                    </Button>
+                  </div>
+                  
+                  {homeData.aboutParagraphs.map((paragraph, index) => (
+                    <div key={index} className="space-y-2 p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs">Parágrafo {index + 1}</Label>
+                        <div className="flex gap-1">
+                          {index > 0 && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => moveParagraph(index, 'up')}
+                            >
+                              <MoveUp className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {index < homeData.aboutParagraphs.length - 1 && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => moveParagraph(index, 'down')}
+                            >
+                              <MoveDown className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {homeData.aboutParagraphs.length > 1 && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => removeParagraph(index)}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      <Textarea
+                        value={paragraph}
+                        onChange={(e) => updateParagraph(index, e.target.value)}
+                        rows={3}
+                      />
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -189,16 +285,35 @@ export default function HomePreviewClient() {
             {/* Objectives */}
             <Card>
               <CardHeader>
-                <CardTitle>Objetivos do Projeto</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Objetivos do Projeto</CardTitle>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={addObjective}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Adicionar
+                  </Button>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3">
                 {homeData.objectives.map((obj, index) => (
-                  <div key={index}>
-                    <Label>Objetivo {index + 1}</Label>
+                  <div key={index} className="flex gap-2">
                     <Input
                       value={obj}
                       onChange={(e) => updateObjective(index, e.target.value)}
+                      className="flex-1"
                     />
+                    {homeData.objectives.length > 1 && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => removeObjective(index)}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                    )}
                   </div>
                 ))}
               </CardContent>
@@ -238,12 +353,33 @@ export default function HomePreviewClient() {
             {/* Impact Cards */}
             <Card>
               <CardHeader>
-                <CardTitle>Cards de Impacto</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Cards de Impacto</CardTitle>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={addImpactCard}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Adicionar Card
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 {homeData.impacts.map((impact, index) => (
-                  <div key={index} className="space-y-3 p-4 bg-gray-50 rounded-lg">
-                    <div className="font-semibold text-sm text-gray-600">Card {index + 1}</div>
+                  <div key={index} className="space-y-3 p-4 bg-gray-50 rounded-lg border">
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold text-sm text-gray-600">Card {impact.number}</div>
+                      {homeData.impacts.length > 1 && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => removeImpactCard(index)}
+                        >
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </Button>
+                      )}
+                    </div>
                     <div>
                       <Label>Título</Label>
                       <Input
@@ -346,9 +482,9 @@ export default function HomePreviewClient() {
                       {homeData.aboutTitle}
                     </h2>
                     <div className="space-y-3 text-sm text-gray-600">
-                      <p>{homeData.aboutParagraph1}</p>
-                      <p>{homeData.aboutParagraph2}</p>
-                      <p>{homeData.aboutParagraph3}</p>
+                      {homeData.aboutParagraphs.map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                      ))}
                     </div>
                     
                     <div className="pt-4 border-t mt-6">
