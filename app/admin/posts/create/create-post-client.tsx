@@ -420,11 +420,16 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
             const children = htmlEl.children
             for (let i = 0; i < children.length; i++) {
               const child = children[i] as HTMLElement
-              if (child.tagName === 'svg' || child.tagName === 'SPAN') {
+              if (child.tagName === 'svg') {
+                // SVG (ícones) - manter no centro, sem ajuste
                 child.style.alignSelf = 'center'
                 child.style.display = 'inline-block'
                 child.style.verticalAlign = 'middle'
-                // Compensar desalinhamento com transform
+              } else if (child.tagName === 'SPAN') {
+                // SPAN (texto) - aplicar compensação
+                child.style.alignSelf = 'center'
+                child.style.display = 'inline-block'
+                child.style.verticalAlign = 'middle'
                 child.style.transform = 'translateY(-2px)'
               }
             }
