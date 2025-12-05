@@ -442,7 +442,7 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
                   child.style.alignSelf = 'center'
                   child.style.display = 'inline-block'
                   child.style.verticalAlign = 'middle'
-                  child.style.transform = 'translateY(-6px)'
+                  child.style.transform = 'translateY(-8px)'
                 }
               }
             } else {
@@ -453,8 +453,8 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
               if (currentPaddingTop && currentPaddingBottom) {
                 const topValue = parseInt(currentPaddingTop)
                 const bottomValue = parseInt(currentPaddingBottom)
-                htmlEl.style.paddingTop = `${Math.max(0, topValue - 6)}px`
-                htmlEl.style.paddingBottom = `${bottomValue + 6}px`
+                htmlEl.style.paddingTop = `${Math.max(0, topValue - 8)}px`
+                htmlEl.style.paddingBottom = `${bottomValue + 8}px`
               }
             }
           })
