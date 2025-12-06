@@ -37,29 +37,29 @@ export function About({ content }: AboutProps) {
   ]
 
   return (
-    <section id="sobre" className="pt-24 md:pt-32 pb-12 md:pb-16 bg-background relative overflow-hidden">
+    <section id="sobre" className="pt-16 sm:pt-20 md:pt-24 lg:pt-32 pb-12 md:pb-16 bg-background relative overflow-hidden">
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
       
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="max-w-4xl mx-auto">
           {/* Tag de seção */}
-          <div className="inline-block mb-6">
-            <span className="text-sm font-semibold uppercase tracking-wider text-orange-500">
+          <div className="inline-block mb-4 sm:mb-6">
+            <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-orange-500">
               {aboutTag}
             </span>
           </div>
 
           {/* Seções */}
           {aboutSections.map((section, sectionIndex) => (
-            <div key={sectionIndex} className={sectionIndex > 0 ? 'mt-12' : ''}>
+            <div key={sectionIndex} className={sectionIndex > 0 ? 'mt-8 sm:mt-12' : ''}>
               {/* Título */}
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8 text-balance leading-tight">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground mb-6 sm:mb-8 text-balance leading-tight">
                 {section.title}
               </h2>
 
               {/* Parágrafos */}
-              <div className="space-y-6 text-lg leading-relaxed text-muted-foreground">
+              <div className="space-y-4 sm:space-y-6 text-base sm:text-lg leading-relaxed text-muted-foreground">
                 {section.paragraphs.map((paragraph, pIndex) => (
                   <div
                     key={pIndex}
@@ -73,12 +73,12 @@ export function About({ content }: AboutProps) {
 
           {/* Quote Before Objectives */}
           {quoteBeforeObjectives && (
-            <div className="mt-16 text-center max-w-3xl mx-auto">
-              <blockquote className="text-2xl md:text-3xl font-bold text-foreground italic text-balance leading-tight">
+            <div className="mt-10 sm:mt-12 md:mt-16 text-center max-w-3xl mx-auto px-2">
+              <blockquote className="text-lg sm:text-xl md:text-2xl font-bold text-foreground italic text-balance leading-tight">
                 {quoteBeforeObjectives}
               </blockquote>
               {quoteAuthorBeforeObjectives && (
-                <p className="mt-4 text-sm text-muted-foreground">
+                <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-muted-foreground">
                   {quoteAuthorBeforeObjectives}
                 </p>
               )}
@@ -87,9 +87,9 @@ export function About({ content }: AboutProps) {
 
           {/* Objetivos */}
           {objectives.length > 0 && content?.showObjectives !== false && (
-            <div className="pt-8 border-t border-border mt-8">
-              <h3 className="text-2xl font-bold text-foreground mb-4">Objetivos do projeto</h3>
-              <ul className="space-y-3 text-muted-foreground">
+            <div className="pt-6 sm:pt-8 border-t border-border mt-6 sm:mt-8">
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-3 sm:mb-4">Objetivos do projeto</h3>
+              <ul className="space-y-2 sm:space-y-3 text-sm sm:text-base text-muted-foreground">
                 {objectives.map((objective, index) => (
                   <li key={index} className="flex items-start gap-3">
                     <span className="text-orange-500 font-bold mt-1">•</span>

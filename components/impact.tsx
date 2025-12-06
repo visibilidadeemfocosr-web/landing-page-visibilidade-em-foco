@@ -45,41 +45,42 @@ export function Impact({ content }: ImpactProps) {
   const quoteAuthor = content?.quoteAuthor || '— Equipe Visibilidade em Foco'
 
   return (
-    <section className="pt-12 md:pt-16 pb-24 md:pb-32 bg-muted/30">
-      <div className="container mx-auto px-6">
+    <section className="pt-12 md:pt-16 pb-16 sm:pb-24 md:pb-32 bg-muted/30">
+      <div className="container mx-auto px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-16">
-            <span className="text-sm font-semibold uppercase tracking-wider text-orange-500">
+          <div className="text-center mb-10 sm:mb-12 md:mb-16 px-2">
+            <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-orange-500">
               {impactTag}
             </span>
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mt-4 mb-6 text-balance">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mt-3 sm:mt-4 mb-4 sm:mb-6 text-balance">
               {impactTitle}
             </h2>
             <div
-              className="text-lg text-muted-foreground max-w-3xl mx-auto text-pretty prose prose-lg max-w-none"
+              className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto text-pretty prose prose-lg max-w-none"
               dangerouslySetInnerHTML={{ __html: impactDescription }}
             />
           </div>
 
           {/* Grid de impactos */}
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
             {impacts.map((impact) => (
               <div
                 key={impact.number}
-                className="bg-card border border-border rounded-2xl p-8 hover:shadow-xl transition-shadow duration-300"
+                className="bg-card border border-border rounded-2xl p-5 sm:p-6 md:p-8 hover:shadow-xl transition-shadow duration-300"
               >
-                <div className="flex items-start gap-6">
-                  <span className="text-5xl font-bold text-orange-500/20">
+                <div className="flex items-start gap-4 sm:gap-6">
+                  <span className="text-4xl sm:text-5xl font-bold text-orange-500/20 flex-shrink-0">
                     {impact.number}
                   </span>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-foreground mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2 sm:mb-3">
                       {impact.title}
                     </h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {impact.description}
-                    </p>
+                    <div 
+                      className="text-sm sm:text-base text-muted-foreground leading-relaxed prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: impact.description }}
+                    />
                   </div>
                 </div>
               </div>
@@ -87,11 +88,11 @@ export function Impact({ content }: ImpactProps) {
           </div>
 
           {/* Quote */}
-          <div className="mt-16 text-center max-w-3xl mx-auto">
-            <blockquote className="text-2xl md:text-3xl font-bold text-foreground italic text-balance leading-tight">
+          <div className="mt-10 sm:mt-12 md:mt-16 text-center max-w-3xl mx-auto px-2">
+            <blockquote className="text-lg sm:text-xl md:text-2xl font-bold text-foreground italic text-balance leading-tight">
               {quote}
             </blockquote>
-            <p className="mt-4 text-sm text-muted-foreground">
+            <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-muted-foreground">
               {quoteAuthor}
             </p>
           </div>

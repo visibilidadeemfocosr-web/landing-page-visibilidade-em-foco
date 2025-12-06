@@ -88,15 +88,15 @@ export function Hero({ content }: HeroProps) {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-white via-gray-50 to-slate-50">
       <div className="absolute inset-0 overflow-hidden">
         {/* Blobs decorativos sutis sobre fundo branco */}
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -top-20 -left-20 sm:-top-40 sm:-left-40 w-48 h-48 sm:w-72 sm:h-72 md:w-96 md:h-96 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full blur-3xl animate-pulse" />
         
-        <div className="absolute -top-20 right-20 w-80 h-80 bg-gradient-to-br from-pink-200/25 to-rose-200/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute -top-10 right-10 sm:-top-20 sm:right-20 w-40 h-40 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-gradient-to-br from-pink-200/25 to-rose-200/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         
-        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-gradient-to-br from-purple-200/28 to-indigo-200/28 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/3 left-1/4 w-48 h-48 sm:w-72 sm:h-72 md:w-96 md:h-96 bg-gradient-to-br from-purple-200/28 to-indigo-200/28 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
         
-        <div className="absolute bottom-20 right-40 w-[500px] h-[500px] bg-gradient-to-br from-cyan-200/20 to-blue-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute bottom-10 right-10 sm:bottom-20 sm:right-20 md:right-40 w-[250px] h-[250px] sm:w-[350px] sm:h-[350px] md:w-[500px] md:h-[500px] bg-gradient-to-br from-cyan-200/20 to-blue-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
         
-        <div className="absolute -bottom-32 -left-20 w-[450px] h-[450px] bg-gradient-to-br from-violet-200/25 to-purple-200/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute -bottom-16 -left-10 sm:-bottom-32 sm:-left-20 w-[225px] h-[225px] sm:w-[350px] sm:h-[350px] md:w-[450px] md:h-[450px] bg-gradient-to-br from-violet-200/25 to-purple-200/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
 
         {/* Hero Image */}
         {content?.heroImage?.url && (
@@ -125,8 +125,8 @@ export function Hero({ content }: HeroProps) {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:50px_50px]" />
       </div>
 
-      <div className="absolute top-6 left-6 md:top-8 md:left-8 z-20">
-        <div className="w-32 h-32 md:w-40 md:h-40">
+      <div className="absolute top-3 left-3 sm:top-4 sm:left-4 md:top-8 md:left-8 z-20">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-32 md:h-32 lg:w-40 lg:h-40">
           <Image 
             src={logoPath}
             alt="Visibilidade em Foco"
@@ -138,10 +138,10 @@ export function Hero({ content }: HeroProps) {
         </div>
       </div>
 
-      <div className="relative z-10 container mx-auto px-6 py-20 text-center">
-        <div className="max-w-5xl mx-auto space-y-8">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 py-12 sm:py-20 text-center">
+        <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
           {/* Título principal */}
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-gray-900 leading-[0.95] tracking-tight text-balance drop-shadow-sm font-heading">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-gray-900 leading-[0.95] tracking-tight text-balance drop-shadow-sm font-heading px-2">
             {mainTitle}{' '}
             <span 
               className="bg-clip-text text-transparent"
@@ -154,13 +154,13 @@ export function Hero({ content }: HeroProps) {
           </h1>
 
           {/* Subtítulo */}
-          <p className="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto leading-relaxed tracking-wide text-pretty font-bold font-heading">
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto leading-relaxed tracking-wide text-pretty font-bold font-heading px-2">
             {subtitle}
           </p>
 
           {/* Descrição */}
           <div 
-            className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed font-heading prose prose-sm max-w-none [&_p]:mb-4 [&_p:last-child]:mb-0 [&_p]:whitespace-pre-line"
+            className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed font-heading prose prose-sm max-w-none [&_p]:mb-4 [&_p:last-child]:mb-0 [&_p]:whitespace-pre-line px-2"
             dangerouslySetInnerHTML={{ 
               __html: (period !== null && period !== undefined && period.trim() !== '') 
                 ? `${description} <span class="font-bold text-orange-500">${period}</span>` 
@@ -169,13 +169,13 @@ export function Hero({ content }: HeroProps) {
           />
 
           {/* Call to Action */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-6 sm:pt-8 px-2">
             {mounted ? (
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
                   <Button 
                     size="lg" 
-                    className="bg-orange-500 hover:bg-orange-600 text-white px-8 sm:px-12 py-6 text-base sm:text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 active:scale-95 touch-manipulation min-h-[56px]"
+                    className="bg-orange-500 hover:bg-orange-600 text-white w-full sm:w-auto px-6 sm:px-8 md:px-12 py-5 sm:py-6 text-sm sm:text-base md:text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 active:scale-95 touch-manipulation min-h-[48px] sm:min-h-[56px]"
                   >
                     PARTICIPE
                   </Button>
@@ -195,7 +195,7 @@ export function Hero({ content }: HeroProps) {
             ) : (
               <Button 
                 size="lg" 
-                className="bg-orange-500 hover:bg-orange-600 text-white px-8 sm:px-12 py-6 text-base sm:text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 active:scale-95 touch-manipulation min-h-[56px]"
+                className="bg-orange-500 hover:bg-orange-600 text-white w-full sm:w-auto px-6 sm:px-8 md:px-12 py-5 sm:py-6 text-sm sm:text-base md:text-lg font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 active:scale-95 touch-manipulation min-h-[48px] sm:min-h-[56px]"
                 disabled
               >
                 PARTICIPE
@@ -205,7 +205,7 @@ export function Hero({ content }: HeroProps) {
             <Button 
               size="lg" 
               variant="outline"
-              className="border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white px-8 sm:px-12 py-6 text-base sm:text-lg font-semibold rounded-full transition-all duration-300 active:scale-95 touch-manipulation min-h-[56px] shadow-lg bg-white"
+              className="border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white w-full sm:w-auto px-6 sm:px-8 md:px-12 py-5 sm:py-6 text-sm sm:text-base md:text-lg font-semibold rounded-full transition-all duration-300 active:scale-95 touch-manipulation min-h-[48px] sm:min-h-[56px] shadow-lg bg-white"
               onClick={() => {
                 document.getElementById('sobre')?.scrollIntoView({ behavior: 'smooth' })
               }}
