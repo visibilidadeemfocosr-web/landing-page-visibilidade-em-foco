@@ -59,6 +59,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0) // Índice do bloco atual na navegação
   const [redeSocialAnswer, setRedeSocialAnswer] = useState<string | null>(null) // Resposta da pergunta sobre rede social
   const [isFromSaoRoque, setIsFromSaoRoque] = useState<boolean | null>(null) // Resposta inicial: é de São Roque?
+  const [apresentouTrabalhoAnswer, setApresentouTrabalhoAnswer] = useState<string | null>(null) // Resposta da pergunta sobre apresentar trabalho
 
   // Criar schema Zod dinamicamente
   const createSchema = () => {
@@ -73,8 +74,29 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
              questionTextLower.includes('lgbtqia+')
     })
     
+    // Encontrar pergunta sobre "apresentou trabalho artístico"
+    const apresentouTrabalhoQuestion = questions.find(q => {
+      const questionText = q.text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      return questionText.includes('apresentou') && 
+             questionText.includes('trabalho') && 
+             questionText.includes('artistico') &&
+             questionText.includes('municipio') &&
+             questionText.includes('sao roque')
+    })
+    
+    // Encontrar pergunta sobre "lugares" (deve ser opcional se resposta for não)
+    const lugaresQuestion = questions.find(q => {
+      const questionText = q.text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      return questionText.includes('lugares') && 
+             questionText.includes('trabalho') &&
+             questionText.includes('artistico') &&
+             questionText.includes('municipio') &&
+             questionText.includes('sao roque')
+    })
+    
     // Usar estado redeSocialAnswer ao invés de watch (que ainda não existe neste ponto)
     const redeSocialValue = redeSocialAnswer
+    const apresentouTrabalhoValue = apresentouTrabalhoAnswer
     
     questions.forEach((question) => {
       let fieldSchema: z.ZodTypeAny
@@ -83,7 +105,14 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       const isDivulgacaoSection = question.section?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes('divulgacao') ||
                                   question.section?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes('divulga')
       const isRedeSocialNo = redeSocialValue === 'nao'
-      const makeOptional = isDivulgacaoSection && isRedeSocialNo && question.id !== redeSocialQuestion?.id
+      const makeOptionalRedeSocial = isDivulgacaoSection && isRedeSocialNo && question.id !== redeSocialQuestion?.id
+      
+      // Se respondeu "Não" para apresentar trabalho, pergunta sobre lugares vira opcional
+      const isLugaresQuestion = question.id === lugaresQuestion?.id
+      const isApresentouTrabalhoNo = apresentouTrabalhoValue === 'nao'
+      const makeOptionalLugares = isLugaresQuestion && isApresentouTrabalhoNo
+      
+      const makeOptional = makeOptionalRedeSocial || makeOptionalLugares
 
       switch (question.field_type) {
         case 'text':
@@ -214,7 +243,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   }
 
   // Schema reativo - recria quando resposta de rede social muda
-  const schema = useMemo(() => createSchema(), [redeSocialAnswer, questions])
+  const schema = useMemo(() => createSchema(), [redeSocialAnswer, apresentouTrabalhoAnswer, questions])
   type FormData = z.infer<typeof schema>
 
   const {
@@ -1527,6 +1556,137 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                             </AlertDescription>
                           </Alert>
                         )}
+                      </>
+                    )
+                  }
+                  
+                  // Verificar se há pergunta sobre "apresentou trabalho artístico no município"
+                  const apresentouTrabalhoQuestion = grouped[section]
+                    .sort((a, b) => a.order - b.order)
+                    .find(q => {
+                      const questionText = q.text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                      return questionText.includes('apresentou') && 
+                             questionText.includes('trabalho') && 
+                             questionText.includes('artistico') &&
+                             questionText.includes('municipio') &&
+                             questionText.includes('sao roque')
+                    })
+                  
+                  // Se encontrou a pergunta sobre apresentar trabalho, aplicar lógica condicional
+                  if (apresentouTrabalhoQuestion) {
+                    const sortedQuestions = grouped[section].sort((a, b) => a.order - b.order)
+                    const apresentouIndex = sortedQuestions.findIndex(q => q.id === apresentouTrabalhoQuestion.id)
+                    
+                    // Pergunta sobre "em quais lugares" (deve aparecer após a pergunta sobre apresentar)
+                    const lugaresQuestion = sortedQuestions.find(q => {
+                      const questionText = q.text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                      return questionText.includes('lugares') && 
+                             questionText.includes('trabalho') &&
+                             questionText.includes('artistico') &&
+                             questionText.includes('municipio') &&
+                             questionText.includes('sao roque')
+                    })
+                    
+                    // Pergunta sobre "colegiado" (deve aparecer se resposta for não)
+                    const colegiadoQuestion = sortedQuestions.find(q => {
+                      const questionText = q.text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                      return questionText.includes('colegiado')
+                    })
+                    
+                    // Obter resposta atual
+                    const watchedApresentouValue = watch(apresentouTrabalhoQuestion.id as keyof FormData)
+                    const currentApresentouAnswer = watchedApresentouValue as string | undefined
+                    
+                    // Atualizar estado
+                    if (currentApresentouAnswer !== apresentouTrabalhoAnswer) {
+                      setApresentouTrabalhoAnswer(currentApresentouAnswer || null)
+                    }
+                    
+                    return (
+                      <>
+                        {/* Renderizar perguntas antes da pergunta sobre apresentar trabalho */}
+                        {sortedQuestions.slice(0, apresentouIndex).map((question) => (
+                          <div key={question.id} className="pb-2 sm:pb-3">
+                            {renderField(question)}
+                          </div>
+                        ))}
+                        
+                        {/* Sempre mostrar a pergunta sobre apresentar trabalho */}
+                        <div className="pb-2 sm:pb-3">
+                          {renderField(apresentouTrabalhoQuestion)}
+                        </div>
+                        
+                        {/* Lógica condicional baseada na resposta */}
+                        {(() => {
+                          const lugaresIndex = lugaresQuestion ? sortedQuestions.findIndex(q => q.id === lugaresQuestion.id) : -1
+                          const colegiadoIndex = colegiadoQuestion ? sortedQuestions.findIndex(q => q.id === colegiadoQuestion.id) : -1
+                          
+                          if (currentApresentouAnswer === 'sim') {
+                            // Se SIM: mostrar lugares + outras perguntas intermediárias + colegiado + resto
+                            return (
+                              <>
+                                {/* Mostrar pergunta sobre lugares */}
+                                {lugaresQuestion && (
+                                  <div className="pb-2 sm:pb-3">
+                                    {renderField(lugaresQuestion)}
+                                  </div>
+                                )}
+                                
+                                {/* Mostrar outras perguntas após lugares até colegiado */}
+                                {sortedQuestions
+                                  .slice(lugaresIndex + 1, colegiadoIndex > -1 ? colegiadoIndex : undefined)
+                                  .map((question) => (
+                                    <div key={question.id} className="pb-2 sm:pb-3">
+                                      {renderField(question)}
+                                    </div>
+                                  ))
+                                }
+                                
+                                {/* Mostrar colegiado e perguntas após */}
+                                {sortedQuestions
+                                  .slice(colegiadoIndex > -1 ? colegiadoIndex : lugaresIndex + 1)
+                                  .map((question) => (
+                                    <div key={question.id} className="pb-2 sm:pb-3">
+                                      {renderField(question)}
+                                    </div>
+                                  ))
+                                }
+                              </>
+                            )
+                          } else if (currentApresentouAnswer === 'nao') {
+                            // Se NÃO: pular lugares, ir direto para colegiado + resto
+                            return (
+                              <>
+                                {/* Pular pergunta sobre lugares, ir direto para colegiado */}
+                                {colegiadoQuestion && (
+                                  <div className="pb-2 sm:pb-3">
+                                    {renderField(colegiadoQuestion)}
+                                  </div>
+                                )}
+                                
+                                {/* Mostrar perguntas após colegiado */}
+                                {sortedQuestions
+                                  .slice(colegiadoIndex + 1)
+                                  .map((question) => (
+                                    <div key={question.id} className="pb-2 sm:pb-3">
+                                      {renderField(question)}
+                                    </div>
+                                  ))
+                                }
+                              </>
+                            )
+                          } else {
+                            // Se ainda não respondeu: mostrar todas exceto lugares (lugares só aparece se resposta for sim)
+                            return sortedQuestions
+                              .slice(apresentouIndex + 1)
+                              .filter(q => q.id !== lugaresQuestion?.id)
+                              .map((question) => (
+                                <div key={question.id} className="pb-2 sm:pb-3">
+                                  {renderField(question)}
+                                </div>
+                              ))
+                          }
+                        })()}
                       </>
                     )
                   }
