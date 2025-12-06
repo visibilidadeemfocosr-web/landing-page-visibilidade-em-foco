@@ -70,18 +70,24 @@ export function PhotoCropEditor({
         })
 
         if (!response.ok) {
-          throw new Error('Erro ao processar imagem')
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || `Erro ao processar imagem: ${response.status} ${response.statusText}`)
         }
 
-        const { url: croppedImageUrl } = await response.json()
+        const result = await response.json()
+        
+        if (!result.url) {
+          throw new Error('URL da imagem cropada não retornada')
+        }
         
         onSave({
-          croppedImageUrl,
+          croppedImageUrl: result.url,
           cropData
         })
         onClose()
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erro ao processar imagem:', error)
+        alert(`Erro ao processar imagem: ${error.message || 'Erro desconhecido'}\n\nVerifique o console para mais detalhes.`)
       }
     }
   }
