@@ -97,6 +97,16 @@ async function getBrowser() {
   })
 }
 
+// SVG placeholder inline (não depende de serviços externos)
+const PLACEHOLDER_IMAGE = 'data:image/svg+xml;base64,' + Buffer.from(`
+  <svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+    <rect width="400" height="400" fill="#f3f4f6"/>
+    <circle cx="200" cy="150" r="50" fill="#d1d5db"/>
+    <path d="M 100 250 Q 200 200 300 250 L 300 350 L 100 350 Z" fill="#d1d5db"/>
+    <text x="200" y="320" font-family="Arial, sans-serif" font-size="16" fill="#9ca3af" text-anchor="middle">Foto</text>
+  </svg>
+`).toString('base64')
+
 export async function POST(request: NextRequest) {
   try {
     const { 
@@ -564,7 +574,7 @@ export async function POST(request: NextRequest) {
         <div class="post-content">
           <div class="photo-container">
             <div class="photo-wrapper">
-              <img src="${photo || 'https://via.placeholder.com/400x400?text=Foto'}" alt="${name}" />
+              <img src="${photo || PLACEHOLDER_IMAGE}" alt="${name}" />
             </div>
             <div class="photo-decoration"></div>
           </div>

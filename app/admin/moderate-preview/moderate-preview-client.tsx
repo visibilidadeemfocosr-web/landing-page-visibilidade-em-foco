@@ -12,6 +12,16 @@ import { toast } from 'sonner'
 import html2canvas from 'html2canvas'
 import { PhotoCropEditor, CropData } from '@/components/photo-crop-editor'
 
+// SVG placeholder inline (não depende de serviços externos)
+const PLACEHOLDER_IMAGE = 'data:image/svg+xml;base64,' + btoa(`
+  <svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+    <rect width="400" height="400" fill="#f3f4f6"/>
+    <circle cx="200" cy="150" r="50" fill="#d1d5db"/>
+    <path d="M 100 250 Q 200 200 300 250 L 300 350 L 100 350 Z" fill="#d1d5db"/>
+    <text x="200" y="320" font-family="Arial, sans-serif" font-size="16" fill="#9ca3af" text-anchor="middle">Foto</text>
+  </svg>
+`)
+
 interface ArtistData {
   submission_id?: string
   name?: string
@@ -40,7 +50,7 @@ export default function AdminModeratePreviewClient() {
     instagram: '@artista_instagram',
     facebook: 'facebook.com/artista',
     linkedin: 'linkedin.com/in/artista',
-    photo: 'https://via.placeholder.com/400x400?text=Foto+do+Artista',
+    photo: PLACEHOLDER_IMAGE,
     isEditing: false,
     status: 'pending' as string,
     moderator_notes: null as string | null
@@ -72,7 +82,7 @@ export default function AdminModeratePreviewClient() {
           instagram: artist.instagram || '',
           facebook: artist.facebook || '',
           linkedin: artist.linkedin || '',
-          photo: artist.photo || 'https://via.placeholder.com/400x400?text=Foto+do+Artista',
+          photo: artist.photo || PLACEHOLDER_IMAGE,
           isEditing: false,
           status: (artist as any).status || 'pending',
           moderator_notes: (artist as any).moderator_notes || null
@@ -648,7 +658,7 @@ export default function AdminModeratePreviewClient() {
               const htmlImg = img as HTMLImageElement
               
               // Substituir placeholders que falharam
-              if (htmlImg.src && htmlImg.src.includes('via.placeholder.com')) {
+              if (htmlImg.src && (htmlImg.src.includes('via.placeholder.com') || htmlImg.src.startsWith('data:image/svg+xml'))) {
                 const placeholder = document.createElement('canvas')
                 placeholder.width = 400
                 placeholder.height = 400
@@ -1099,7 +1109,7 @@ export default function AdminModeratePreviewClient() {
                           alt={previewData.name}
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            e.currentTarget.src = 'https://via.placeholder.com/400x400?text=Foto'
+                            e.currentTarget.src = PLACEHOLDER_IMAGE
                           }}
                         />
                       </div>
