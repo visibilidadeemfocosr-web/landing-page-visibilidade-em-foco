@@ -196,3 +196,19 @@
 .ProseMirror em {
   font-style: italic;
 }
+
+/* Preservar quebras de linha em conteúdo HTML renderizado */
+[class*="prose"] p {
+  margin-bottom: 1rem;
+  white-space: pre-line;
+}
+
+[class*="prose"] p:last-child {
+  margin-bottom: 0;
+}
+
+[class*="prose"] br {
+  display: block;
+  content: "";
+  margin-top: 0.5rem;
+}

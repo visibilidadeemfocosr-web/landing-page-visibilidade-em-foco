@@ -1,19 +1,88 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { DynamicForm } from "@/components/dynamic-form"
 import { RegistrationFormLoader } from "@/components/registration-form-loader"
 import Image from "next/image"
 
-export function Hero() {
+interface HomeContent {
+  logoPath?: string
+  mainTitle?: string
+  highlightedWord?: string
+  subtitle?: string
+  description?: string
+  period?: string | null
+  heroImage?: {
+    url: string
+    position: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'custom'
+    customPosition?: {
+      top?: string
+      left?: string
+      right?: string
+      bottom?: string
+    }
+    size: {
+      width: string
+      height: string
+    }
+    opacity: number
+  }
+}
+
+interface HeroProps {
+  content?: HomeContent
+}
+
+export function Hero({ content }: HeroProps) {
   const [mounted, setMounted] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Valores padrão ou do banco
+  const logoPath = content?.logoPath || '/logoN.png'
+  const mainTitle = content?.mainTitle || 'Mapeamento de Artistas'
+  const highlightedWord = content?.highlightedWord || 'LGBTQIAPN+'
+  const subtitle = content?.subtitle || 'do município de São Roque'
+  const description = content?.description || 'Um projeto que celebra, documenta e dá visibilidade à produção artística e cultural da comunidade LGBTQIAPN+ no município de São Roque! Participe do mapeamento, pesquisa aberta de'
+  // Se content existe, usar period mesmo se for null. Só usar padrão se content não existir
+  const period = content !== undefined ? content.period : '08/12/2025 até 08/02/2026'
+  
+  // Função para calcular posicionamento da imagem
+  const getImagePosition = () => {
+    if (!content?.heroImage) return {}
+    
+    const { position, customPosition } = content.heroImage
+    
+    // Se for posicionamento personalizado, usar customPosition
+    if (position === 'custom' && customPosition) {
+      return customPosition
+    }
+    
+    const positions: Record<string, React.CSSProperties> = {
+      'top-left': { top: 0, left: 0 },
+      'top-center': { top: 0, left: '50%', transform: 'translateX(-50%)' },
+      'top-right': { top: 0, right: 0 },
+      'center-left': { top: '50%', left: 0, transform: 'translateY(-50%)' },
+      'center': { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' },
+      'center-right': { top: '50%', right: 0, transform: 'translateY(-50%)' },
+      'bottom-left': { bottom: 0, left: 0 },
+      'bottom-center': { bottom: 0, left: '50%', transform: 'translateX(-50%)' },
+      'bottom-right': { bottom: 0, right: 0 },
+    }
+    
+    return positions[position] || positions.center
+  }
+
+  // Debug
+  if (typeof window !== 'undefined') {
+    console.log('Hero - content:', content)
+    console.log('Hero - period:', period, 'tipo:', typeof period)
+  }
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-white via-gray-50 to-slate-50">
@@ -29,6 +98,29 @@ export function Hero() {
         
         <div className="absolute -bottom-32 -left-20 w-[450px] h-[450px] bg-gradient-to-br from-violet-200/25 to-purple-200/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
 
+        {/* Hero Image */}
+        {content?.heroImage?.url && (
+          <div
+            className="absolute z-0"
+            style={{
+              ...getImagePosition(),
+              width: content.heroImage.size.width,
+              height: content.heroImage.size.height,
+              opacity: content.heroImage.opacity / 100,
+            }}
+          >
+            <img
+              src={content.heroImage.url}
+              alt="Hero background"
+              className="w-full h-full object-cover"
+              style={{
+                width: content.heroImage.size.width,
+                height: content.heroImage.size.height,
+              }}
+            />
+          </div>
+        )}
+
         {/* Grid pattern sutil para fundo claro */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:50px_50px]" />
       </div>
@@ -36,7 +128,7 @@ export function Hero() {
       <div className="absolute top-6 left-6 md:top-8 md:left-8 z-20">
         <div className="w-32 h-32 md:w-40 md:h-40">
           <Image 
-            src="/logoN.png?v=2"
+            src={logoPath}
             alt="Visibilidade em Foco"
             width={160}
             height={160}
@@ -50,26 +142,31 @@ export function Hero() {
         <div className="max-w-5xl mx-auto space-y-8">
           {/* Título principal */}
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-gray-900 leading-[0.95] tracking-tight text-balance drop-shadow-sm font-heading">
-            Mapeamento de Artistas{' '}
+            {mainTitle}{' '}
             <span 
               className="bg-clip-text text-transparent"
               style={{
                 backgroundImage: 'linear-gradient(to right, #E40303 0%, #FF8C00 20%, #FFED00 40%, #008026 60%, #24408E 80%, #732982 100%)'
               }}
             >
-              LGBTQIAPN+
+              {highlightedWord}
             </span>
           </h1>
 
           {/* Subtítulo */}
           <p className="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto leading-relaxed tracking-wide text-pretty font-bold font-heading">
-            do município de São Roque
+            {subtitle}
           </p>
 
           {/* Descrição */}
-          <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed font-heading">
-            Um projeto que celebra, documenta e dá visibilidade à produção artística e cultural da comunidade LGBTQIAPN+ no município de São Roque! Participe do mapeamento, pesquisa aberta de <span className="font-bold text-orange-500">08/12/2025 até 08/02/2026</span>
-          </p>
+          <div 
+            className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed font-heading prose prose-sm max-w-none [&_p]:mb-4 [&_p:last-child]:mb-0 [&_p]:whitespace-pre-line"
+            dangerouslySetInnerHTML={{ 
+              __html: (period !== null && period !== undefined && period.trim() !== '') 
+                ? `${description} <span class="font-bold text-orange-500">${period}</span>` 
+                : description 
+            }}
+          />
 
           {/* Call to Action */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">

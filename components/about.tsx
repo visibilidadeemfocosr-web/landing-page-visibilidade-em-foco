@@ -1,4 +1,41 @@
-export function About() {
+interface HomeContent {
+  aboutTag?: string
+  aboutSections?: Array<{
+    title: string
+    paragraphs: string[]
+  }>
+  quoteBeforeObjectives?: string
+  quoteAuthorBeforeObjectives?: string
+  showObjectives?: boolean
+  objectives?: string[]
+}
+
+interface AboutProps {
+  content?: HomeContent
+}
+
+export function About({ content }: AboutProps) {
+  const aboutTag = content?.aboutTag || 'Sobre o Projeto'
+  const aboutSections = content?.aboutSections || [
+    {
+      title: 'Por que mapear artistas LGBTQIAPN+?',
+      paragraphs: [
+        'O projeto <strong>Visibilidade em Foco</strong> nasce da urgência de reconhecer, documentar e celebrar a existência e a produção artística da comunidade LGBTQIAPN+ no interior de São Paulo.',
+        'Historicamente, artistas LGBTQIAPN+ enfrentam o apagamento de suas trajetórias e a invisibilização de suas obras. Em cidades do interior, essa realidade é ainda mais profunda, onde a falta de espaços de representação e o isolamento cultural dificultam o reconhecimento e a circulação de suas produções.',
+        'Este mapeamento não é apenas um levantamento de dados — <strong>é um ato político de resistência e afirmação</strong>. Ao registrar essas existências, criamos um arquivo vivo que valida identidades, fortalece redes de apoio e constrói um legado cultural para futuras gerações.'
+      ]
+    }
+  ]
+  const quoteBeforeObjectives = content?.quoteBeforeObjectives
+  const quoteAuthorBeforeObjectives = content?.quoteAuthorBeforeObjectives || ''
+  const objectives = content?.objectives || [
+    'Dar visibilidade à produção artística LGBTQIAPN+ em São Roque',
+    'Criar um arquivo histórico e cultural da comunidade',
+    'Fortalecer redes de apoio e colaboração entre artistas',
+    'Promover políticas públicas de cultura e diversidade',
+    'Combater o apagamento e a marginalização cultural'
+  ]
+
   return (
     <section id="sobre" className="py-24 md:py-32 bg-background relative overflow-hidden">
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
@@ -9,55 +46,59 @@ export function About() {
           {/* Tag de seção */}
           <div className="inline-block mb-6">
             <span className="text-sm font-semibold uppercase tracking-wider text-orange-500">
-              Sobre o Projeto
+              {aboutTag}
             </span>
           </div>
 
-          {/* Título */}
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8 text-balance leading-tight">
-            Por que mapear artistas LGBTQIAPN+?
-          </h2>
+          {/* Seções */}
+          {aboutSections.map((section, sectionIndex) => (
+            <div key={sectionIndex} className={sectionIndex > 0 ? 'mt-12' : ''}>
+              {/* Título */}
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-8 text-balance leading-tight">
+                {section.title}
+              </h2>
 
-          {/* Conteúdo */}
-          <div className="space-y-6 text-lg leading-relaxed text-muted-foreground">
-            <p className="text-pretty">
-              O projeto <strong className="text-foreground">Visibilidade em Foco</strong> nasce da urgência de reconhecer, documentar e celebrar a existência e a produção artística da comunidade LGBTQIAPN+ no interior de São Paulo.
-            </p>
+              {/* Parágrafos */}
+              <div className="space-y-6 text-lg leading-relaxed text-muted-foreground">
+                {section.paragraphs.map((paragraph, pIndex) => (
+                  <div
+                    key={pIndex}
+                    className="text-pretty prose prose-lg max-w-none"
+                    dangerouslySetInnerHTML={{ __html: paragraph }}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
 
-            <p className="text-pretty">
-              Historicamente, artistas LGBTQIAPN+ enfrentam o apagamento de suas trajetórias e a invisibilização de suas obras. Em cidades do interior, essa realidade é ainda mais profunda, onde a falta de espaços de representação e o isolamento cultural dificultam o reconhecimento e a circulação de suas produções.
-            </p>
+          {/* Quote Before Objectives */}
+          {quoteBeforeObjectives && (
+            <div className="mt-16 text-center max-w-3xl mx-auto">
+              <blockquote className="text-2xl md:text-3xl font-bold text-foreground italic text-balance leading-tight">
+                {quoteBeforeObjectives}
+              </blockquote>
+              {quoteAuthorBeforeObjectives && (
+                <p className="mt-4 text-sm text-muted-foreground">
+                  {quoteAuthorBeforeObjectives}
+                </p>
+              )}
+            </div>
+          )}
 
-            <p className="text-pretty">
-              Este mapeamento não é apenas um levantamento de dados — <strong className="text-foreground">é um ato político de resistência e afirmação</strong>. Ao registrar essas existências, criamos um arquivo vivo que valida identidades, fortalece redes de apoio e constrói um legado cultural para futuras gerações.
-            </p>
-
+          {/* Objetivos */}
+          {objectives.length > 0 && content?.showObjectives !== false && (
             <div className="pt-8 border-t border-border mt-8">
               <h3 className="text-2xl font-bold text-foreground mb-4">Objetivos do projeto</h3>
               <ul className="space-y-3 text-muted-foreground">
-                <li className="flex items-start gap-3">
-                  <span className="text-orange-500 font-bold mt-1">•</span>
-                  <span>Dar visibilidade à produção artística LGBTQIAPN+ em São Roque</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-orange-500 font-bold mt-1">•</span>
-                  <span>Criar um arquivo histórico e cultural da comunidade</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-orange-500 font-bold mt-1">•</span>
-                  <span>Fortalecer redes de apoio e colaboração entre artistas</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-orange-500 font-bold mt-1">•</span>
-                  <span>Promover políticas públicas de cultura e diversidade</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-orange-500 font-bold mt-1">•</span>
-                  <span>Combater o apagamento e a marginalização cultural</span>
-                </li>
+                {objectives.map((objective, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <span className="text-orange-500 font-bold mt-1">•</span>
+                    <span>{objective}</span>
+                  </li>
+                ))}
               </ul>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </section>

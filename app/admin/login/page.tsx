@@ -61,7 +61,7 @@ export default function AdminLoginPage() {
           </Link>
         </div>
 
-        <Card className="w-full">
+        <Card className="w-full bg-white dark:bg-gray-950 border-0 shadow-xl">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Área Administrativa</CardTitle>
             <CardDescription>

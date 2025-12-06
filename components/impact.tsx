@@ -1,5 +1,25 @@
-export function Impact() {
-  const impacts = [
+interface HomeContent {
+  impactTag?: string
+  impactTitle?: string
+  impactDescription?: string
+  impacts?: Array<{
+    number: string
+    title: string
+    description: string
+  }>
+  quote?: string
+  quoteAuthor?: string
+}
+
+interface ImpactProps {
+  content?: HomeContent
+}
+
+export function Impact({ content }: ImpactProps) {
+  const impactTag = content?.impactTag || 'Impacto Social'
+  const impactTitle = content?.impactTitle || 'A importância de existir e resistir'
+  const impactDescription = content?.impactDescription || 'Mais do que um levantamento de dados, este projeto é sobre <strong>dar voz</strong>, <strong>criar memória</strong> e <strong>transformar realidades</strong>.'
+  const impacts = content?.impacts || [
     {
       number: "01",
       title: "Reconhecimento",
@@ -18,9 +38,11 @@ export function Impact() {
     {
       number: "04",
       title: "Transformação",
-      description: "Promove mudanças culturais e sociais através da arte e da visibilidade LGBTS."
+      description: "Promove mudanças culturais e sociais através da arte e da visibilidade LGBTQIAPN+."
     }
   ]
+  const quote = content?.quote || '"É nossa voz, nossa expressão e nosso talento que nos colocam no mundo — e a arte é parte essencial disso."'
+  const quoteAuthor = content?.quoteAuthor || '— Equipe Visibilidade em Foco'
 
   return (
     <section className="py-24 md:py-32 bg-muted/30">
@@ -29,14 +51,15 @@ export function Impact() {
           {/* Header */}
           <div className="text-center mb-16">
             <span className="text-sm font-semibold uppercase tracking-wider text-orange-500">
-              Impacto Social
+              {impactTag}
             </span>
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mt-4 mb-6 text-balance">
-              A importância de existir e resistir
+              {impactTitle}
             </h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-pretty">
-              Mais do que um levantamento de dados, este projeto é sobre <strong className="text-foreground">dar voz</strong>, <strong className="text-foreground">criar memória</strong> e <strong className="text-foreground">transformar realidades</strong>.
-            </p>
+            <div
+              className="text-lg text-muted-foreground max-w-3xl mx-auto text-pretty prose prose-lg max-w-none"
+              dangerouslySetInnerHTML={{ __html: impactDescription }}
+            />
           </div>
 
           {/* Grid de impactos */}
@@ -66,10 +89,10 @@ export function Impact() {
           {/* Quote */}
           <div className="mt-16 text-center max-w-3xl mx-auto">
             <blockquote className="text-2xl md:text-3xl font-bold text-foreground italic text-balance leading-tight">
-              "É nossa voz, nossa expressão e nosso talento que nos colocam no mundo — e a arte é parte essencial disso."
+              {quote}
             </blockquote>
             <p className="mt-4 text-sm text-muted-foreground">
-              — Equipe Visibilidade em Foco
+              {quoteAuthor}
             </p>
           </div>
         </div>

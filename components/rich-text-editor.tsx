@@ -8,7 +8,7 @@ import { Bold, Italic, Palette } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface RichTextEditorProps {
   content: string
@@ -18,6 +18,9 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ content, onChange, placeholder, className }: RichTextEditorProps) {
+  const isInternalUpdateRef = useRef(false)
+  const lastContentRef = useRef<string>(content || '')
+  
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -29,7 +32,11 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
     content,
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML())
+      if (!isInternalUpdateRef.current) {
+        const html = editor.getHTML()
+        lastContentRef.current = html
+        onChange(html)
+      }
     },
     editorProps: {
       attributes: {
@@ -39,6 +46,23 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
   })
 
   const [selectedColor, setSelectedColor] = useState('#000000')
+
+  // Sincronizar conteúdo do editor quando a prop content mudar
+  useEffect(() => {
+    if (editor && content !== undefined) {
+      const currentContent = editor.getHTML()
+      // Se o conteúdo mudou externamente (não foi o usuário editando)
+      if (lastContentRef.current !== content && currentContent !== content) {
+        isInternalUpdateRef.current = true
+        editor.commands.setContent(content, false) // false = não emitir evento onUpdate
+        lastContentRef.current = content
+        // Resetar flag após um pequeno delay
+        setTimeout(() => {
+          isInternalUpdateRef.current = false
+        }, 100)
+      }
+    }
+  }, [content, editor])
 
   // Sincronizar cor selecionada com a cor atual do editor
   useEffect(() => {

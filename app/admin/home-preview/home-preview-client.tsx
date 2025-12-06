@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -9,8 +9,63 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { RichTextEditor } from '@/components/rich-text-editor'
-import { Plus, Trash2, MoveUp, MoveDown, Maximize2, X, Image as ImageIcon, Type, FileText, Target, Sparkles, Quote, Palette } from 'lucide-react'
+import { Plus, Trash2, MoveUp, MoveDown, Maximize2, X, Image as ImageIcon, Type, FileText, Target, Sparkles, Quote, Palette, Save, Loader2, Upload, Trash } from 'lucide-react'
+import { toast } from 'sonner'
 import Image from 'next/image'
+
+interface HomeData {
+  logoPath: string
+  mainTitle: string
+  highlightedWord: string
+  subtitle: string
+  description: string
+  period: string | null
+  heroImage?: {
+    url: string
+    position: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'custom'
+    customPosition?: {
+      top?: string
+      left?: string
+      right?: string
+      bottom?: string
+    }
+    size: {
+      width: string
+      height: string
+    }
+    opacity: number
+  }
+  aboutTag: string
+  aboutSections: Array<{
+    title: string
+    paragraphs: string[]
+  }>
+  quoteBeforeObjectives?: string
+  quoteAuthorBeforeObjectives?: string
+  showObjectives?: boolean
+  objectives: string[]
+  impactTag: string
+  impactTitle: string
+  impactDescription: string
+  impacts: Array<{
+    number: string
+    title: string
+    description: string
+  }>
+  quote: string
+  quoteAuthor: string
+  footer?: {
+    title: string
+    description: string
+    supportTitle: string
+    supportLogos: Array<{
+      name: string
+      imagePath: string
+    }>
+    copyright: string
+    lgpdText: string
+  }
+}
 
 export default function HomePreviewClient() {
   // Lista de logos disponíveis na pasta public
@@ -29,7 +84,7 @@ export default function HomePreviewClient() {
     { name: 'Placeholder Logo SVG', path: '/placeholder-logo.svg' },
   ]
 
-  const [homeData, setHomeData] = useState({
+  const [homeData, setHomeData] = useState<HomeData>({
     // Logo Section
     logoPath: '/logoN.png',
     
@@ -53,7 +108,12 @@ export default function HomePreviewClient() {
       }
     ],
     
+    // Quote before Objectives
+    quoteBeforeObjectives: '',
+    quoteAuthorBeforeObjectives: '',
+    
     // Objectives
+    showObjectives: true,
     objectives: [
       'Dar visibilidade à produção artística LGBTQIAPN+ em São Roque',
       'Criar um arquivo histórico e cultural da comunidade',
@@ -91,10 +151,156 @@ export default function HomePreviewClient() {
     ],
     
     quote: '"É nossa voz, nossa expressão e nosso talento que nos colocam no mundo — e a arte é parte essencial disso."',
-    quoteAuthor: '— Equipe Visibilidade em Foco'
+    quoteAuthor: '— Equipe Visibilidade em Foco',
+    
+    // Footer
+    footer: {
+      title: 'Visibilidade em Foco',
+      description: 'Mapeamento de Artistas LGBTQIAPN+ do Município de São Roque',
+      supportTitle: 'Apoio e Realização',
+      supportLogos: [
+        { name: 'Prefeitura de São Roque', imagePath: '/prefeitura.png' },
+        { name: 'PNAB', imagePath: '/pnab.png' }
+      ],
+      copyright: '© 2025 Visibilidade em Foco. Todos os direitos reservados.',
+      lgpdText: 'Este projeto respeita a privacidade e os dados pessoais conforme a LGPD.'
+    }
   })
 
-  const updateField = (field: string, value: string) => {
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [hasChanges, setHasChanges] = useState(false)
+
+  // Carregar dados do banco ao montar
+  useEffect(() => {
+    loadHomeContent()
+  }, [])
+
+  const loadHomeContent = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/admin/home-content', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      })
+      if (response.ok) {
+        const data = await response.json()
+        // Sempre atualizar, mesmo se o conteúdo estiver vazio
+        if (data.content && Object.keys(data.content).length > 0) {
+          // Limpar campos vazios explicitamente (converter '' para null para campos opcionais)
+          const cleanedContent = { ...data.content }
+          // Se period for string vazia, definir como null
+          if (cleanedContent.period === '') {
+            cleanedContent.period = null
+          }
+          // Garantir que todos os campos do tipo HomeData existam
+          // IMPORTANTE: Se um campo existe no banco (mesmo que vazio), usar ele. Só usar padrão se for undefined.
+          const mergedContent: HomeData = {
+            logoPath: cleanedContent.logoPath !== undefined ? cleanedContent.logoPath : '/logoN.png',
+            mainTitle: cleanedContent.mainTitle !== undefined ? cleanedContent.mainTitle : 'Mapeamento de Artistas',
+            highlightedWord: cleanedContent.highlightedWord !== undefined ? cleanedContent.highlightedWord : 'LGBTQIAPN+',
+            subtitle: cleanedContent.subtitle !== undefined ? cleanedContent.subtitle : 'do município de São Roque',
+            description: cleanedContent.description !== undefined ? cleanedContent.description : 'Um projeto que celebra, documenta e dá visibilidade à produção artística e cultural da comunidade LGBTQIAPN+ no município de São Roque! Participe do mapeamento, pesquisa aberta de',
+            period: cleanedContent.period !== undefined ? (cleanedContent.period === '' ? null : cleanedContent.period) : null,
+            heroImage: cleanedContent.heroImage !== undefined ? cleanedContent.heroImage : undefined,
+            aboutTag: cleanedContent.aboutTag !== undefined ? cleanedContent.aboutTag : 'Sobre o Projeto',
+            aboutSections: cleanedContent.aboutSections !== undefined ? cleanedContent.aboutSections : [],
+            quoteBeforeObjectives: cleanedContent.quoteBeforeObjectives !== undefined ? cleanedContent.quoteBeforeObjectives : '',
+            quoteAuthorBeforeObjectives: cleanedContent.quoteAuthorBeforeObjectives !== undefined ? cleanedContent.quoteAuthorBeforeObjectives : '',
+            showObjectives: cleanedContent.showObjectives !== undefined ? cleanedContent.showObjectives : true,
+            objectives: cleanedContent.objectives !== undefined ? cleanedContent.objectives : [],
+            impactTag: cleanedContent.impactTag !== undefined ? cleanedContent.impactTag : 'Impacto Social',
+            impactTitle: cleanedContent.impactTitle !== undefined ? cleanedContent.impactTitle : 'A importância de existir e resistir',
+            impactDescription: cleanedContent.impactDescription !== undefined ? cleanedContent.impactDescription : '',
+            impacts: cleanedContent.impacts !== undefined ? cleanedContent.impacts : [],
+            quote: cleanedContent.quote !== undefined ? cleanedContent.quote : '',
+            quoteAuthor: cleanedContent.quoteAuthor !== undefined ? cleanedContent.quoteAuthor : '',
+            footer: cleanedContent.footer !== undefined ? cleanedContent.footer : {
+              title: 'Visibilidade em Foco',
+              description: 'Mapeamento de Artistas LGBTQIAPN+ do Município de São Roque',
+              supportTitle: 'Apoio e Realização',
+              supportLogos: [
+                { name: 'Prefeitura de São Roque', imagePath: '/prefeitura.png' },
+                { name: 'PNAB', imagePath: '/pnab.png' }
+              ],
+              copyright: '© 2025 Visibilidade em Foco. Todos os direitos reservados.',
+              lgpdText: 'Este projeto respeita a privacidade e os dados pessoais conforme a LGPD.'
+            },
+          }
+          setHomeData(mergedContent)
+          console.log('Conteúdo carregado do banco:', mergedContent)
+          console.log('Descrição específica:', mergedContent.description, 'existe no banco?', cleanedContent.description !== undefined, 'valor original:', cleanedContent.description)
+          console.log('Citação antes dos objetivos:', mergedContent.quoteBeforeObjectives, 'existe no banco?', cleanedContent.quoteBeforeObjectives !== undefined)
+          console.log('Autor da citação:', mergedContent.quoteAuthorBeforeObjectives, 'existe no banco?', cleanedContent.quoteAuthorBeforeObjectives !== undefined)
+        } else {
+          console.log('Nenhum conteúdo encontrado no banco, mantendo valores padrão')
+        }
+      } else {
+        console.error('Erro na resposta:', response.status, response.statusText)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar conteúdo:', error)
+      toast.error('Erro ao carregar conteúdo do banco')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const saveHomeContent = async () => {
+    try {
+      setSaving(true)
+      // Limpar campos vazios antes de salvar (converter '' para null)
+      const contentToSave = { ...homeData }
+      // Se period for string vazia, definir como null
+      if (contentToSave.period === '') {
+        contentToSave.period = null
+      }
+      
+      console.log('Salvando conteúdo:', contentToSave)
+      console.log('Descrição sendo salva:', contentToSave.description, 'tipo:', typeof contentToSave.description, 'tamanho:', contentToSave.description?.length)
+      console.log('Citação antes dos objetivos:', contentToSave.quoteBeforeObjectives)
+      console.log('Autor da citação:', contentToSave.quoteAuthorBeforeObjectives)
+      
+      const response = await fetch('/api/admin/home-content', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
+        },
+        body: JSON.stringify({ content: contentToSave }),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        console.log('Conteúdo salvo com sucesso:', result)
+        toast.success('Conteúdo salvo com sucesso!')
+        setHasChanges(false)
+        // Aguardar um pouco antes de recarregar para garantir que o banco foi atualizado
+        setTimeout(async () => {
+          await loadHomeContent()
+        }, 500)
+      } else {
+        const error = await response.json()
+        throw new Error(error.error || 'Erro ao salvar')
+      }
+    } catch (error: any) {
+      console.error('Erro ao salvar conteúdo:', error)
+      toast.error(error.message || 'Erro ao salvar conteúdo')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Marcar como alterado quando houver mudanças
+  useEffect(() => {
+    if (!loading) {
+      setHasChanges(true)
+    }
+  }, [homeData, loading])
+
+  const updateField = (field: string, value: string | null | boolean) => {
     setHomeData({ ...homeData, [field]: value })
   }
 
@@ -203,6 +409,53 @@ export default function HomePreviewClient() {
     setHomeData({ ...homeData, impacts: renumbered })
   }
 
+  const updateFooterField = (field: string, value: string) => {
+    setHomeData({
+      ...homeData,
+      footer: {
+        ...homeData.footer!,
+        [field]: value,
+      },
+    })
+    setHasChanges(true)
+  }
+
+  const addSupportLogo = () => {
+    setHomeData({
+      ...homeData,
+      footer: {
+        ...homeData.footer!,
+        supportLogos: [...homeData.footer!.supportLogos, { name: 'Novo Logo', imagePath: '' }],
+      },
+    })
+    setHasChanges(true)
+  }
+
+  const removeSupportLogo = (index: number) => {
+    const newLogos = homeData.footer!.supportLogos.filter((_, i) => i !== index)
+    setHomeData({
+      ...homeData,
+      footer: {
+        ...homeData.footer!,
+        supportLogos: newLogos,
+      },
+    })
+    setHasChanges(true)
+  }
+
+  const updateSupportLogo = (index: number, field: 'name' | 'imagePath', value: string) => {
+    const newLogos = [...homeData.footer!.supportLogos]
+    newLogos[index] = { ...newLogos[index], [field]: value }
+    setHomeData({
+      ...homeData,
+      footer: {
+        ...homeData.footer!,
+        supportLogos: newLogos,
+      },
+    })
+    setHasChanges(true)
+  }
+
   const [fullScreenOpen, setFullScreenOpen] = useState(false)
 
   // Componente de Preview Completo (reutilizável)
@@ -223,8 +476,47 @@ export default function HomePreviewClient() {
           </div>
         </div>
         <div className="absolute inset-0 overflow-hidden">
+          {/* Blobs decorativos sutis sobre fundo branco */}
           <div className="absolute -top-40 -left-40 w-96 h-96 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full blur-3xl animate-pulse" />
           <div className="absolute -top-20 right-20 w-80 h-80 bg-gradient-to-br from-pink-200/25 to-rose-200/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-gradient-to-br from-purple-200/28 to-indigo-200/28 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute bottom-20 right-40 w-[500px] h-[500px] bg-gradient-to-br from-cyan-200/20 to-blue-200/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+          <div className="absolute -bottom-32 -left-20 w-[450px] h-[450px] bg-gradient-to-br from-violet-200/25 to-purple-200/25 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+          
+          {/* Hero Image */}
+          {homeData.heroImage?.url && (
+            <div
+              className="absolute z-0"
+              style={{
+                ...(homeData.heroImage.position === 'top-left' && { top: 0, left: 0 }),
+                ...(homeData.heroImage.position === 'top-center' && { top: 0, left: '50%', transform: 'translateX(-50%)' }),
+                ...(homeData.heroImage.position === 'top-right' && { top: 0, right: 0 }),
+                ...(homeData.heroImage.position === 'center-left' && { top: '50%', left: 0, transform: 'translateY(-50%)' }),
+                ...(homeData.heroImage.position === 'center' && { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }),
+                ...(homeData.heroImage.position === 'center-right' && { top: '50%', right: 0, transform: 'translateY(-50%)' }),
+                ...(homeData.heroImage.position === 'bottom-left' && { bottom: 0, left: 0 }),
+                ...(homeData.heroImage.position === 'bottom-center' && { bottom: 0, left: '50%', transform: 'translateX(-50%)' }),
+                ...(homeData.heroImage.position === 'bottom-right' && { bottom: 0, right: 0 }),
+                ...(homeData.heroImage.position === 'custom' && homeData.heroImage.customPosition),
+                width: homeData.heroImage.size.width,
+                height: homeData.heroImage.size.height,
+                opacity: homeData.heroImage.opacity / 100,
+              }}
+            >
+              <img
+                src={homeData.heroImage.url}
+                alt="Hero background"
+                className="w-full h-full object-cover"
+                style={{
+                  width: homeData.heroImage.size.width,
+                  height: homeData.heroImage.size.height,
+                }}
+              />
+            </div>
+          )}
+
+          {/* Grid pattern sutil para fundo claro */}
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:50px_50px]" />
         </div>
 
         <div className="relative z-10 container mx-auto px-6 py-20 text-center">
@@ -244,8 +536,12 @@ export default function HomePreviewClient() {
               {homeData.subtitle}
             </p>
             <div 
-              className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{ __html: `${homeData.description} <span class="font-bold text-orange-500">${homeData.period}</span>` }}
+              className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed font-heading prose prose-sm max-w-none [&_p]:mb-4 [&_p:last-child]:mb-0 [&_p]:whitespace-pre-line"
+              dangerouslySetInnerHTML={{ 
+                __html: homeData.period && homeData.period !== null && homeData.period.trim() !== '' 
+                  ? `${homeData.description} <span class="font-bold text-orange-500">${homeData.period}</span>` 
+                  : homeData.description 
+              }}
             />
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
               <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-8 py-6 text-lg">
@@ -286,17 +582,33 @@ export default function HomePreviewClient() {
               </div>
             ))}
             
-            <div className="pt-12 border-t mt-12">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Objetivos do projeto</h3>
-              <ul className="space-y-4 text-lg text-gray-600 max-w-2xl mx-auto">
-                {homeData.objectives.map((obj, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <span className="text-orange-500 font-bold text-xl mt-1">•</span>
-                    <span>{obj}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Quote Before Objectives */}
+            {homeData.quoteBeforeObjectives && (
+              <div className="mt-12 text-center max-w-3xl mx-auto">
+                <blockquote className="text-xl md:text-2xl font-bold text-gray-900 italic text-balance leading-tight">
+                  {homeData.quoteBeforeObjectives}
+                </blockquote>
+                {homeData.quoteAuthorBeforeObjectives && (
+                  <p className="mt-3 text-sm text-gray-600">
+                    {homeData.quoteAuthorBeforeObjectives}
+                  </p>
+                )}
+              </div>
+            )}
+            
+            {homeData.showObjectives !== false && (
+              <div className="pt-12 border-t mt-12">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Objetivos do projeto</h3>
+                <ul className="space-y-4 text-lg text-gray-600 max-w-2xl mx-auto">
+                  {homeData.objectives.map((obj, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <span className="text-orange-500 font-bold text-xl mt-1">•</span>
+                      <span>{obj}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -350,6 +662,68 @@ export default function HomePreviewClient() {
           </div>
         </div>
       </section>
+
+      {/* Footer Section */}
+      <footer className="bg-gradient-to-br from-slate-100 via-gray-100 to-slate-50 text-gray-800 py-12 relative overflow-hidden border-t border-gray-200">
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            {/* Título e descrição */}
+            <div className="text-center space-y-4 mb-8">
+              <h3 className="text-2xl font-bold text-orange-500 font-heading">
+                {homeData.footer?.title || 'Visibilidade em Foco'}
+              </h3>
+              <p className="text-gray-700 leading-relaxed text-base">
+                {homeData.footer?.description || 'Mapeamento de Artistas LGBTQIAPN+ do Município de São Roque'}
+              </p>
+            </div>
+
+            {/* Seção de Apoio/Realização */}
+            {homeData.footer?.supportLogos && homeData.footer.supportLogos.length > 0 && (
+              <div className="py-6 border-y border-gray-300">
+                <p className="text-center text-xs font-semibold text-gray-700 mb-4 uppercase tracking-wider">
+                  {homeData.footer.supportTitle || 'Apoio e Realização'}
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-6">
+                  {homeData.footer.supportLogos.map((logo, index) => (
+                    logo.imagePath && (
+                      <div key={index} className="h-12 md:h-16 flex items-center">
+                        <Image 
+                          src={logo.imagePath}
+                          alt={logo.name}
+                          width={120}
+                          height={60}
+                          className="h-full w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300"
+                          unoptimized
+                        />
+                      </div>
+                    )
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Copyright e links */}
+            <div className="pt-6 text-center space-y-2">
+              <p className="text-xs text-gray-600">
+                {homeData.footer?.copyright || '© 2025 Visibilidade em Foco. Todos os direitos reservados.'}
+              </p>
+              <p className="text-xs text-gray-500">
+                <a 
+                  href="/admin" 
+                  className="hover:text-gray-700 transition-colors underline underline-offset-2"
+                >
+                  Área Administrativa
+                </a>
+              </p>
+              {homeData.footer?.lgpdText && (
+                <p className="text-xs text-gray-600">
+                  {homeData.footer.lgpdText}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 
@@ -358,17 +732,42 @@ export default function HomePreviewClient() {
       <div className="container mx-auto px-4 py-8">
         {/* Header Moderno */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
-              <Palette className="w-6 h-6 text-white" />
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
+                <Palette className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 font-heading">Editor da Home</h1>
+                <p className="text-gray-600 mt-1">
+                  Edite os textos e veja as mudanças em tempo real
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 font-heading">Editor da Home</h1>
-              <p className="text-gray-600 mt-1">
-                Edite os textos e veja as mudanças em tempo real
-              </p>
-            </div>
+            <Button
+              onClick={saveHomeContent}
+              disabled={saving || loading || !hasChanges}
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Alterações
+                </>
+              )}
+            </Button>
           </div>
+          {loading && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Carregando conteúdo...
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -461,9 +860,402 @@ export default function HomePreviewClient() {
                 <div>
                   <Label>Período</Label>
                   <Input
-                    value={homeData.period}
-                    onChange={(e) => updateField('period', e.target.value)}
+                    value={homeData.period || ''}
+                    onChange={(e) => updateField('period', e.target.value || null)}
                   />
+                </div>
+                
+                {/* Hero Image Section */}
+                <div className="border-t pt-4 mt-4">
+                  <Label className="text-base font-semibold mb-3 block">Imagem de Fundo do Hero</Label>
+                  
+                  {homeData.heroImage?.url ? (
+                    <div className="space-y-4">
+                      {/* Preview Interativo da Imagem */}
+                      <div>
+                        <Label className="text-sm font-medium mb-2 block">Preview Interativo - Arraste a imagem para posicionar</Label>
+                        <div 
+                          className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-300 cursor-move"
+                          onMouseDown={(e) => {
+                            e.preventDefault()
+                            const container = e.currentTarget
+                            const containerRect = container.getBoundingClientRect()
+                            
+                            // Converter posição atual para coordenadas se não for custom
+                            let currentLeft = 50
+                            let currentTop = 50
+                            
+                            if (homeData.heroImage?.position === 'custom' && homeData.heroImage.customPosition) {
+                              const left = homeData.heroImage.customPosition.left
+                              const top = homeData.heroImage.customPosition.top
+                              currentLeft = left ? parseFloat(left.replace('%', '').replace('px', '')) : 50
+                              currentTop = top ? parseFloat(top.replace('%', '').replace('px', '')) : 50
+                            } else {
+                              // Converter posição pré-definida para coordenadas
+                              const positions: Record<string, { left: number; top: number }> = {
+                                'top-left': { left: 0, top: 0 },
+                                'top-center': { left: 50, top: 0 },
+                                'top-right': { left: 100, top: 0 },
+                                'center-left': { left: 0, top: 50 },
+                                'center': { left: 50, top: 50 },
+                                'center-right': { left: 100, top: 50 },
+                                'bottom-left': { left: 0, top: 100 },
+                                'bottom-center': { left: 50, top: 100 },
+                                'bottom-right': { left: 100, top: 100 },
+                              }
+                              const pos = positions[homeData.heroImage?.position || 'center']
+                              if (pos) {
+                                currentLeft = pos.left
+                                currentTop = pos.top
+                              }
+                            }
+                            
+                            const startX = e.clientX
+                            const startY = e.clientY
+                            
+                            const handleMouseMove = (moveEvent: MouseEvent) => {
+                              const deltaX = moveEvent.clientX - startX
+                              const deltaY = moveEvent.clientY - startY
+                              
+                              const percentX = (deltaX / containerRect.width) * 100
+                              const percentY = (deltaY / containerRect.height) * 100
+                              
+                              const newLeft = Math.max(0, Math.min(100, currentLeft + percentX))
+                              const newTop = Math.max(0, Math.min(100, currentTop + percentY))
+                              
+                              setHomeData({
+                                ...homeData,
+                                heroImage: {
+                                  ...homeData.heroImage!,
+                                  position: 'custom',
+                                  customPosition: {
+                                    left: `${newLeft}%`,
+                                    top: `${newTop}%`,
+                                  },
+                                },
+                              })
+                            }
+                            
+                            const handleMouseUp = () => {
+                              document.removeEventListener('mousemove', handleMouseMove)
+                              document.removeEventListener('mouseup', handleMouseUp)
+                            }
+                            
+                            document.addEventListener('mousemove', handleMouseMove)
+                            document.addEventListener('mouseup', handleMouseUp)
+                          }}
+                        >
+                          <img
+                            src={homeData.heroImage.url}
+                            alt="Hero preview"
+                            className="absolute cursor-move select-none"
+                            style={{
+                              opacity: homeData.heroImage.opacity / 100,
+                              width: homeData.heroImage.size.width,
+                              height: homeData.heroImage.size.height,
+                              ...(homeData.heroImage.position === 'custom' && homeData.heroImage.customPosition
+                                ? {
+                                    left: homeData.heroImage.customPosition.left || '50%',
+                                    top: homeData.heroImage.customPosition.top || '50%',
+                                    right: homeData.heroImage.customPosition.right,
+                                    bottom: homeData.heroImage.customPosition.bottom,
+                                    transform: 'translate(-50%, -50%)',
+                                  }
+                                : {
+                                    ...(homeData.heroImage.position === 'top-left' && { top: 0, left: 0, transform: 'none' }),
+                                    ...(homeData.heroImage.position === 'top-center' && { top: 0, left: '50%', transform: 'translateX(-50%)' }),
+                                    ...(homeData.heroImage.position === 'top-right' && { top: 0, right: 0, transform: 'none' }),
+                                    ...(homeData.heroImage.position === 'center-left' && { top: '50%', left: 0, transform: 'translateY(-50%)' }),
+                                    ...(homeData.heroImage.position === 'center' && { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }),
+                                    ...(homeData.heroImage.position === 'center-right' && { top: '50%', right: 0, transform: 'translateY(-50%)' }),
+                                    ...(homeData.heroImage.position === 'bottom-left' && { bottom: 0, left: 0, transform: 'none' }),
+                                    ...(homeData.heroImage.position === 'bottom-center' && { bottom: 0, left: '50%', transform: 'translateX(-50%)' }),
+                                    ...(homeData.heroImage.position === 'bottom-right' && { bottom: 0, right: 0, transform: 'none' }),
+                                  }),
+                              pointerEvents: 'none',
+                            }}
+                            draggable={false}
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2 z-10"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setHomeData({
+                                ...homeData,
+                                heroImage: undefined,
+                              })
+                            }}
+                          >
+                            <Trash className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <div className="mt-2 flex items-center justify-between">
+                          <p className="text-xs text-gray-500">
+                            💡 Clique e arraste a imagem no preview acima para posicioná-la
+                          </p>
+                          {homeData.heroImage.position === 'custom' && homeData.heroImage.customPosition && (
+                            <div className="text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded">
+                              {homeData.heroImage.customPosition.left && `Esquerda: ${homeData.heroImage.customPosition.left} `}
+                              {homeData.heroImage.customPosition.top && `Topo: ${homeData.heroImage.customPosition.top} `}
+                              {homeData.heroImage.customPosition.right && `Direita: ${homeData.heroImage.customPosition.right} `}
+                              {homeData.heroImage.customPosition.bottom && `Inferior: ${homeData.heroImage.customPosition.bottom}`}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Posicionamento */}
+                      <div>
+                        <Label>Posicionamento</Label>
+                        <Select
+                          value={homeData.heroImage.position}
+                          onValueChange={(value: any) => {
+                            setHomeData({
+                              ...homeData,
+                              heroImage: {
+                                ...homeData.heroImage!,
+                                position: value,
+                                // Inicializar customPosition se for personalizado
+                                customPosition: value === 'custom' 
+                                  ? (homeData.heroImage?.customPosition || { right: '0', top: '50%' })
+                                  : homeData.heroImage?.customPosition,
+                              },
+                            })
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="center">Centro (padrão)</SelectItem>
+                            <SelectItem value="center-left">Esquerda (centro vertical)</SelectItem>
+                            <SelectItem value="center-right">Direita (centro vertical)</SelectItem>
+                            <SelectItem value="top-left">Superior Esquerda</SelectItem>
+                            <SelectItem value="top-center">Superior Centro</SelectItem>
+                            <SelectItem value="top-right">Superior Direita</SelectItem>
+                            <SelectItem value="bottom-left">Inferior Esquerda</SelectItem>
+                            <SelectItem value="bottom-center">Inferior Centro</SelectItem>
+                            <SelectItem value="bottom-right">Inferior Direita</SelectItem>
+                            <SelectItem value="custom">Personalizado (posição exata)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      {/* Campos de posicionamento personalizado */}
+                      {homeData.heroImage.position === 'custom' && (
+                        <div className="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                          <Label className="text-sm font-semibold">Posição Personalizada</Label>
+                          <p className="text-xs text-gray-600 mb-3">
+                            Defina a posição exata da imagem usando pixels (px) ou porcentagem (%). 
+                            Deixe vazio para não definir.
+                          </p>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label className="text-xs">Topo</Label>
+                              <Input
+                                type="text"
+                                value={homeData.heroImage.customPosition?.top || ''}
+                                onChange={(e) => {
+                                  setHomeData({
+                                    ...homeData,
+                                    heroImage: {
+                                      ...homeData.heroImage!,
+                                      customPosition: {
+                                        ...homeData.heroImage!.customPosition,
+                                        top: e.target.value || undefined,
+                                      },
+                                    },
+                                  })
+                                }}
+                                placeholder="ex: 20px, 10%"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Esquerda</Label>
+                              <Input
+                                type="text"
+                                value={homeData.heroImage.customPosition?.left || ''}
+                                onChange={(e) => {
+                                  setHomeData({
+                                    ...homeData,
+                                    heroImage: {
+                                      ...homeData.heroImage!,
+                                      customPosition: {
+                                        ...homeData.heroImage!.customPosition,
+                                        left: e.target.value || undefined,
+                                      },
+                                    },
+                                  })
+                                }}
+                                placeholder="ex: 20px, 10%"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Direita</Label>
+                              <Input
+                                type="text"
+                                value={homeData.heroImage.customPosition?.right || ''}
+                                onChange={(e) => {
+                                  setHomeData({
+                                    ...homeData,
+                                    heroImage: {
+                                      ...homeData.heroImage!,
+                                      customPosition: {
+                                        ...homeData.heroImage!.customPosition,
+                                        right: e.target.value || undefined,
+                                      },
+                                    },
+                                  })
+                                }}
+                                placeholder="ex: 20px, 10%"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Inferior</Label>
+                              <Input
+                                type="text"
+                                value={homeData.heroImage.customPosition?.bottom || ''}
+                                onChange={(e) => {
+                                  setHomeData({
+                                    ...homeData,
+                                    heroImage: {
+                                      ...homeData.heroImage!,
+                                      customPosition: {
+                                        ...homeData.heroImage!.customPosition,
+                                        bottom: e.target.value || undefined,
+                                      },
+                                    },
+                                  })
+                                }}
+                                placeholder="ex: 20px, 10%"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Tamanho */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Largura</Label>
+                          <Input
+                            type="text"
+                            value={homeData.heroImage.size.width}
+                            onChange={(e) => {
+                              setHomeData({
+                                ...homeData,
+                                heroImage: {
+                                  ...homeData.heroImage!,
+                                  size: {
+                                    ...homeData.heroImage!.size,
+                                    width: e.target.value,
+                                  },
+                                },
+                              })
+                            }}
+                            placeholder="ex: 100%, 500px, auto"
+                          />
+                        </div>
+                        <div>
+                          <Label>Altura</Label>
+                          <Input
+                            type="text"
+                            value={homeData.heroImage.size.height}
+                            onChange={(e) => {
+                              setHomeData({
+                                ...homeData,
+                                heroImage: {
+                                  ...homeData.heroImage!,
+                                  size: {
+                                    ...homeData.heroImage!.size,
+                                    height: e.target.value,
+                                  },
+                                },
+                              })
+                            }}
+                            placeholder="ex: 100%, 500px, auto"
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Opacidade */}
+                      <div>
+                        <Label>Opacidade: {homeData.heroImage.opacity}%</Label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={homeData.heroImage.opacity}
+                          onChange={(e) => {
+                            setHomeData({
+                              ...homeData,
+                              heroImage: {
+                                ...homeData.heroImage!,
+                                opacity: parseInt(e.target.value),
+                              },
+                            })
+                          }}
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <Label htmlFor="hero-image-upload" className="cursor-pointer">
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+                          <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                          <p className="text-sm text-gray-600">Clique para fazer upload de uma imagem</p>
+                          <p className="text-xs text-gray-400 mt-1">PNG, JPG, WEBP até 5MB</p>
+                        </div>
+                      </Label>
+                      <input
+                        id="hero-image-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0]
+                          if (!file) return
+                          
+                          try {
+                            const formData = new FormData()
+                            formData.append('file', file)
+                            
+                            const response = await fetch('/api/admin/upload-hero-image', {
+                              method: 'POST',
+                              body: formData,
+                            })
+                            
+                            if (response.ok) {
+                              const data = await response.json()
+                              setHomeData({
+                                ...homeData,
+                                heroImage: {
+                                  url: data.url,
+                                  position: 'center',
+                                  size: {
+                                    width: '100%',
+                                    height: '100%',
+                                  },
+                                  opacity: 100,
+                                },
+                              })
+                              toast.success('Imagem enviada com sucesso!')
+                            } else {
+                              const error = await response.json()
+                              toast.error(error.error || 'Erro ao fazer upload')
+                            }
+                          } catch (error: any) {
+                            console.error('Erro ao fazer upload:', error)
+                            toast.error('Erro ao fazer upload da imagem')
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -607,6 +1399,37 @@ export default function HomePreviewClient() {
               </CardContent>
             </Card>
 
+            {/* Quote Before Objectives */}
+            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500 to-yellow-500">
+                    <Quote className="w-4 h-4 text-white" />
+                  </div>
+                  <CardTitle className="text-lg">Citação (Antes dos Objetivos)</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label>Citação</Label>
+                  <Textarea
+                    value={homeData.quoteBeforeObjectives || ''}
+                    onChange={(e) => updateField('quoteBeforeObjectives', e.target.value)}
+                    placeholder="Digite a citação..."
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label>Autor da Citação</Label>
+                  <Input
+                    value={homeData.quoteAuthorBeforeObjectives || ''}
+                    onChange={(e) => updateField('quoteAuthorBeforeObjectives', e.target.value)}
+                    placeholder="ex: — Equipe Visibilidade em Foco"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Objectives */}
             <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
@@ -617,15 +1440,29 @@ export default function HomePreviewClient() {
                     </div>
                     <CardTitle className="text-lg">Objetivos do Projeto</CardTitle>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={addObjective}
-                    className="bg-white hover:bg-gray-50"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Adicionar
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200">
+                      <input
+                        type="checkbox"
+                        id="show-objectives"
+                        checked={homeData.showObjectives !== false}
+                        onChange={(e) => updateField('showObjectives', e.target.checked)}
+                        className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                      />
+                      <Label htmlFor="show-objectives" className="text-sm font-medium cursor-pointer">
+                        Exibir na home
+                      </Label>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={addObjective}
+                      className="bg-white hover:bg-gray-50"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Adicionar
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -772,6 +1609,107 @@ export default function HomePreviewClient() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Footer Section */}
+            <Card className="border-0 shadow-md hover:shadow-lg transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-slate-500 to-gray-600">
+                    <FileText className="w-4 h-4 text-white" />
+                  </div>
+                  <CardTitle className="text-lg">Rodapé (Footer)</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label>Título</Label>
+                  <Input
+                    value={homeData.footer?.title || ''}
+                    onChange={(e) => updateFooterField('title', e.target.value)}
+                    placeholder="Visibilidade em Foco"
+                  />
+                </div>
+                <div>
+                  <Label>Descrição</Label>
+                  <Input
+                    value={homeData.footer?.description || ''}
+                    onChange={(e) => updateFooterField('description', e.target.value)}
+                    placeholder="Mapeamento de Artistas LGBTQIAPN+ do Município de São Roque"
+                  />
+                </div>
+                <div>
+                  <Label>Título da Seção de Apoio</Label>
+                  <Input
+                    value={homeData.footer?.supportTitle || ''}
+                    onChange={(e) => updateFooterField('supportTitle', e.target.value)}
+                    placeholder="Apoio e Realização"
+                  />
+                </div>
+                
+                {/* Logos de Apoio */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <Label>Logos de Apoio/Realização</Label>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={addSupportLogo}
+                      className="bg-white hover:bg-gray-50"
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Adicionar Logo
+                    </Button>
+                  </div>
+                  <div className="space-y-3">
+                    {homeData.footer?.supportLogos.map((logo, index) => (
+                      <Card key={index} className="p-3 bg-gray-50">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-1 space-y-2">
+                            <Input
+                              value={logo.name}
+                              onChange={(e) => updateSupportLogo(index, 'name', e.target.value)}
+                              placeholder="Nome do logo (ex: Prefeitura de São Roque)"
+                            />
+                            <Input
+                              value={logo.imagePath}
+                              onChange={(e) => updateSupportLogo(index, 'imagePath', e.target.value)}
+                              placeholder="Caminho da imagem (ex: /prefeitura.png)"
+                            />
+                          </div>
+                          {homeData.footer!.supportLogos.length > 1 && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => removeSupportLogo(index)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Copyright</Label>
+                  <Input
+                    value={homeData.footer?.copyright || ''}
+                    onChange={(e) => updateFooterField('copyright', e.target.value)}
+                    placeholder="© 2025 Visibilidade em Foco. Todos os direitos reservados."
+                  />
+                </div>
+                <div>
+                  <Label>Texto LGPD</Label>
+                  <Input
+                    value={homeData.footer?.lgpdText || ''}
+                    onChange={(e) => updateFooterField('lgpdText', e.target.value)}
+                    placeholder="Este projeto respeita a privacidade e os dados pessoais conforme a LGPD."
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Preview - Lado Direito */}
@@ -820,7 +1758,39 @@ export default function HomePreviewClient() {
               <CardContent className="p-0">
                 <div className="space-y-8 bg-white p-6 rounded-lg">
                   {/* Hero Preview */}
-                  <div className="relative space-y-4 text-center bg-gradient-to-br from-white via-gray-50 to-slate-50 p-6 rounded-lg min-h-[400px]">
+                  <div className="relative space-y-4 text-center bg-gradient-to-br from-white via-gray-50 to-slate-50 p-6 rounded-lg min-h-[400px] overflow-hidden">
+                    {/* Hero Image Background */}
+                    {homeData.heroImage?.url && (
+                      <div
+                        className="absolute inset-0 z-0"
+                        style={{
+                          ...(homeData.heroImage.position === 'top-left' && { top: 0, left: 0 }),
+                          ...(homeData.heroImage.position === 'top-center' && { top: 0, left: '50%', transform: 'translateX(-50%)' }),
+                          ...(homeData.heroImage.position === 'top-right' && { top: 0, right: 0 }),
+                          ...(homeData.heroImage.position === 'center-left' && { top: '50%', left: 0, transform: 'translateY(-50%)' }),
+                          ...(homeData.heroImage.position === 'center' && { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }),
+                          ...(homeData.heroImage.position === 'center-right' && { top: '50%', right: 0, transform: 'translateY(-50%)' }),
+                          ...(homeData.heroImage.position === 'bottom-left' && { bottom: 0, left: 0 }),
+                          ...(homeData.heroImage.position === 'bottom-center' && { bottom: 0, left: '50%', transform: 'translateX(-50%)' }),
+                          ...(homeData.heroImage.position === 'bottom-right' && { bottom: 0, right: 0 }),
+                          ...(homeData.heroImage.position === 'custom' && homeData.heroImage.customPosition),
+                          width: homeData.heroImage.size.width,
+                          height: homeData.heroImage.size.height,
+                          opacity: homeData.heroImage.opacity / 100,
+                        }}
+                      >
+                        <img
+                          src={homeData.heroImage.url}
+                          alt="Hero background"
+                          className="w-full h-full object-cover"
+                          style={{
+                            width: homeData.heroImage.size.width,
+                            height: homeData.heroImage.size.height,
+                          }}
+                        />
+                      </div>
+                    )}
+                    
                     {/* Logo no canto superior esquerdo - igual à home principal */}
                     <div className="absolute top-2 left-2 z-20">
                       <div className="w-16 h-16 md:w-20 md:h-20">
@@ -833,31 +1803,37 @@ export default function HomePreviewClient() {
                         />
                       </div>
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900">
-                      {homeData.mainTitle}{' '}
-                      <span 
-                        className="bg-clip-text text-transparent"
-                        style={{
-                          backgroundImage: 'linear-gradient(to right, #E40303 0%, #FF8C00 20%, #FFED00 40%, #008026 60%, #24408E 80%, #732982 100%)'
+                    <div className="relative z-10 space-y-4">
+                      <h1 className="text-3xl font-bold text-gray-900">
+                        {homeData.mainTitle}{' '}
+                        <span 
+                          className="bg-clip-text text-transparent"
+                          style={{
+                            backgroundImage: 'linear-gradient(to right, #E40303 0%, #FF8C00 20%, #FFED00 40%, #008026 60%, #24408E 80%, #732982 100%)'
+                          }}
+                        >
+                          {homeData.highlightedWord}
+                        </span>
+                      </h1>
+                      <p className="text-xl font-bold text-gray-700">
+                        {homeData.subtitle}
+                      </p>
+                      <div 
+                        className="text-sm text-gray-600 prose prose-sm max-w-none [&_p]:mb-4 [&_p:last-child]:mb-0 [&_p]:whitespace-pre-line"
+                        dangerouslySetInnerHTML={{ 
+                          __html: homeData.period && homeData.period !== null && homeData.period.trim() !== '' 
+                            ? `${homeData.description} <span class="font-bold text-orange-500">${homeData.period}</span>` 
+                            : homeData.description 
                         }}
-                      >
-                        {homeData.highlightedWord}
-                      </span>
-                    </h1>
-                    <p className="text-xl font-bold text-gray-700">
-                      {homeData.subtitle}
-                    </p>
-                    <div 
-                      className="text-sm text-gray-600 prose prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{ __html: `${homeData.description} <span class="font-bold text-orange-500">${homeData.period}</span>` }}
-                    />
-                    <div className="flex gap-3 justify-center pt-4">
+                      />
+                      <div className="flex gap-3 justify-center pt-4">
                       <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-full">
                         PARTICIPE
                       </Button>
                       <Button variant="outline" className="border-2 border-gray-900 rounded-full">
                         SAIBA MAIS
                       </Button>
+                      </div>
                     </div>
                   </div>
 
@@ -886,17 +1862,33 @@ export default function HomePreviewClient() {
                       </div>
                     ))}
                     
-                    <div className="pt-4 border-t mt-6">
-                      <h3 className="text-lg font-bold text-gray-900 mb-3">Objetivos do projeto</h3>
-                      <ul className="space-y-2 text-sm text-gray-600">
-                        {homeData.objectives.map((obj, index) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <span className="text-orange-500 font-bold">•</span>
-                            <span>{obj}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    {/* Quote Before Objectives */}
+                    {homeData.quoteBeforeObjectives && (
+                      <div className="mt-8 text-center max-w-2xl mx-auto">
+                        <blockquote className="text-lg md:text-xl font-bold text-gray-900 italic text-balance leading-tight">
+                          {homeData.quoteBeforeObjectives}
+                        </blockquote>
+                        {homeData.quoteAuthorBeforeObjectives && (
+                          <p className="mt-2 text-xs text-gray-600">
+                            {homeData.quoteAuthorBeforeObjectives}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    
+                    {homeData.showObjectives !== false && (
+                      <div className="pt-4 border-t mt-6">
+                        <h3 className="text-lg font-bold text-gray-900 mb-3">Objetivos do projeto</h3>
+                        <ul className="space-y-2 text-sm text-gray-600">
+                          {homeData.objectives.map((obj, index) => (
+                            <li key={index} className="flex items-start gap-2">
+                              <span className="text-orange-500 font-bold">•</span>
+                              <span>{obj}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
 
                   <div className="border-t pt-8" />
@@ -945,6 +1937,68 @@ export default function HomePreviewClient() {
                     </div>
                   </div>
                 </div>
+
+                {/* Footer Preview */}
+                <footer className="bg-gradient-to-br from-slate-100 via-gray-100 to-slate-50 text-gray-800 py-8 relative overflow-hidden border-t border-gray-200">
+                  <div className="container mx-auto px-4 relative z-10">
+                    <div className="max-w-6xl mx-auto">
+                      {/* Título e descrição */}
+                      <div className="text-center space-y-3 mb-6">
+                        <h3 className="text-xl font-bold text-orange-500 font-heading">
+                          {homeData.footer?.title || 'Visibilidade em Foco'}
+                        </h3>
+                        <p className="text-gray-700 leading-relaxed text-sm">
+                          {homeData.footer?.description || 'Mapeamento de Artistas LGBTQIAPN+ do Município de São Roque'}
+                        </p>
+                      </div>
+
+                      {/* Seção de Apoio/Realização */}
+                      {homeData.footer?.supportLogos && homeData.footer.supportLogos.length > 0 && (
+                        <div className="py-4 border-y border-gray-300">
+                          <p className="text-center text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wider">
+                            {homeData.footer.supportTitle || 'Apoio e Realização'}
+                          </p>
+                          <div className="flex flex-wrap items-center justify-center gap-4">
+                            {homeData.footer.supportLogos.map((logo, index) => (
+                              logo.imagePath && (
+                                <div key={index} className="h-10 md:h-12 flex items-center">
+                                  <Image 
+                                    src={logo.imagePath}
+                                    alt={logo.name}
+                                    width={100}
+                                    height={50}
+                                    className="h-full w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300"
+                                    unoptimized
+                                  />
+                                </div>
+                              )
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Copyright e links */}
+                      <div className="pt-4 text-center space-y-1">
+                        <p className="text-xs text-gray-600">
+                          {homeData.footer?.copyright || '© 2025 Visibilidade em Foco. Todos os direitos reservados.'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          <a 
+                            href="/admin" 
+                            className="hover:text-gray-700 transition-colors underline underline-offset-2"
+                          >
+                            Área Administrativa
+                          </a>
+                        </p>
+                        {homeData.footer?.lgpdText && (
+                          <p className="text-xs text-gray-600">
+                            {homeData.footer.lgpdText}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </footer>
               </CardContent>
             </Card>
           </div>
