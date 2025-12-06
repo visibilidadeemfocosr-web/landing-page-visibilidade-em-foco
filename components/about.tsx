@@ -37,7 +37,7 @@ export function About({ content }: AboutProps) {
   ]
 
   return (
-    <section id="sobre" className="py-24 md:py-32 bg-background relative overflow-hidden">
+    <section id="sobre" className="pt-24 md:pt-32 pb-12 md:pb-16 bg-background relative overflow-hidden">
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
       

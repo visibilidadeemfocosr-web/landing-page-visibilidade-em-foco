@@ -45,7 +45,7 @@ export function Impact({ content }: ImpactProps) {
   const quoteAuthor = content?.quoteAuthor || '— Equipe Visibilidade em Foco'
 
   return (
-    <section className="py-24 md:py-32 bg-muted/30">
+    <section className="pt-12 md:pt-16 pb-24 md:pb-32 bg-muted/30">
       <div className="container mx-auto px-6">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
