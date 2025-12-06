@@ -54,7 +54,7 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Ri
       // Se o conteúdo mudou externamente (não foi o usuário editando)
       if (lastContentRef.current !== content && currentContent !== content) {
         isInternalUpdateRef.current = true
-        editor.commands.setContent(content, false) // false = não emitir evento onUpdate
+        editor.commands.setContent(content, { emitUpdate: false }) // não emitir evento onUpdate
         lastContentRef.current = content
         // Resetar flag após um pequeno delay
         setTimeout(() => {
