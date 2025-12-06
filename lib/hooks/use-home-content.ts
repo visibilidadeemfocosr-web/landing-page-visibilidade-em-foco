@@ -127,12 +127,73 @@ let cachedContent: HomeContent | null = null
 let cacheTimestamp: number = 0
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
 
-export function useHomeContent() {
-  const [content, setContent] = useState<HomeContent>(defaultContent)
-  const [loading, setLoading] = useState(true)
+export function useHomeContent(initialContent?: any) {
+  // Se tem conteúdo inicial do servidor, usar ele e mesclar com padrão
+  const getInitialContent = (): HomeContent => {
+    if (initialContent && Object.keys(initialContent).length > 0) {
+      return {
+        ...defaultContent,
+        ...initialContent,
+        heroImage: initialContent.heroImage || defaultContent.heroImage,
+        aboutSections: initialContent.aboutSections || defaultContent.aboutSections,
+        objectives: initialContent.objectives || defaultContent.objectives,
+        impacts: initialContent.impacts || defaultContent.impacts,
+        footer: initialContent.footer || defaultContent.footer,
+        period: initialContent.period === null || initialContent.period === '' ? null : (initialContent.period || defaultContent.period),
+      }
+    }
+    return defaultContent
+  }
+
+  const [content, setContent] = useState<HomeContent>(getInitialContent())
+  const [loading, setLoading] = useState(!initialContent) // Se tem initialContent, não está loading
   const loadingRef = useRef(false)
 
   useEffect(() => {
+    // Se já tem conteúdo inicial do servidor, só fazer revalidação em background
+    if (initialContent && Object.keys(initialContent).length > 0) {
+      // Atualizar cache com conteúdo inicial
+      cachedContent = getInitialContent()
+      cacheTimestamp = Date.now()
+      
+      // Revalidar em background (sem bloquear UI)
+      const revalidate = async () => {
+        try {
+          const response = await fetch('/api/home-content', {
+            headers: {
+              'Cache-Control': 'max-age=60',
+            },
+          })
+          if (response.ok) {
+            const data = await response.json()
+            if (data.content && Object.keys(data.content).length > 0) {
+              const mergedContent: HomeContent = {
+                ...defaultContent,
+                ...data.content,
+                heroImage: data.content.heroImage || defaultContent.heroImage,
+                aboutSections: data.content.aboutSections || defaultContent.aboutSections,
+                objectives: data.content.objectives || defaultContent.objectives,
+                impacts: data.content.impacts || defaultContent.impacts,
+                footer: data.content.footer || defaultContent.footer,
+              }
+              if (data.content.period === null || data.content.period === '') {
+                mergedContent.period = null
+              }
+              cachedContent = mergedContent
+              cacheTimestamp = Date.now()
+              setContent(mergedContent)
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao revalidar conteúdo:', error)
+        }
+      }
+      
+      // Revalidar após 1 segundo (não bloqueia renderização inicial)
+      setTimeout(revalidate, 1000)
+      return
+    }
+
     const loadContent = async () => {
       // Evitar múltiplas requisições simultâneas
       if (loadingRef.current) return
