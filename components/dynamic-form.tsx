@@ -276,6 +276,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   })
 
   // Sincronizar estado da pergunta sobre rede social quando o formulário carregar
+  // Usar subscription do react-hook-form para evitar loops infinitos
   useEffect(() => {
     const redeSocialQuestion = questions.find(q => {
       const sectionLower = q.section?.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') || ''
@@ -285,13 +286,38 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
              questionTextLower.includes('lgbtqia+')
     })
     
-    if (redeSocialQuestion) {
-      const currentValue = watch(redeSocialQuestion.id as keyof FormData) as string
-      if (currentValue) {
-        setRedeSocialAnswer(currentValue)
-      }
-    }
-  }, [questions, watch])
+    if (!redeSocialQuestion) return
+    
+    const subscription = watch((value) => {
+      const currentValue = value[redeSocialQuestion.id as keyof typeof value] as string
+      setRedeSocialAnswer(prev => currentValue && currentValue !== prev ? currentValue : prev)
+    })
+    
+    return () => subscription.unsubscribe()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions])
+
+  useEffect(() => {
+    // Encontrar pergunta sobre "apresentou trabalho artístico"
+    const apresentouTrabalhoQuestion = questions.find(q => {
+      const questionText = q.text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      return questionText.includes('apresentou') && 
+             questionText.includes('trabalho') && 
+             questionText.includes('artistico') &&
+             questionText.includes('municipio') &&
+             questionText.includes('sao roque')
+    })
+    
+    if (!apresentouTrabalhoQuestion) return
+    
+    const subscription = watch((value) => {
+      const currentValue = value[apresentouTrabalhoQuestion.id as keyof typeof value] as string
+      setApresentouTrabalhoAnswer(prev => currentValue && currentValue !== prev ? currentValue : prev)
+    })
+    
+    return () => subscription.unsubscribe()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions])
 
   // Função para validar campos "outros" dinamicamente
   const validateOtherFields = (data: FormData): boolean => {
@@ -1596,11 +1622,6 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                     // Obter resposta atual
                     const watchedApresentouValue = watch(apresentouTrabalhoQuestion.id as keyof FormData)
                     const currentApresentouAnswer = watchedApresentouValue as string | undefined
-                    
-                    // Atualizar estado
-                    if (currentApresentouAnswer !== apresentouTrabalhoAnswer) {
-                      setApresentouTrabalhoAnswer(currentApresentouAnswer || null)
-                    }
                     
                     return (
                       <>
