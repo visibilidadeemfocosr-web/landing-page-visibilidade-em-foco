@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 interface HomeContent {
   logoPath?: string
@@ -122,44 +122,86 @@ const defaultContent: HomeContent = {
   }
 }
 
+// Cache simples no cliente (5 minutos)
+let cachedContent: HomeContent | null = null
+let cacheTimestamp: number = 0
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutos
+
 export function useHomeContent() {
   const [content, setContent] = useState<HomeContent>(defaultContent)
   const [loading, setLoading] = useState(true)
+  const loadingRef = useRef(false)
 
   useEffect(() => {
     const loadContent = async () => {
+      // Evitar múltiplas requisições simultâneas
+      if (loadingRef.current) return
+      
+      // Verificar cache
+      const now = Date.now()
+      if (cachedContent && (now - cacheTimestamp) < CACHE_DURATION) {
+        setContent(cachedContent)
+        setLoading(false)
+        return
+      }
+
+      loadingRef.current = true
       try {
+        // Usar cache do navegador (60 segundos) + cache do CDN
         const response = await fetch('/api/home-content', {
-          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'max-age=60',
+          },
         })
         if (response.ok) {
           const data = await response.json()
           if (data.content && Object.keys(data.content).length > 0) {
-            // Mesclar com valores padrão, mas respeitando valores vazios/null do banco
-            const mergedContent = { ...defaultContent }
-            // Sobrescrever com dados do banco
-            Object.keys(data.content).forEach(key => {
-              const value = data.content[key]
-              // Se o valor é null ou string vazia, não usar o padrão - deixar como está
-              if (value === null || value === '') {
-                // Para campos opcionais como period, null significa "não mostrar"
-                mergedContent[key as keyof HomeContent] = (value === '' ? null : value) as any
-              } else if (value !== undefined) {
-                // Valor existe e não é vazio, usar ele
-                mergedContent[key as keyof HomeContent] = value
-              }
-            })
-            console.log('Conteúdo mesclado na home:', mergedContent)
-            console.log('Período específico:', mergedContent.period, 'tipo:', typeof mergedContent.period)
+            // Mesclar com valores padrão de forma otimizada
+            const mergedContent: HomeContent = {
+              ...defaultContent,
+              ...data.content,
+              // Mesclar objetos aninhados manualmente para evitar sobrescrever completamente
+              heroImage: data.content.heroImage || defaultContent.heroImage,
+              aboutSections: data.content.aboutSections || defaultContent.aboutSections,
+              objectives: data.content.objectives || defaultContent.objectives,
+              impacts: data.content.impacts || defaultContent.impacts,
+              footer: data.content.footer || defaultContent.footer,
+            }
+            
+            // Tratar valores null/vazios especificamente
+            if (data.content.period === null || data.content.period === '') {
+              mergedContent.period = null
+            }
+            // Atualizar cache
+            cachedContent = mergedContent
+            cacheTimestamp = Date.now()
+            
             setContent(mergedContent)
+          } else {
+            // Se não há conteúdo, usar padrão e cachear
+            cachedContent = defaultContent
+            cacheTimestamp = Date.now()
+            setContent(defaultContent)
+          }
+        } else {
+          // Se resposta não ok, usar cache se disponível ou padrão
+          if (cachedContent) {
+            setContent(cachedContent)
+          } else {
+            setContent(defaultContent)
           }
         }
       } catch (error) {
         console.error('Erro ao carregar conteúdo da home:', error)
-        // Em caso de erro, usar valores padrão
-        setContent(defaultContent)
+        // Em caso de erro, usar cache se disponível ou valores padrão
+        if (cachedContent) {
+          setContent(cachedContent)
+        } else {
+          setContent(defaultContent)
+        }
       } finally {
         setLoading(false)
+        loadingRef.current = false
       }
     }
 

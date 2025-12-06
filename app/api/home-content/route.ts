@@ -23,12 +23,13 @@ export async function GET() {
       throw error
     }
     
-    // Retornar com cache reduzido para garantir atualizações mais rápidas
+    // Cache otimizado: 5 minutos no CDN, revalidação em background
+    // stale-while-revalidate permite servir conteúdo antigo enquanto busca novo
     return NextResponse.json(
       { content: data?.content || {}, updated_at: data?.updated_at },
       {
         headers: {
-          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
         },
       }
     )
