@@ -4,36 +4,97 @@ import { existsSync, readFileSync } from 'fs'
 import { execSync } from 'child_process'
 import path from 'path'
 
-function findChromeExecutable(): string | null {
-  const possiblePaths = [
-    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    '/Applications/Chromium.app/Contents/MacOS/Chromium',
-    '/usr/bin/google-chrome',
-    '/usr/bin/chromium',
-    '/usr/bin/chromium-browser',
-    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-  ]
+// Detectar se está em ambiente serverless (Vercel)
+const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME
 
-  for (const path of possiblePaths) {
-    if (existsSync(path)) {
-      return path
+async function getBrowser() {
+  // Em ambiente serverless (Vercel), usar @sparticuz/chromium
+  if (isServerless) {
+    try {
+      const chromium = await import('@sparticuz/chromium')
+      const puppeteerCore = await import('puppeteer-core')
+      
+      // Usar type assertion para contornar problemas de tipo
+      const chromiumModule = chromium as any
+      
+      // Configurar Chromium para serverless (se disponível)
+      if (typeof chromiumModule.setGraphicsMode === 'function') {
+        chromiumModule.setGraphicsMode(false)
+      }
+      
+      // Obter argumentos e executável
+      const chromiumArgs = chromiumModule.args || chromiumModule.default?.args || []
+      const chromiumExecutablePath = typeof chromiumModule.executablePath === 'function'
+        ? await chromiumModule.executablePath()
+        : typeof chromiumModule.default?.executablePath === 'function'
+        ? await chromiumModule.default.executablePath()
+        : chromiumModule.executablePath || chromiumModule.default?.executablePath
+      
+      return await puppeteerCore.default.launch({
+        args: [...chromiumArgs, '--hide-scrollbars', '--disable-web-security'],
+        defaultViewport: chromiumModule.defaultViewport || chromiumModule.default?.defaultViewport || { width: 1920, height: 1080 },
+        executablePath: chromiumExecutablePath,
+        headless: chromiumModule.headless !== false,
+      })
+    } catch (error: any) {
+      console.error('Erro ao carregar @sparticuz/chromium:', error)
+      throw new Error(`Chromium não disponível no ambiente serverless: ${error.message}`)
     }
   }
+  
+  // Em desenvolvimento/local, usar Chrome local
+  function findChromeExecutable(): string | null {
+    const possiblePaths = [
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      '/Applications/Chromium.app/Contents/MacOS/Chromium',
+      '/usr/bin/google-chrome',
+      '/usr/bin/chromium',
+      '/usr/bin/chromium-browser',
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    ]
 
-  try {
-    if (process.platform === 'darwin') {
-      const chromePath = execSync('which "Google Chrome" || which chromium || which chromium-browser', { encoding: 'utf8' }).trim()
-      if (chromePath) return chromePath
-    } else if (process.platform === 'linux') {
-      const chromePath = execSync('which google-chrome || which chromium || which chromium-browser', { encoding: 'utf8' }).trim()
-      if (chromePath) return chromePath
+    for (const path of possiblePaths) {
+      if (existsSync(path)) {
+        return path
+      }
     }
-  } catch (e) {
-    // Ignorar erros
+
+    try {
+      if (process.platform === 'darwin') {
+        const chromePath = execSync('which "Google Chrome" || which chromium || which chromium-browser', { encoding: 'utf8' }).trim()
+        if (chromePath) return chromePath
+      } else if (process.platform === 'linux') {
+        const chromePath = execSync('which google-chrome || which chromium || which chromium-browser', { encoding: 'utf8' }).trim()
+        if (chromePath) return chromePath
+      }
+    } catch (e) {
+      // Ignorar erros
+    }
+
+    return null
   }
 
-  return null
+  const chromePath = process.env.CHROME_EXECUTABLE_PATH || findChromeExecutable()
+
+  if (!chromePath) {
+    throw new Error('Chrome/Chromium não encontrado. Configure CHROME_EXECUTABLE_PATH ou instale o Chrome.')
+  }
+
+  return await puppeteer.launch({
+    headless: true,
+    executablePath: chromePath,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--disable-gpu',
+      '--disable-web-security',
+    ],
+  })
 }
 
 export async function POST(request: NextRequest) {
@@ -576,33 +637,9 @@ export async function POST(request: NextRequest) {
     `
 
     // Usar Puppeteer para capturar
-    const chromePath = process.env.CHROME_EXECUTABLE_PATH || findChromeExecutable()
-
-    if (!chromePath) {
-      return NextResponse.json(
-        {
-          error: 'Chrome/Chromium não encontrado. Configure CHROME_EXECUTABLE_PATH ou instale o Chrome.',
-        },
-        { status: 500 }
-      )
-    }
-
     let browser
     try {
-      browser = await puppeteer.launch({
-        headless: true,
-        executablePath: chromePath,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu',
-          '--disable-web-security',
-        ],
-      })
+      browser = await getBrowser()
 
       const page = await browser.newPage()
       await page.setViewport({ width, height })
