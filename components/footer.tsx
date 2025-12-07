@@ -18,10 +18,36 @@ interface FooterProps {
   content?: FooterContent
 }
 
+// Função helper para normalizar URL do Instagram
+function normalizeInstagramUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined
+  
+  // Remover espaços em branco
+  url = url.trim()
+  
+  // Se já começa com http:// ou https://, retornar como está
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+  
+  // Se começa com instagram.com ou www.instagram.com, adicionar https://
+  if (url.startsWith('instagram.com/') || url.startsWith('www.instagram.com/')) {
+    return `https://${url}`
+  }
+  
+  // Se começa com @, remover e construir URL
+  if (url.startsWith('@')) {
+    return `https://instagram.com/${url.substring(1)}`
+  }
+  
+  // Caso padrão: adicionar https://instagram.com/
+  return `https://instagram.com/${url}`
+}
+
 export function Footer({ content }: FooterProps) {
   const title = content?.title || 'Visibilidade em Foco'
   const description = content?.description || 'Mapeamento de Artistas LGBTQIAPN+ do Município de São Roque'
-  const instagramUrl = content?.instagramUrl
+  const instagramUrl = normalizeInstagramUrl(content?.instagramUrl)
   const supportTitle = content?.supportTitle || 'Apoio e Realização'
   const supportLogos = content?.supportLogos || [
     { name: 'Prefeitura de São Roque', imagePath: '/prefeitura.png' },

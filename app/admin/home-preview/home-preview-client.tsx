@@ -684,22 +684,33 @@ export default function HomePreviewClient() {
             </div>
 
             {/* Seção Siga-nos no Instagram */}
-            {homeData.footer?.instagramUrl && (
-              <div className="text-center mb-8">
-                <p className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wider">
-                  Siga-nos no Instagram
-                </p>
-                <a
-                  href={homeData.footer.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white rounded-full font-semibold text-base shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                >
-                  <Instagram className="w-6 h-6" />
-                  <span>@visibilidadeemfoco</span>
-                </a>
-              </div>
-            )}
+            {homeData.footer?.instagramUrl && (() => {
+              // Normalizar URL do Instagram
+              const normalizeUrl = (url: string) => {
+                url = url.trim()
+                if (url.startsWith('http://') || url.startsWith('https://')) return url
+                if (url.startsWith('instagram.com/') || url.startsWith('www.instagram.com/')) return `https://${url}`
+                if (url.startsWith('@')) return `https://instagram.com/${url.substring(1)}`
+                return `https://instagram.com/${url}`
+              }
+              const normalizedUrl = normalizeUrl(homeData.footer!.instagramUrl!)
+              return (
+                <div className="text-center mb-8">
+                  <p className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wider">
+                    Siga-nos no Instagram
+                  </p>
+                  <a
+                    href={normalizedUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white rounded-full font-semibold text-base shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                  >
+                    <Instagram className="w-6 h-6" />
+                    <span>@visibilidadeemfoco</span>
+                  </a>
+                </div>
+              )
+            })()}
 
             {/* Seção de Apoio/Realização */}
             {homeData.footer?.supportLogos && homeData.footer.supportLogos.length > 0 && (
@@ -1988,22 +1999,33 @@ export default function HomePreviewClient() {
                       </div>
 
                       {/* Seção Siga-nos no Instagram */}
-                      {homeData.footer?.instagramUrl && (
-                        <div className="text-center mb-6">
-                          <p className="text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wider">
-                            Siga-nos no Instagram
-                          </p>
-                          <a
-                            href={homeData.footer.instagramUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white rounded-full font-semibold text-sm shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                          >
-                            <Instagram className="w-5 h-5" />
-                            <span>@visibilidadeemfoco</span>
-                          </a>
-                        </div>
-                      )}
+                      {homeData.footer?.instagramUrl && (() => {
+                        // Normalizar URL do Instagram
+                        const normalizeUrl = (url: string) => {
+                          url = url.trim()
+                          if (url.startsWith('http://') || url.startsWith('https://')) return url
+                          if (url.startsWith('instagram.com/') || url.startsWith('www.instagram.com/')) return `https://${url}`
+                          if (url.startsWith('@')) return `https://instagram.com/${url.substring(1)}`
+                          return `https://instagram.com/${url}`
+                        }
+                        const normalizedUrl = normalizeUrl(homeData.footer!.instagramUrl!)
+                        return (
+                          <div className="text-center mb-6">
+                            <p className="text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wider">
+                              Siga-nos no Instagram
+                            </p>
+                            <a
+                              href={normalizedUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white rounded-full font-semibold text-sm shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                            >
+                              <Instagram className="w-5 h-5" />
+                              <span>@visibilidadeemfoco</span>
+                            </a>
+                          </div>
+                        )
+                      })()}
 
                       {/* Seção de Apoio/Realização */}
                       {homeData.footer?.supportLogos && homeData.footer.supportLogos.length > 0 && (
