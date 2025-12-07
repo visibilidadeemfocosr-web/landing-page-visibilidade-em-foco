@@ -113,6 +113,7 @@ const defaultContent: HomeContent = {
   footer: {
     title: 'Visibilidade em Foco',
     description: 'Mapeamento de Artistas LGBTQIAPN+ do Município de São Roque',
+    instagramUrl: '',
     supportTitle: 'Apoio e Realização',
     supportLogos: [
       { name: 'Prefeitura de São Roque', imagePath: '/prefeitura.png' },
@@ -139,7 +140,10 @@ export function useHomeContent(initialContent?: any) {
         aboutSections: initialContent.aboutSections || defaultContent.aboutSections,
         objectives: initialContent.objectives || defaultContent.objectives,
         impacts: initialContent.impacts || defaultContent.impacts,
-        footer: initialContent.footer || defaultContent.footer,
+        footer: initialContent.footer ? {
+          ...defaultContent.footer,
+          ...initialContent.footer,
+        } : defaultContent.footer,
         period: initialContent.period === null || initialContent.period === '' ? null : (initialContent.period || defaultContent.period),
       }
     }
@@ -175,7 +179,10 @@ export function useHomeContent(initialContent?: any) {
                 aboutSections: data.content.aboutSections || defaultContent.aboutSections,
                 objectives: data.content.objectives || defaultContent.objectives,
                 impacts: data.content.impacts || defaultContent.impacts,
-                footer: data.content.footer || defaultContent.footer,
+                footer: data.content.footer ? {
+                  ...defaultContent.footer,
+                  ...data.content.footer,
+                } : defaultContent.footer,
               }
               if (data.content.period === null || data.content.period === '') {
                 mergedContent.period = null
@@ -227,7 +234,10 @@ export function useHomeContent(initialContent?: any) {
               aboutSections: data.content.aboutSections || defaultContent.aboutSections,
               objectives: data.content.objectives || defaultContent.objectives,
               impacts: data.content.impacts || defaultContent.impacts,
-              footer: data.content.footer || defaultContent.footer,
+              footer: data.content.footer ? {
+                ...defaultContent.footer,
+                ...data.content.footer,
+              } : defaultContent.footer,
             }
             
             // Tratar valores null/vazios especificamente
