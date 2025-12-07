@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { RichTextEditor } from '@/components/rich-text-editor'
-import { Plus, Trash2, MoveUp, MoveDown, Maximize2, X, Image as ImageIcon, Type, FileText, Target, Sparkles, Quote, Palette, Save, Loader2, Upload, Trash } from 'lucide-react'
+import { Plus, Trash2, MoveUp, MoveDown, Maximize2, X, Image as ImageIcon, Type, FileText, Target, Sparkles, Quote, Palette, Save, Loader2, Upload, Trash, Instagram } from 'lucide-react'
 import { toast } from 'sonner'
 import Image from 'next/image'
 
@@ -57,6 +57,7 @@ interface HomeData {
   footer?: {
     title: string
     description: string
+    instagramUrl?: string
     supportTitle: string
     supportLogos: Array<{
       name: string
@@ -157,6 +158,7 @@ export default function HomePreviewClient() {
     footer: {
       title: 'Visibilidade em Foco',
       description: 'Mapeamento de Artistas LGBTQIAPN+ do Município de São Roque',
+      instagramUrl: '',
       supportTitle: 'Apoio e Realização',
       supportLogos: [
         { name: 'Prefeitura de São Roque', imagePath: '/prefeitura.png' },
@@ -217,9 +219,13 @@ export default function HomePreviewClient() {
             impacts: cleanedContent.impacts !== undefined ? cleanedContent.impacts : [],
             quote: cleanedContent.quote !== undefined ? cleanedContent.quote : '',
             quoteAuthor: cleanedContent.quoteAuthor !== undefined ? cleanedContent.quoteAuthor : '',
-            footer: cleanedContent.footer !== undefined ? cleanedContent.footer : {
+            footer: cleanedContent.footer !== undefined ? {
+              ...cleanedContent.footer,
+              instagramUrl: cleanedContent.footer.instagramUrl !== undefined ? cleanedContent.footer.instagramUrl : ''
+            } : {
               title: 'Visibilidade em Foco',
               description: 'Mapeamento de Artistas LGBTQIAPN+ do Município de São Roque',
+              instagramUrl: '',
               supportTitle: 'Apoio e Realização',
               supportLogos: [
                 { name: 'Prefeitura de São Roque', imagePath: '/prefeitura.png' },
@@ -676,6 +682,24 @@ export default function HomePreviewClient() {
                 {homeData.footer?.description || 'Mapeamento de Artistas LGBTQIAPN+ do Município de São Roque'}
               </p>
             </div>
+
+            {/* Seção Siga-nos no Instagram */}
+            {homeData.footer?.instagramUrl && (
+              <div className="text-center mb-8">
+                <p className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wider">
+                  Siga-nos no Instagram
+                </p>
+                <a
+                  href={homeData.footer.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white rounded-full font-semibold text-base shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                >
+                  <Instagram className="w-6 h-6" />
+                  <span>@visibilidadeemfoco</span>
+                </a>
+              </div>
+            )}
 
             {/* Seção de Apoio/Realização */}
             {homeData.footer?.supportLogos && homeData.footer.supportLogos.length > 0 && (
@@ -1638,6 +1662,17 @@ export default function HomePreviewClient() {
                   />
                 </div>
                 <div>
+                  <Label>URL do Instagram</Label>
+                  <Input
+                    value={homeData.footer?.instagramUrl || ''}
+                    onChange={(e) => updateFooterField('instagramUrl', e.target.value)}
+                    placeholder="https://instagram.com/visibilidadeemfoco"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Link completo do perfil do Instagram (ex: https://instagram.com/visibilidadeemfoco)
+                  </p>
+                </div>
+                <div>
                   <Label>Título da Seção de Apoio</Label>
                   <Input
                     value={homeData.footer?.supportTitle || ''}
@@ -1951,6 +1986,24 @@ export default function HomePreviewClient() {
                           {homeData.footer?.description || 'Mapeamento de Artistas LGBTQIAPN+ do Município de São Roque'}
                         </p>
                       </div>
+
+                      {/* Seção Siga-nos no Instagram */}
+                      {homeData.footer?.instagramUrl && (
+                        <div className="text-center mb-6">
+                          <p className="text-xs font-semibold text-gray-700 mb-3 uppercase tracking-wider">
+                            Siga-nos no Instagram
+                          </p>
+                          <a
+                            href={homeData.footer.instagramUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white rounded-full font-semibold text-sm shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                          >
+                            <Instagram className="w-5 h-5" />
+                            <span>@visibilidadeemfoco</span>
+                          </a>
+                        </div>
+                      )}
 
                       {/* Seção de Apoio/Realização */}
                       {homeData.footer?.supportLogos && homeData.footer.supportLogos.length > 0 && (

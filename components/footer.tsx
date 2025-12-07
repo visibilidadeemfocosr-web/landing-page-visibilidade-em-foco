@@ -1,8 +1,10 @@
 import Image from 'next/image'
+import { Instagram } from 'lucide-react'
 
 interface FooterContent {
   title?: string
   description?: string
+  instagramUrl?: string
   supportTitle?: string
   supportLogos?: Array<{
     name: string
@@ -19,6 +21,7 @@ interface FooterProps {
 export function Footer({ content }: FooterProps) {
   const title = content?.title || 'Visibilidade em Foco'
   const description = content?.description || 'Mapeamento de Artistas LGBTQIAPN+ do Município de São Roque'
+  const instagramUrl = content?.instagramUrl
   const supportTitle = content?.supportTitle || 'Apoio e Realização'
   const supportLogos = content?.supportLogos || [
     { name: 'Prefeitura de São Roque', imagePath: '/prefeitura.png' },
@@ -49,6 +52,24 @@ export function Footer({ content }: FooterProps) {
               {description}
             </p>
           </div>
+
+          {/* Seção Siga-nos no Instagram */}
+          {instagramUrl && (
+            <div className="text-center mb-8 sm:mb-10 md:mb-12">
+              <p className="text-sm sm:text-base font-semibold text-gray-700 mb-4 sm:mb-6 uppercase tracking-wider">
+                Siga-nos no Instagram
+              </p>
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white rounded-full font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 hover:from-purple-600 hover:via-pink-600 hover:to-orange-600"
+              >
+                <Instagram className="w-6 h-6 sm:w-7 sm:h-7" />
+                <span>@visibilidadeemfoco</span>
+              </a>
+            </div>
+          )}
 
           {/* Seção de Apoio/Realização */}
           {supportLogos.length > 0 && (

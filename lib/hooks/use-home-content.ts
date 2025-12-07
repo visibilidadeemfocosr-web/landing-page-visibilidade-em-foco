@@ -44,6 +44,7 @@ interface HomeContent {
   footer?: {
     title: string
     description: string
+    instagramUrl?: string
     supportTitle: string
     supportLogos: Array<{
       name: string
