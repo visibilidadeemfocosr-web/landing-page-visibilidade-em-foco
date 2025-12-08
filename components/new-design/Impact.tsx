@@ -1,0 +1,157 @@
+'use client'
+
+import { motion } from 'framer-motion'
+import { useInView } from 'framer-motion'
+import { useRef } from 'react'
+import { PeopleIllustration, SpeakerIllustration } from './CustomShapes'
+
+export function Impact() {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: "-100px" })
+
+  return (
+    <section ref={ref} id="impacto" className="py-24 bg-white relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="mb-20"
+        >
+          <div className="text-sm tracking-widest text-gray-500 mb-4">03 / IMPACTO</div>
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            <div>
+              <h2 className="text-5xl md:text-6xl lg:text-7xl tracking-tight leading-tight">
+                <div className="text-black">A IMPORTÂNCIA</div>
+                <div className="text-black">DE</div>
+                <div className="relative inline-block">
+                  <span className="text-black">EXISTIR</span>
+                  <div className="absolute -bottom-2 left-0 right-0 h-3 bg-yellow-400 -z-10" />
+                </div>
+                <div className="text-black">E RESISTIR</div>
+              </h2>
+            </div>
+            <div className="flex items-end h-full">
+              <p className="text-xl md:text-2xl text-gray-700 leading-relaxed">
+                Muito mais que números e estatísticas — um movimento de validação, resistência e transformação.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Grid de conceitos visuais */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="grid md:grid-cols-4 gap-6 mb-20"
+        >
+          <div className="bg-orange-500 p-8 text-white aspect-square flex flex-col justify-between">
+            <div className="text-sm tracking-widest">01</div>
+            <div>
+              <div className="text-3xl tracking-tight mb-2">RESISTÊNCIA</div>
+              <p className="text-sm text-orange-100">Contra o apagamento histórico</p>
+            </div>
+          </div>
+
+          <div className="bg-purple-600 p-8 text-white aspect-square flex flex-col justify-between">
+            <div className="text-sm tracking-widest">02</div>
+            <div>
+              <div className="text-3xl tracking-tight mb-2">VISIBILIDADE</div>
+              <p className="text-sm text-purple-100">Reconhecimento aos artistas</p>
+            </div>
+          </div>
+
+          <div className="bg-blue-600 p-8 text-white aspect-square flex flex-col justify-between">
+            <div className="text-sm tracking-widest">03</div>
+            <div>
+              <div className="text-3xl tracking-tight mb-2">CONEXÃO</div>
+              <p className="text-sm text-blue-100">Fortalecer a rede local</p>
+            </div>
+          </div>
+
+          <div className="bg-pink-500 p-8 text-white aspect-square flex flex-col justify-between">
+            <div className="text-sm tracking-widest">04</div>
+            <div>
+              <div className="text-3xl tracking-tight mb-2">VOZ</div>
+              <p className="text-sm text-pink-100">Amplificar histórias</p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Seção de ilustrações conceituais */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="grid md:grid-cols-2 gap-12 mb-20"
+        >
+          <div className="bg-stone-100 p-12 relative">
+            <div className="absolute top-0 right-0 w-32 h-32 opacity-30">
+              <PeopleIllustration />
+            </div>
+            <div className="relative z-10">
+              <h3 className="text-3xl mb-6 tracking-tight">COMUNIDADE</h3>
+              <p className="text-lg text-gray-700 leading-relaxed mb-4">
+                Criar espaços de encontro, troca e fortalecimento mútuo entre artistas LGBTQIAPN+.
+              </p>
+              <div className="w-20 h-1 bg-purple-600" />
+            </div>
+          </div>
+
+          <div className="bg-stone-100 p-12 relative">
+            <div className="absolute top-0 right-0 w-32 h-32 opacity-30">
+              <SpeakerIllustration />
+            </div>
+            <div className="relative z-10">
+              <h3 className="text-3xl mb-6 tracking-tight">AMPLIFICAÇÃO</h3>
+              <p className="text-lg text-gray-700 leading-relaxed mb-4">
+                Dar voz, palco e reconhecimento para quem sempre esteve aqui, criando e resistindo.
+              </p>
+              <div className="w-20 h-1 bg-orange-500" />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Bloco de destaque final */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="relative"
+        >
+          <div className="grid md:grid-cols-5 gap-8">
+            {/* Bloco visual */}
+            <div className="md:col-span-2 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-500 p-12 flex items-center justify-center relative overflow-hidden">
+              <div className="absolute inset-0 opacity-20">
+                <div className="absolute top-10 left-10 w-20 h-20 border-4 border-white rounded-full" />
+                <div className="absolute bottom-10 right-10 w-32 h-32 border-4 border-white" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-white rounded-full" />
+              </div>
+              <div className="text-white text-center relative z-10">
+                <div className="text-8xl md:text-9xl mb-4" style={{ fontWeight: '900', lineHeight: '1' }}>+</div>
+                <div className="text-xl tracking-wider">JUNTOS</div>
+              </div>
+            </div>
+
+            {/* Bloco de texto */}
+            <div className="md:col-span-3 bg-black text-white p-12 flex flex-col justify-center">
+              <h3 className="text-3xl md:text-4xl mb-6 tracking-tight leading-tight">
+                Este mapeamento é muito mais que dados
+              </h3>
+              <p className="text-xl md:text-2xl text-gray-300 leading-relaxed mb-6">
+                É sobre <span className="text-yellow-400">validar existências</span>, <span className="text-pink-400">fortalecer identidades</span> e <span className="text-purple-400">construir um futuro</span> onde artistas LGBTQIAPN+ tenham o reconhecimento e espaço que merecem.
+              </p>
+              <div className="flex items-center gap-4 text-lg">
+                <div className="w-12 h-1 bg-pink-500" />
+                <span className="tracking-wide">Transformar a realidade cultural</span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
