@@ -1057,14 +1057,14 @@ export default function AdminModeratePreviewClient() {
           <CardContent>
             <div 
               id="instagram-preview"
-              className="relative w-full aspect-square bg-gradient-to-br from-white via-gray-50 to-slate-50 rounded-lg overflow-hidden border border-gray-200"
+              className="relative w-full aspect-square bg-stone-50 rounded-lg overflow-hidden border border-gray-200"
             >
               {/* Grid pattern de fundo */}
               <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:50px_50px]" />
               
               {/* Blobs decorativos */}
-              <div className="absolute -top-20 -left-20 w-64 h-64 bg-gradient-to-br from-blue-200/25 to-purple-200/25 rounded-full blur-3xl" />
-              <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-gradient-to-br from-pink-200/25 to-orange-200/15 rounded-full blur-3xl" />
+              <div className="absolute -top-20 -left-20 w-64 h-64 bg-gradient-to-br from-purple-200/20 to-pink-200/20 rounded-full blur-3xl" />
+              <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-gradient-to-br from-purple-200/20 to-purple-300/15 rounded-full blur-3xl" />
               
               {/* Conteúdo do post */}
               <div className="relative z-0 h-full flex flex-col p-8">
@@ -1090,7 +1090,7 @@ export default function AdminModeratePreviewClient() {
 
                 {/* Ícone da linguagem artística no canto superior direito */}
                 <div className="absolute top-4 right-4 z-[1]">
-                  <div className="bg-orange-500 rounded-full p-3 shadow-lg border-2 border-orange-500/30">
+                  <div className="bg-purple-600 rounded-full p-3 shadow-lg border-2 border-purple-600/30">
                     <div className="text-white">
                       {getLanguageIcon(previewData.mainArtisticLanguage)}
                     </div>
@@ -1103,7 +1103,7 @@ export default function AdminModeratePreviewClient() {
                   <div className="flex-1 flex flex-col items-center justify-center space-y-6 mt-16">
                     {/* Foto do artista */}
                     <div className="relative">
-                      <div className="w-80 h-80 rounded-full overflow-hidden border-4 border-orange-500/20 shadow-2xl bg-white">
+                      <div className="w-80 h-80 rounded-full overflow-hidden border-4 border-purple-600/20 shadow-2xl bg-white">
                         <img
                           src={previewData.photo}
                           alt={previewData.name}
@@ -1114,19 +1114,19 @@ export default function AdminModeratePreviewClient() {
                         />
                       </div>
                       {/* Decoração ao redor da foto */}
-                      <div className="absolute -inset-4 rounded-full border-2 border-orange-500/20 animate-pulse" />
+                      <div className="absolute -inset-4 rounded-full border-2 border-purple-600/20 animate-pulse" />
                     </div>
 
                     {/* Nome do artista */}
                     <div className="text-center">
-                      <h2 className="text-4xl font-bold mb-1.5 text-gray-900">{previewData.name}</h2>
-                      <div className="w-32 h-1 bg-orange-500 mx-auto rounded-full mb-1.5" />
+                      <h2 className="text-4xl font-bold mb-1.5 text-gray-900 tracking-tight">{previewData.name}</h2>
+                      <div className="w-32 h-1 bg-purple-600 mx-auto rounded-full mb-1.5" />
                     </div>
 
                     {/* Ícone de arraste para ver mais */}
                     <div className="flex flex-col items-center gap-2 pt-4 animate-bounce">
-                      <div className="bg-orange-500/10 backdrop-blur-sm rounded-full p-3 border-2 border-orange-500/30">
-                        <ChevronRight className="w-6 h-6 text-orange-500" />
+                      <div className="bg-purple-600/10 backdrop-blur-sm rounded-full p-3 border-2 border-purple-600/30">
+                        <ChevronRight className="w-6 h-6 text-purple-600" />
                       </div>
                       <span className="text-xs text-gray-600 font-medium">Arraste para ver mais</span>
                     </div>
@@ -1136,30 +1136,30 @@ export default function AdminModeratePreviewClient() {
                   <div className="flex-1 flex flex-col items-center justify-center space-y-6 mt-16">
                     {/* Nome do artista (menor, no topo) */}
                     <div className="text-center">
-                      <h2 className="text-3xl font-bold mb-2 text-gray-900">{previewData.name}</h2>
-                      <div className="w-24 h-1.5 bg-orange-500 mx-auto rounded-full" />
+                      <h2 className="text-3xl font-bold mb-2 text-gray-900 tracking-tight">{previewData.name}</h2>
+                      <div className="w-24 h-1.5 bg-purple-600 mx-auto rounded-full" />
                     </div>
 
                     {/* Bio */}
                     <div className="max-w-lg text-center space-y-4 px-4">
-                      <p className="text-xl leading-relaxed text-gray-900">
+                      <p className="text-xl leading-relaxed text-gray-900 tracking-tight">
                         {previewData.isEditing ? editedBio : previewData.bio}
                       </p>
                     </div>
 
                     {/* Redes sociais */}
                     <div className="flex flex-col items-center gap-3 pt-4">
-                      <p className="text-base text-gray-700 mb-2 font-medium">Entre em contato:</p>
+                      <p className="text-base text-gray-700 mb-2 font-medium tracking-tight">Entre em contato:</p>
                       <div className="flex items-center justify-center gap-3 flex-wrap">
                         {previewData.instagram && (
                           <a
                             href={`https://instagram.com/${previewData.instagram.replace('@', '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 px-6 py-3 bg-orange-500/10 hover:bg-orange-500/20 rounded-full backdrop-blur-sm border-2 border-orange-500/20 transition-all"
+                            className="flex items-center gap-3 px-6 py-3 bg-purple-600/10 hover:bg-purple-600/20 rounded-full backdrop-blur-sm border-2 border-purple-600/20 transition-all"
                           >
-                            <Instagram className="w-6 h-6 text-orange-500" />
-                            <span className="text-base font-medium text-gray-900">{previewData.instagram}</span>
+                            <Instagram className="w-6 h-6 text-purple-600" />
+                            <span className="text-base font-medium text-gray-900 tracking-tight">{previewData.instagram}</span>
                           </a>
                         )}
                         {previewData.facebook && (
@@ -1167,10 +1167,10 @@ export default function AdminModeratePreviewClient() {
                             href={previewData.facebook}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 px-6 py-3 bg-orange-500/10 hover:bg-orange-500/20 rounded-full backdrop-blur-sm border-2 border-orange-500/20 transition-all"
+                            className="flex items-center gap-3 px-6 py-3 bg-purple-600/10 hover:bg-purple-600/20 rounded-full backdrop-blur-sm border-2 border-purple-600/20 transition-all"
                           >
-                            <Facebook className="w-6 h-6 text-orange-500" />
-                            <span className="text-base font-medium text-gray-900">Facebook</span>
+                            <Facebook className="w-6 h-6 text-purple-600" />
+                            <span className="text-base font-medium text-gray-900 tracking-tight">Facebook</span>
                           </a>
                         )}
                         {previewData.linkedin && (
@@ -1178,10 +1178,10 @@ export default function AdminModeratePreviewClient() {
                             href={previewData.linkedin}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 px-6 py-3 bg-orange-500/10 hover:bg-orange-500/20 rounded-full backdrop-blur-sm border-2 border-orange-500/20 transition-all"
+                            className="flex items-center gap-3 px-6 py-3 bg-purple-600/10 hover:bg-purple-600/20 rounded-full backdrop-blur-sm border-2 border-purple-600/20 transition-all"
                           >
-                            <Linkedin className="w-6 h-6 text-orange-500" />
-                            <span className="text-base font-medium text-gray-900">LinkedIn</span>
+                            <Linkedin className="w-6 h-6 text-purple-600" />
+                            <span className="text-base font-medium text-gray-900 tracking-tight">LinkedIn</span>
                           </a>
                         )}
                       </div>

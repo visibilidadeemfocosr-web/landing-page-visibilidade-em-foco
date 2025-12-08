@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
       width: ${width}px;
       height: ${height}px;
       position: relative;
-      background: linear-gradient(to bottom right, #ffffff 0%, #f8f9fa 50%, #f1f3f5 100%);
+      background: #fafaf9;
       overflow: hidden;
     }
     
@@ -232,7 +232,7 @@ export async function POST(request: NextRequest) {
       left: -80px;
       width: 256px;
       height: 256px;
-      background: linear-gradient(to bottom right, rgba(147, 197, 253, 0.25), rgba(196, 181, 253, 0.25));
+      background: linear-gradient(to bottom right, rgba(192, 132, 252, 0.20), rgba(236, 72, 153, 0.20));
       border-radius: 50%;
       filter: blur(80px);
       z-index: 0;
@@ -245,7 +245,7 @@ export async function POST(request: NextRequest) {
       right: -80px;
       width: 256px;
       height: 256px;
-      background: linear-gradient(to bottom right, rgba(251, 207, 232, 0.25), rgba(251, 191, 36, 0.15));
+      background: linear-gradient(to bottom right, rgba(192, 132, 252, 0.20), rgba(168, 85, 247, 0.15));
       border-radius: 50%;
       filter: blur(80px);
       z-index: 0;
@@ -277,11 +277,11 @@ export async function POST(request: NextRequest) {
       position: absolute;
       top: 40px;
       right: 40px;
-      background: #f97316;
+      background: #9333ea;
       border-radius: 50%;
       padding: 14px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      border: 2px solid rgba(249, 115, 22, 0.3);
+      border: 2px solid rgba(147, 51, 234, 0.3);
       z-index: 10;
       display: flex;
       align-items: center;
@@ -326,7 +326,7 @@ export async function POST(request: NextRequest) {
       height: 720px;
       border-radius: 50%;
       overflow: hidden;
-      border: 10px solid rgba(249, 115, 22, 0.2);
+      border: 10px solid rgba(147, 51, 234, 0.2);
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
       background: #ffffff;
     }
@@ -344,7 +344,7 @@ export async function POST(request: NextRequest) {
       right: -16px;
       bottom: -16px;
       border-radius: 50%;
-      border: 2px solid rgba(236, 72, 153, 0.3);
+      border: 2px solid rgba(147, 51, 234, 0.3);
     }
     
     .artist-name {
@@ -356,12 +356,13 @@ export async function POST(request: NextRequest) {
       font-weight: bold;
       margin-bottom: 12px;
       color: #1f2937;
+      letter-spacing: -0.025em;
     }
     
     .name-divider {
       width: 280px;
       height: 8px;
-      background: #f97316;
+      background: #9333ea;
       margin: 0 auto 10px;
       border-radius: 9999px;
     }
@@ -385,8 +386,8 @@ export async function POST(request: NextRequest) {
     }
     
     .language-tag.principal {
-      background: rgba(249, 115, 22, 0.1);
-      border-color: rgba(249, 115, 22, 0.3);
+      background: rgba(147, 51, 234, 0.1);
+      border-color: rgba(147, 51, 234, 0.3);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
       width: fit-content;
@@ -394,7 +395,7 @@ export async function POST(request: NextRequest) {
     }
     
     .language-tag.principal span:first-child {
-      color: #f97316;
+      color: #9333ea;
       font-weight: 600;
       font-size: 32px;
     }
@@ -433,17 +434,17 @@ export async function POST(request: NextRequest) {
     }
     
     .swipe-icon {
-      background: rgba(249, 115, 22, 0.1);
+      background: rgba(147, 51, 234, 0.1);
       backdrop-filter: blur(10px);
       border-radius: 50%;
       padding: 12px;
-      border: 2px solid rgba(249, 115, 22, 0.3);
+      border: 2px solid rgba(147, 51, 234, 0.3);
     }
     
     .swipe-icon svg {
       width: 32px;
       height: 32px;
-      color: #f97316;
+      color: #9333ea;
     }
     
     .swipe-text {
@@ -472,12 +473,13 @@ export async function POST(request: NextRequest) {
       font-weight: bold;
       margin-bottom: 16px;
       color: #1f2937;
+      letter-spacing: -0.025em;
     }
     
     .name-divider-small {
       width: 200px;
       height: 8px;
-      background: #f97316;
+      background: #9333ea;
       margin: 0 auto;
       border-radius: 9999px;
     }
@@ -492,6 +494,7 @@ export async function POST(request: NextRequest) {
       font-size: 32px;
       line-height: 1.65;
       color: #1f2937;
+      letter-spacing: -0.01em;
     }
     
     .social-links {
@@ -522,16 +525,16 @@ export async function POST(request: NextRequest) {
       align-items: center;
       gap: 14px;
       padding: 18px 32px;
-      background: rgba(249, 115, 22, 0.1);
+      background: rgba(147, 51, 234, 0.1);
       backdrop-filter: blur(10px);
       border-radius: 9999px;
-      border: 2px solid rgba(249, 115, 22, 0.2);
+      border: 2px solid rgba(147, 51, 234, 0.2);
     }
     
     .social-button svg {
       width: 32px;
       height: 32px;
-      color: #f97316;
+      color: #9333ea;
     }
     
     .social-button span {
