@@ -1,18 +1,61 @@
-'use client'
+"use client"
 
+import React, { useState, useEffect } from "react"
 import { motion } from 'framer-motion'
-import { AbstractShape1, StarBurstShape } from './CustomShapes'
-import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
-import { RegistrationFormLoader } from '@/components/registration-form-loader'
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { RegistrationFormLoader } from "@/components/registration-form-loader"
+import Image from "next/image"
+import { AbstractShape1, StarBurstShape } from '@/components/new-design/CustomShapes'
 
-export function Hero() {
-  const [dialogOpen, setDialogOpen] = useState(false)
+interface HomeContent {
+  logoPath?: string
+  mainTitle?: string
+  highlightedWord?: string
+  subtitle?: string
+  description?: string
+  period?: string | null
+  heroImage?: {
+    url: string
+    position: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'custom'
+    customPosition?: {
+      top?: string
+      left?: string
+      right?: string
+      bottom?: string
+    }
+    size: {
+      width: string
+      height: string
+    }
+    opacity: number
+  }
+}
+
+interface HeroStyledProps {
+  content?: HomeContent
+}
+
+export function HeroStyled({ content }: HeroStyledProps) {
   const [mounted, setMounted] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Valores padrão ou do banco
+  const logoPath = content?.logoPath || '/logoN.png'
+  const mainTitle = content?.mainTitle || 'Mapeamento de Artistas'
+  const highlightedWord = content?.highlightedWord || 'LGBTQIAPN+'
+  const subtitle = content?.subtitle || 'do município de São Roque'
+  const description = content?.description || 'Um projeto que celebra, documenta e dá visibilidade à produção artística e cultural da comunidade LGBTQIAPN+ no município de São Roque! Participe do mapeamento, pesquisa aberta de'
+  const period = content !== undefined ? content.period : '08/12/2025 até 08/02/2026'
+
+  // Extrair título principal e palavra destacada
+  const titleParts = mainTitle.split(highlightedWord)
+  const beforeHighlight = titleParts[0].trim()
+  const afterHighlight = titleParts[1]?.trim() || ''
 
   return (
     <>
@@ -26,12 +69,16 @@ export function Hero() {
               transition={{ duration: 0.6 }}
               className="relative"
             >
-              <div className="text-black tracking-tight leading-tight">
-                <div className="text-xl">VISIBILIDADE</div>
-                <div className="text-xl">EM FOCO</div>
+              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24">
+                <Image 
+                  src={logoPath}
+                  alt="Visibilidade em Foco"
+                  width={96}
+                  height={96}
+                  className="w-full h-full object-contain"
+                  unoptimized
+                />
               </div>
-              <div className="absolute -top-2 -right-8 w-6 h-6 bg-yellow-400 rounded-full" />
-              <div className="absolute -bottom-1 -left-4 w-8 h-8 bg-purple-600 rounded-full" />
             </motion.div>
 
             <motion.div
@@ -106,28 +153,27 @@ export function Hero() {
                   
                   <h1 className="space-y-2 mb-8">
                     <div className="text-6xl md:text-7xl lg:text-8xl text-black leading-none tracking-tight">
-                      ARTISTAS
+                      {beforeHighlight || 'ARTISTAS'}
                     </div>
                     <div className="text-6xl md:text-7xl lg:text-8xl leading-none tracking-tight relative inline-block">
-                      <span className="text-black">LGB</span>
-                      <span className="relative inline-block">
-                        <span className="text-black">T</span>
-                        <div className="absolute -top-4 -right-6 w-12 h-12 bg-yellow-400 -z-10" />
-                      </span>
-                      <span className="text-black">QIAPN+</span>
+                      <span className="text-black">{highlightedWord}</span>
+                      <div className="absolute -top-4 -right-6 w-12 h-12 bg-yellow-400 -z-10" />
                     </div>
                     <div className="text-4xl md:text-5xl text-gray-700 tracking-tight">
-                      de São Roque
+                      {subtitle}
                     </div>
                   </h1>
 
                   <div className="relative mb-8">
                     <div className="absolute -left-4 top-0 bottom-0 w-1 bg-pink-500" />
-                    <p className="text-xl md:text-2xl text-gray-800 pl-8">
-                      Reconhecer. Documentar. Celebrar.
-                      <br />
-                      <strong>Sua voz importa.</strong>
-                    </p>
+                    <div 
+                      className="text-xl md:text-2xl text-gray-800 pl-8"
+                      dangerouslySetInnerHTML={{ 
+                        __html: (period !== null && period !== undefined && period.trim() !== '') 
+                          ? `${description} <span class="font-bold text-orange-500">${period}</span>` 
+                          : description 
+                      }}
+                    />
                   </div>
                 </div>
 
@@ -138,7 +184,7 @@ export function Hero() {
                   className="flex flex-col sm:flex-row gap-4"
                 >
                   {mounted ? (
-                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen} modal={true}>
+                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                       <DialogTrigger asChild>
                         <button 
                           className="group bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white px-10 py-4 rounded-full transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 relative overflow-hidden"
@@ -150,10 +196,8 @@ export function Hero() {
                           </span>
                         </button>
                       </DialogTrigger>
-                      <DialogContent 
-                        className="!max-w-[100vw] w-[100vw] !max-h-[100vh] h-[100vh] !top-0 !left-0 !translate-x-0 !translate-y-0 rounded-none p-0 sm:max-w-[95vw] sm:w-[95vw] sm:max-h-[95vh] sm:h-[95vh] sm:!top-[50%] sm:!left-[50%] sm:!translate-x-[-50%] sm:!translate-y-[-50%] sm:rounded-lg sm:p-6 overflow-hidden flex flex-col bg-white !z-[60]"
-                      >
-                        <DialogHeader className="flex-shrink-0 pb-4 pt-4 px-4 sm:px-0 border-b bg-white">
+                      <DialogContent className="!max-w-[100vw] w-[100vw] !max-h-[100vh] h-[100vh] !top-0 !left-0 !translate-x-0 !translate-y-0 rounded-none p-0 sm:max-w-[95vw] sm:w-[95vw] sm:max-h-[95vh] sm:h-[95vh] sm:!top-[50%] sm:!left-[50%] sm:!translate-x-[-50%] sm:!translate-y-[-50%] sm:rounded-lg sm:p-6 overflow-hidden flex flex-col bg-white">
+                        <DialogHeader className="flex-shrink-0 pb-4 pt-4 px-4 sm:px-0 border-b bg-white z-10">
                           <DialogTitle className="text-xl sm:text-2xl font-bold">Cadastro de Artista</DialogTitle>
                           <DialogDescription className="text-sm sm:text-base leading-relaxed pt-2">
                             Preencha o formulário abaixo para fazer parte do mapeamento Visibilidade em Foco. Seus dados serão tratados com total segurança e privacidade.
@@ -166,26 +210,30 @@ export function Hero() {
                     </Dialog>
                   ) : (
                     <button 
-                      className="group bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white px-10 py-4 rounded-full transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 relative overflow-hidden"
+                      className="group bg-gradient-to-r from-orange-500 to-pink-500 text-white px-10 py-4 rounded-full transition-all duration-300 shadow-xl opacity-50 cursor-not-allowed"
+                      disabled
                     >
-                      <span className="relative z-10">PARTICIPAR AGORA</span>
-                      <div className="absolute inset-0 bg-black transform translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                      <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-                        PARTICIPAR AGORA
-                      </span>
+                      PARTICIPAR AGORA
                     </button>
                   )}
                   
-                  <button className="border-2 border-black text-black hover:bg-black hover:text-white px-10 py-4 text-lg tracking-wide transition-all duration-300">
+                  <button 
+                    className="border-2 border-black text-black hover:bg-black hover:text-white px-10 py-4 text-lg tracking-wide transition-all duration-300"
+                    onClick={() => {
+                      document.getElementById('sobre')?.scrollIntoView({ behavior: 'smooth' })
+                    }}
+                  >
                     SAIBA MAIS
                   </button>
                 </motion.div>
 
-                <div className="mt-8 bg-black text-white px-6 py-4 inline-block">
-                  <p className="text-sm tracking-wider">
-                    <span className="text-yellow-400">15/12/2025</span> até <span className="text-yellow-400">15/02/2026</span>
-                  </p>
-                </div>
+                {period && (
+                  <div className="mt-8 bg-black text-white px-6 py-4 inline-block">
+                    <p className="text-sm tracking-wider">
+                      <span className="text-yellow-400">{period}</span>
+                    </p>
+                  </div>
+                )}
               </motion.div>
 
               {/* Lado direito - Arte abstrata customizada */}
@@ -263,4 +311,3 @@ export function Hero() {
     </>
   )
 }
-

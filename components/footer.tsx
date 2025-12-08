@@ -102,21 +102,21 @@ export function Footer({ content }: FooterProps) {
             <div className="py-6 sm:py-8 border-y border-gray-300">
               <p className="text-center text-xs sm:text-sm font-semibold text-gray-700 mb-4 sm:mb-6 uppercase tracking-wider">
                 {supportTitle}
-              </p>
+            </p>
               <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-8 lg:gap-12">
                 {supportLogos.map((logo, index) => (
                   <div key={index} className="h-12 sm:h-14 md:h-16 lg:h-20 flex items-center">
                     {logo.imagePath && (
-                      <Image 
+                <Image 
                         src={logo.imagePath}
                         alt={logo.name}
-                        width={180}
-                        height={80}
-                        className="h-full w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300"
-                        unoptimized
-                      />
+                  width={180}
+                  height={80}
+                  className="h-full w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300"
+                  unoptimized
+                />
                     )}
-                  </div>
+              </div>
                 ))}
               </div>
             </div>
@@ -138,7 +138,7 @@ export function Footer({ content }: FooterProps) {
             {lgpdText && (
               <p className="text-xs sm:text-sm text-gray-600 px-2">
                 {lgpdText}
-              </p>
+            </p>
             )}
           </div>
         </div>

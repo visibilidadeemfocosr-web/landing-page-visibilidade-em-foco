@@ -5,7 +5,7 @@ import { useRef } from 'react'
 import { useInView } from '@/hooks/use-in-view'
 
 export function Importance() {
-  const ref = useRef(null)
+  const ref = useRef<HTMLElement>(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
   const points = [

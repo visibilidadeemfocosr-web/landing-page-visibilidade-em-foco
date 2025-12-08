@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -21,6 +21,11 @@ interface DynamicFormProps {
   questions: Question[]
   previewMode?: boolean
   onSuccess?: () => void
+  skipInitialQuestion?: boolean // Nova prop para pular pergunta inicial
+  hideProgress?: boolean // Ocultar indicador de progresso interno
+  onBlockChange?: (blockIndex: number, totalBlocks: number) => void // Callback quando o bloco muda
+  onNavigateNextReady?: (navigateNext: () => Promise<void>) => void // Callback para expor função de avançar
+  onNavigatePrevReady?: (navigatePrev: () => void) => void // Callback para expor função de voltar
 }
 
 // Componente para renderizar HTML formatado de forma segura
@@ -47,7 +52,7 @@ function FormattedText({ html }: { html: string }) {
   return <span>{html}</span>
 }
 
-export function DynamicForm({ questions, previewMode = false, onSuccess }: DynamicFormProps) {
+export function DynamicForm({ questions, previewMode = false, onSuccess, skipInitialQuestion = false, hideProgress = false, onBlockChange, onNavigateNextReady, onNavigatePrevReady }: DynamicFormProps) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState<Record<string, boolean>>({})
   const [fileUrls, setFileUrls] = useState<Record<string, string>>({})
@@ -58,8 +63,9 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
   const [otherFieldErrors, setOtherFieldErrors] = useState<Record<string, boolean>>({}) // Rastrear erros nos campos "outros"
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0) // Índice do bloco atual na navegação
   const [redeSocialAnswer, setRedeSocialAnswer] = useState<string | null>(null) // Resposta da pergunta sobre rede social
-  const [isFromSaoRoque, setIsFromSaoRoque] = useState<boolean | null>(null) // Resposta inicial: é de São Roque?
+  const [isFromSaoRoque, setIsFromSaoRoque] = useState<boolean | null>(skipInitialQuestion ? true : null) // Resposta inicial: é de São Roque?
   const [apresentouTrabalhoAnswer, setApresentouTrabalhoAnswer] = useState<string | null>(null) // Resposta da pergunta sobre apresentar trabalho
+  const [pendingNavigation, setPendingNavigation] = useState<'next' | 'prev' | null>(null) // Navegação pendente
 
   // Criar schema Zod dinamicamente
   const createSchema = () => {
@@ -256,6 +262,8 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
     trigger,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
+    mode: 'onSubmit', // Validação apenas ao submeter, não automaticamente
+    reValidateMode: 'onSubmit', // Revalidação apenas ao submeter
     defaultValues: {
       consent: false,
       // Inicializar checkboxes com opções como arrays vazios
@@ -825,7 +833,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             </Label>
             <RadioGroup
               onValueChange={(value) => {
-                setValue(fieldId as keyof FormData, value as any)
+                setValue(fieldId as keyof FormData, value as any, { shouldValidate: false })
                 clearErrors(fieldId as keyof FormData)
                 // Verificar se a opção selecionada contém "outros" (case insensitive)
                 const hasOtherKeyword = question.has_other_option && 
@@ -838,7 +846,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                   setValue(`${fieldId}_other` as keyof FormData, '' as any)
                 }
               }}
-              value={watch(fieldId as keyof FormData) as string}
+              value={watch(fieldId as keyof FormData) as string || ''}
               className="space-y-2"
             >
               {question.options?.map((option, idx) => {
@@ -848,12 +856,16 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                   <div key={idx} className="space-y-2">
                     <label
                       htmlFor={`${fieldId}-${idx}`}
-                      className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer touch-manipulation min-h-[48px] active:bg-muted"
+                      className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 cursor-pointer min-h-[48px] active:bg-muted relative"
                     >
-                      <RadioGroupItem value={option} id={`${fieldId}-${idx}`} className="h-5 w-5" />
-                      <Label htmlFor={`${fieldId}-${idx}`} className="font-normal cursor-pointer text-base sm:text-sm flex-1">
+                      <RadioGroupItem 
+                        value={option} 
+                        id={`${fieldId}-${idx}`} 
+                        className="h-5 w-5 shrink-0"
+                      />
+                      <span className="font-normal cursor-pointer text-base sm:text-sm flex-1">
                         {option}
-                      </Label>
+                      </span>
                     </label>
                     {/* Mostrar campo de texto se "outros" estiver selecionado */}
                     {isOtherOption && watch(fieldId as keyof FormData) === option && (
@@ -1284,6 +1296,129 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
 
   const isCepInvalid = cepCityValid === false
 
+  // Calcular totalBlocks para notificar componente pai
+  let totalBlocksForNotification = 0
+  if (showOtherQuestions && otherQuestions.length > 0) {
+    const sectionOrderFromQuestions: string[] = []
+    const seenSections = new Set<string>()
+
+    for (const question of otherQuestions) {
+      const section = question.section || 'Sem seção'
+      if (!seenSections.has(section)) {
+        sectionOrderFromQuestions.push(section)
+        seenSections.add(section)
+      }
+    }
+
+    const semSecaoIndex = sectionOrderFromQuestions.indexOf('Sem seção')
+    if (semSecaoIndex !== -1 && semSecaoIndex !== sectionOrderFromQuestions.length - 1) {
+      sectionOrderFromQuestions.splice(semSecaoIndex, 1)
+      sectionOrderFromQuestions.push('Sem seção')
+    }
+
+    totalBlocksForNotification = sectionOrderFromQuestions.length
+  }
+
+  // Refs para armazenar funções de navegação
+  const navigateNextRef = useRef<(() => Promise<void>) | null>(null)
+  const navigatePrevRef = useRef<(() => void) | null>(null)
+  const functionsExposedRef = useRef(false) // Flag para evitar expor funções múltiplas vezes
+
+  // Notificar componente pai sobre mudança de bloco (de forma assíncrona)
+  // Usar useRef para rastrear último valor notificado e evitar notificações desnecessárias
+  const lastNotifiedRef = useRef<{ blockIndex: number; total: number } | null>(null)
+  
+  useEffect(() => {
+    if (onBlockChange && showOtherQuestions && totalBlocksForNotification > 0) {
+      const current = { blockIndex: currentBlockIndex, total: totalBlocksForNotification }
+      const last = lastNotifiedRef.current
+      
+      // Só notificar se o valor mudou
+      if (!last || last.blockIndex !== current.blockIndex || last.total !== current.total) {
+        lastNotifiedRef.current = current
+        // Usar setTimeout para garantir que não estamos atualizando durante renderização
+        const timeoutId = setTimeout(() => {
+          onBlockChange(currentBlockIndex, totalBlocksForNotification)
+        }, 0)
+        return () => clearTimeout(timeoutId)
+      }
+    }
+  }, [currentBlockIndex, totalBlocksForNotification, showOtherQuestions, onBlockChange])
+
+  // Processar navegação pendente de forma assíncrona
+  useEffect(() => {
+    if (!pendingNavigation || !showOtherQuestions || totalBlocksForNotification === 0) return
+
+    if (pendingNavigation === 'prev') {
+      const newIndex = Math.max(currentBlockIndex - 1, 0)
+      setCurrentBlockIndex(newIndex)
+      setPendingNavigation(null)
+      // Notificar componente pai de forma assíncrona
+      setTimeout(() => {
+        if (onBlockChange) {
+          onBlockChange(newIndex, totalBlocksForNotification)
+        }
+      }, 0)
+      // Scroll para o topo (removido para evitar problemas de scroll)
+    } else if (pendingNavigation === 'next') {
+      const nextIndex = currentBlockIndex + 1
+      setCurrentBlockIndex(nextIndex)
+      setPendingNavigation(null)
+      // Notificar componente pai sobre mudança de forma assíncrona
+      setTimeout(() => {
+        if (onBlockChange) {
+          onBlockChange(nextIndex, totalBlocksForNotification)
+        }
+      }, 0)
+      // Scroll para o topo (removido para evitar problemas de scroll)
+    }
+  }, [pendingNavigation, showOtherQuestions, currentBlockIndex, totalBlocksForNotification, onBlockChange])
+
+  // Expor funções de navegação quando hideProgress é true e formulário está pronto
+  // Usar useEffect para garantir que não atualizamos durante renderização
+  useEffect(() => {
+    if (!hideProgress || !showOtherQuestions) {
+      functionsExposedRef.current = false
+      return
+    }
+    
+    // Verificar se as funções estão disponíveis e expor de forma assíncrona
+    if (navigateNextRef.current && navigatePrevRef.current) {
+      // Usar setTimeout para garantir que não estamos atualizando durante renderização
+      const timeoutId = setTimeout(() => {
+        if (onNavigateNextReady && navigateNextRef.current) {
+          onNavigateNextReady(navigateNextRef.current)
+        }
+        if (onNavigatePrevReady && navigatePrevRef.current) {
+          onNavigatePrevReady(navigatePrevRef.current)
+        }
+        functionsExposedRef.current = true
+      }, 0)
+      
+      return () => clearTimeout(timeoutId)
+    } else {
+      // Se as funções não estão disponíveis, resetar flag
+      functionsExposedRef.current = false
+    }
+  }, [hideProgress, showOtherQuestions, onNavigateNextReady, onNavigatePrevReady, currentBlockIndex])
+  
+  // Verificar novamente quando currentBlockIndex muda (funções podem ser recriadas)
+  useEffect(() => {
+    if (hideProgress && showOtherQuestions && navigateNextRef.current && navigatePrevRef.current && !functionsExposedRef.current) {
+      const timeoutId = setTimeout(() => {
+        if (onNavigateNextReady && navigateNextRef.current) {
+          onNavigateNextReady(navigateNextRef.current)
+        }
+        if (onNavigatePrevReady && navigatePrevRef.current) {
+          onNavigatePrevReady(navigatePrevRef.current)
+        }
+        functionsExposedRef.current = true
+      }, 100)
+      
+      return () => clearTimeout(timeoutId)
+    }
+  }, [currentBlockIndex, hideProgress, showOtherQuestions, onNavigateNextReady, onNavigatePrevReady])
+
   // Verificar se estamos no último bloco (para mostrar consentimento e envio só no final)
   let isOnLastBlock = true
   if (showOtherQuestions && otherQuestions.length > 0) {
@@ -1429,11 +1564,14 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       {/* Formulário completo - só aparece se respondeu "Sim" */}
       {isFromSaoRoque === true && (
         <>
-          <Alert className="text-left">
-            <AlertDescription className="text-xs sm:text-sm leading-relaxed">
-              <strong>Privacidade e Proteção de Dados:</strong> Seus dados serão utilizados exclusivamente para o projeto Visibilidade em Foco e não serão compartilhados com terceiros sem seu consentimento. Você pode solicitar a remoção das suas informações a qualquer momento.
-            </AlertDescription>
-          </Alert>
+          {/* Mensagem de privacidade - só mostrar se não estiver no modal (skipInitialQuestion) */}
+          {!skipInitialQuestion && (
+            <Alert className="text-left">
+              <AlertDescription className="text-xs sm:text-sm leading-relaxed">
+                <strong>Privacidade e Proteção de Dados:</strong> Seus dados serão utilizados exclusivamente para o projeto Visibilidade em Foco e não serão compartilhados com terceiros sem seu consentimento. Você pode solicitar a remoção das suas informações a qualquer momento.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Mostrar a pergunta CEP apenas quando ainda não avançou para os outros blocos */}
           {cepQuestion && !showOtherQuestions && (
@@ -1492,17 +1630,188 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
           sectionOrderFromQuestions.push('Sem seção')
         }
         
-        // Debug: log da ordem das seções no componente
-        console.log('🔍 DynamicForm - Seções na ordem extraída:', sectionOrderFromQuestions)
-        console.log('🔍 DynamicForm - Todas as seções nas perguntas:', Object.keys(grouped))
-        console.log('🔍 DynamicForm - Primeiras 5 perguntas:', otherQuestions.slice(0, 5).map(q => ({ 
-          section: q.section, 
-          order: q.order 
-        })))
+        // Ordem das seções processada
 
         const totalBlocks = sectionOrderFromQuestions.length;
         const currentBlock = sectionOrderFromQuestions[currentBlockIndex];
         const isLastBlock = currentBlockIndex === totalBlocks - 1;
+
+        // Função para navegar para o próximo bloco (armazenada em ref para acesso externo)
+        const handleNavigateNext = async () => {
+          // Validar campos do bloco atual antes de continuar
+          const currentBlockQuestions = grouped[currentBlock] || []
+          const fieldsToValidate = currentBlockQuestions
+            .filter(q => q.required)
+            .map(q => q.id)
+          
+          // Se não houver campos obrigatórios, avançar
+          if (fieldsToValidate.length === 0) {
+            // Marcar navegação como pendente e processar em useEffect
+            requestAnimationFrame(() => {
+              setPendingNavigation('next')
+            })
+            return
+          }
+          
+          // Verificar se há valores preenchidos antes de validar
+          // Se não houver nenhum valor preenchido, não validar ainda (usuário ainda não começou a preencher)
+          const formData = watch()
+          const hasAnyValue = fieldsToValidate.some(fieldId => {
+            const value = formData[fieldId as keyof typeof formData]
+            return value !== undefined && value !== null && value !== '' && 
+                   (Array.isArray(value) ? value.length > 0 : true)
+          })
+          
+          // Se não houver nenhum valor preenchido, não mostrar erro ainda
+          // O usuário precisa começar a preencher antes de validar
+          if (!hasAnyValue) {
+            // Marcar navegação como pendente e processar em useEffect
+            requestAnimationFrame(() => {
+              setPendingNavigation('next')
+            })
+            return
+          }
+          
+          // Trigger validação e aguardar resultado (apenas se houver valores preenchidos)
+          const isValid = await trigger(fieldsToValidate as any)
+          
+          // Se houver erros, fazer scroll para o primeiro erro
+          if (!isValid) {
+            // Encontrar o primeiro campo com erro
+            const firstErrorField = fieldsToValidate.find(fieldId => {
+              return errors[fieldId as keyof typeof errors]
+            })
+            
+            if (firstErrorField) {
+              // Scroll para o campo com erro (usar scrollTo em vez de scrollIntoView para evitar problemas)
+              setTimeout(() => {
+                const errorElement = document.getElementById(firstErrorField) || 
+                  document.querySelector(`[id*="${firstErrorField}"]`)
+                if (errorElement) {
+                  const formContainer = document.getElementById('form-scroll-container')
+                  if (formContainer && errorElement) {
+                    const elementTop = errorElement.getBoundingClientRect().top
+                    const containerTop = formContainer.getBoundingClientRect().top
+                    const scrollPosition = formContainer.scrollTop + elementTop - containerTop - 100
+                    formContainer.scrollTo({ top: scrollPosition, behavior: 'smooth' })
+                  }
+                  errorElement.focus()
+                }
+              }, 100)
+            }
+            // Mostrar toast apenas uma vez - usar toast.error com id único para evitar duplicatas
+            toast.error('Por favor, preencha todos os campos obrigatórios deste bloco', {
+              id: 'validation-error-block'
+            })
+            return
+          }
+          
+          // Validar também campos "outros" apenas do bloco atual
+          // Reutilizar formData já declarado acima
+          const formDataTyped = formData as FormData
+          let otherFieldsValid = true
+          const newOtherFieldErrors: Record<string, boolean> = {}
+          
+          currentBlockQuestions.forEach((question) => {
+            // Radio e Select com "outros"
+            if ((question.field_type === 'radio' || question.field_type === 'select') && question.has_other_option) {
+              const selectedValue = formDataTyped[question.id as keyof FormData] as string
+              const isOtherOption = selectedValue && question.options?.some(opt => 
+                opt.toLowerCase().includes('outro') && opt === selectedValue
+              )
+              
+              if (isOtherOption) {
+                const otherValue = formDataTyped[`${question.id}_other` as keyof FormData] as string
+                if (!otherValue || !otherValue.trim()) {
+                  otherFieldsValid = false
+                  newOtherFieldErrors[question.id] = true
+                }
+              }
+            }
+            
+            // Checkbox com "outros"
+            if (question.field_type === 'checkbox' && question.has_other_option) {
+              const selectedValues = formDataTyped[question.id as keyof FormData] as string[] | undefined
+              const hasOtherSelected = selectedValues?.some(val => 
+                question.options?.some(opt => opt.toLowerCase().includes('outro') && opt === val)
+              )
+              
+              if (hasOtherSelected) {
+                const otherValue = formDataTyped[`${question.id}_other` as keyof FormData] as string
+                if (!otherValue || !otherValue.trim()) {
+                  otherFieldsValid = false
+                  newOtherFieldErrors[question.id] = true
+                }
+              }
+            }
+          })
+          
+          if (!otherFieldsValid) {
+            setOtherFieldErrors(newOtherFieldErrors)
+            toast.error('Por favor, preencha o campo "Qual?" quando selecionar a opção "Outros"')
+            
+            // Scroll para o primeiro campo com erro (usar scrollTo em vez de scrollIntoView)
+            setTimeout(() => {
+              const firstErrorFieldId = Object.keys(newOtherFieldErrors)[0]
+              if (firstErrorFieldId) {
+                const errorInput = document.getElementById(`${firstErrorFieldId}_other`)
+                if (errorInput) {
+                  const formContainer = document.getElementById('form-scroll-container')
+                  if (formContainer && errorInput) {
+                    const elementTop = errorInput.getBoundingClientRect().top
+                    const containerTop = formContainer.getBoundingClientRect().top
+                    const scrollPosition = formContainer.scrollTop + elementTop - containerTop - 100
+                    formContainer.scrollTo({ top: scrollPosition, behavior: 'smooth' })
+                  }
+                  errorInput.focus()
+                }
+              }
+            }, 100)
+            
+            return
+          }
+          
+          // Limpar erros e avançar para o próximo bloco
+          setOtherFieldErrors({})
+          // Marcar navegação como pendente e processar em useEffect (usar requestAnimationFrame para evitar atualização durante renderização)
+          requestAnimationFrame(() => {
+            setPendingNavigation('next')
+          })
+          
+          // Scroll para o topo do formulário após um pequeno delay
+          setTimeout(() => {
+            const formContainer = document.getElementById('form-scroll-container')
+            if (formContainer) {
+              formContainer.scrollTo({ top: 0, behavior: 'smooth' })
+            }
+          }, 150)
+        }
+
+        // Função para navegar para o bloco anterior (armazenada em ref para acesso externo)
+        const handleNavigatePrev = () => {
+          // Usar requestAnimationFrame para garantir que a atualização aconteça após a renderização atual
+          requestAnimationFrame(() => {
+            setPendingNavigation('prev')
+          })
+        }
+
+        // Armazenar funções em refs para acesso externo
+        navigateNextRef.current = handleNavigateNext
+        navigatePrevRef.current = handleNavigatePrev
+        
+        // Resetar flag quando as funções são recriadas (novo bloco)
+        functionsExposedRef.current = false
+        
+        // Expor funções imediatamente após serem criadas (de forma assíncrona para evitar erro durante renderização)
+        if (hideProgress && onNavigateNextReady && onNavigatePrevReady) {
+          setTimeout(() => {
+            if (navigateNextRef.current && navigatePrevRef.current) {
+              onNavigateNextReady(navigateNextRef.current)
+              onNavigatePrevReady(navigatePrevRef.current)
+              functionsExposedRef.current = true
+            }
+          }, 0)
+        }
 
         return (
           <div className="space-y-6 sm:space-y-8">
@@ -1726,20 +2035,25 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             
             {/* Botão Continuar e Indicador de Progresso */}
             {/* Mostrar apenas se não for o último bloco (no último bloco, mostrar apenas o botão "Enviar Cadastro") */}
-            {totalBlocks > 1 && !isLastBlock && (
+            {/* Ocultar TUDO (indicador e botões) quando hideProgress for true - botões ficam no FormModal */}
+            {totalBlocks > 1 && !isLastBlock && !hideProgress && (
               <div className="bg-background border-t pt-6 pb-safe sm:pb-4 mt-8">
                 <div className="flex flex-col gap-4">
-                  {/* Indicador de Progresso */}
-                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
-                    <span>Bloco {currentBlockIndex + 1} de {totalBlocks}</span>
-                    <span>{sectionOrderFromQuestions[currentBlockIndex]}</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div
-                      className="bg-orange-500 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${((currentBlockIndex + 1) / totalBlocks) * 100}%` }}
-                    />
-                  </div>
+                  {/* Indicador de Progresso - oculto quando hideProgress for true */}
+                  {!hideProgress && (
+                    <>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+                        <span>Bloco {currentBlockIndex + 1} de {totalBlocks}</span>
+                        <span>{sectionOrderFromQuestions[currentBlockIndex]}</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div
+                          className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${((currentBlockIndex + 1) / totalBlocks) * 100}%` }}
+                        />
+                      </div>
+                    </>
+                  )}
                   
                   {/* Botões de navegação */}
                   <div className="flex gap-3">
@@ -1748,16 +2062,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => {
-                          setCurrentBlockIndex(prev => Math.max(prev - 1, 0))
-                          // Scroll para o topo
-                          setTimeout(() => {
-                            const formContainer = document.getElementById('form-scroll-container')
-                            if (formContainer) {
-                              formContainer.scrollTo({ top: 0, behavior: 'smooth' })
-                            }
-                          }, 150)
-                        }}
+                        onClick={handleNavigatePrev}
                         className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-6 text-base sm:text-lg font-semibold min-h-[56px] rounded-full"
                       >
                         Voltar
@@ -1767,89 +2072,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                     {/* Botão Continuar */}
                     <Button
                     type="button"
-                    onClick={async () => {
-                      // Validar campos do bloco atual antes de continuar
-                      const currentBlockQuestions = grouped[currentBlock] || []
-                      const fieldsToValidate = currentBlockQuestions
-                        .filter(q => q.required)
-                        .map(q => q.id)
-                      
-                      const isValid = await trigger(fieldsToValidate as any)
-                      
-                      if (isValid) {
-                        // Validar também campos "outros" apenas do bloco atual
-                        const formData = watch() as FormData
-                        let otherFieldsValid = true
-                        const newOtherFieldErrors: Record<string, boolean> = {}
-                        
-                        currentBlockQuestions.forEach((question) => {
-                          // Radio e Select com "outros"
-                          if ((question.field_type === 'radio' || question.field_type === 'select') && question.has_other_option) {
-                            const selectedValue = formData[question.id as keyof FormData] as string
-                            const isOtherOption = selectedValue && question.options?.some(opt => 
-                              opt.toLowerCase().includes('outro') && opt === selectedValue
-                            )
-                            
-                            if (isOtherOption) {
-                              const otherValue = formData[`${question.id}_other` as keyof FormData] as string
-                              if (!otherValue || !otherValue.trim()) {
-                                otherFieldsValid = false
-                                newOtherFieldErrors[question.id] = true
-                              }
-                            }
-                          }
-                          
-                          // Checkbox com "outros"
-                          if (question.field_type === 'checkbox' && question.has_other_option) {
-                            const selectedValues = formData[question.id as keyof FormData] as string[] | undefined
-                            const hasOtherSelected = selectedValues?.some(val => 
-                              question.options?.some(opt => opt.toLowerCase().includes('outro') && opt === val)
-                            )
-                            
-                            if (hasOtherSelected) {
-                              const otherValue = formData[`${question.id}_other` as keyof FormData] as string
-                              if (!otherValue || !otherValue.trim()) {
-                                otherFieldsValid = false
-                                newOtherFieldErrors[question.id] = true
-                              }
-                            }
-                          }
-                        })
-                        
-                        if (!otherFieldsValid) {
-                          setOtherFieldErrors(newOtherFieldErrors)
-                          toast.error('Por favor, preencha o campo "Qual?" quando selecionar a opção "Outros"')
-                          
-                          // Scroll para o primeiro campo com erro
-                          setTimeout(() => {
-                            const firstErrorFieldId = Object.keys(newOtherFieldErrors)[0]
-                            if (firstErrorFieldId) {
-                              const errorInput = document.getElementById(`${firstErrorFieldId}_other`)
-                              if (errorInput) {
-                                errorInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                                errorInput.focus()
-                              }
-                            }
-                          }, 100)
-                          
-                          return
-                        }
-                        
-                        // Limpar erros e avançar para o próximo bloco
-                        setOtherFieldErrors({})
-                        setCurrentBlockIndex(prev => prev + 1)
-                        
-                        // Scroll para o topo do formulário após um pequeno delay
-                        setTimeout(() => {
-                          const formContainer = document.getElementById('form-scroll-container')
-                          if (formContainer) {
-                            formContainer.scrollTo({ top: 0, behavior: 'smooth' })
-                          }
-                        }, 150)
-                      } else {
-                        toast.error('Por favor, preencha todos os campos obrigatórios deste bloco')
-                      }
-                    }}
+                    onClick={handleNavigateNext}
                     className={`${currentBlockIndex > 0 ? 'flex-1' : 'w-full'} bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98] rounded-full`}
                   >
                     Continuar
@@ -1860,7 +2083,8 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             )}
             
             {/* Indicador de Progresso no último bloco */}
-            {totalBlocks > 1 && isLastBlock && (
+            {/* Ocultar TUDO quando hideProgress for true - botões ficam no FormModal */}
+            {totalBlocks > 1 && isLastBlock && !hideProgress && (
               <div className="bg-background border-t pt-6 pb-safe sm:pb-4 mt-8">
                 <div className="flex flex-col gap-4">
                   {/* Indicador de Progresso */}
@@ -1880,15 +2104,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => {
-                        setCurrentBlockIndex(prev => Math.max(prev - 1, 0))
-                        setTimeout(() => {
-                          const formContainer = document.getElementById('form-scroll-container')
-                          if (formContainer) {
-                            formContainer.scrollTo({ top: 0, behavior: 'smooth' })
-                          }
-                        }, 150)
-                      }}
+                      onClick={handleNavigatePrev}
                       className="w-full border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-6 text-base sm:text-lg font-semibold min-h-[56px] rounded-full"
                     >
                       Voltar
@@ -1970,16 +2186,35 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
     estado?: string
   }>({})
   const [isValidCity, setIsValidCity] = useState<boolean | null>(null)
+  const isSearchingRef = useRef(false) // Flag para evitar loop durante busca
   const cepValue = watch(fieldId as any) || ''
 
   // Buscar CEP quando tiver 8 dígitos
   useEffect(() => {
+    // Ignorar se já estamos buscando para evitar loop
+    if (isSearchingRef.current) {
+      return
+    }
+    
     const cleanCep = cepValue.replace(/\D/g, '')
-    if (cleanCep.length === 8 && cleanCep !== lastSearchedCep) {
+    
+    // Só processar se o CEP limpo mudou e tem 8 dígitos
+    if (cleanCep.length === 8 && cleanCep !== lastSearchedCep && !isSearchingRef.current) {
+      isSearchingRef.current = true
       setLastSearchedCep(cleanCep)
-      searchCep(cleanCep)
-    } else if (cleanCep.length < 8) {
-      // Limpar dados se CEP estiver incompleto
+      
+      // Usar setTimeout para garantir que a busca aconteça de forma assíncrona
+      setTimeout(() => {
+        searchCep(cleanCep).finally(() => {
+          // Resetar flag após busca completar
+          setTimeout(() => {
+            isSearchingRef.current = false
+          }, 1000)
+        })
+      }, 0)
+    } else if (cleanCep.length === 0 && lastSearchedCep) {
+      // Só limpar quando CEP estiver completamente vazio para evitar loops
+      setLastSearchedCep('')
       setAddressData({})
       setIsValidCity(null)
       if (onCityValidationChange) {
@@ -1992,7 +2227,7 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cepValue])
 
-  const searchCep = async (cep: string) => {
+  const searchCep = async (cep: string): Promise<void> => {
     setLoadingCep(true)
     try {
       const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`)
@@ -2012,9 +2247,8 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
         return
       }
 
-      // Preencher o CEP formatado
-      const formattedCep = `${cep.slice(0, 5)}-${cep.slice(5)}`
-      setValue(fieldId as any, formattedCep)
+      // Não atualizar o CEP aqui para evitar loop - o handleCepChange já formata
+      // O CEP já está formatado pelo handleCepChange antes de chegar aqui
 
       // Armazenar dados do endereço para exibir nos campos desabilitados
       const addressInfo = {
@@ -2067,9 +2301,7 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
         onBairroChange(addressInfo.bairro)
       }
       
-      // Debug
-      console.log('CEP encontrado:', addressInfo)
-      console.log('Dados da API ViaCEP:', data)
+      // CEP encontrado e processado
 
       // Buscar campos relacionados pelo texto da pergunta e preencher
       // Apenas campos de input (text, number) que são realmente campos de formulário
@@ -2137,6 +2369,11 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
 
   // Formatar CEP enquanto digita
   const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Ignorar se já estamos buscando para evitar loop
+    if (isSearchingRef.current) {
+      return
+    }
+    
     let value = e.target.value.replace(/\D/g, '')
     if (value.length > 8) value = value.slice(0, 8)
     
@@ -2145,7 +2382,9 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
       value = `${value.slice(0, 5)}-${value.slice(5)}`
     }
     
-    setValue(fieldId as any, value)
+    // Usar setValue sem shouldValidate para evitar validação automática
+    // shouldDirty: true garante que o campo seja marcado como modificado
+    setValue(fieldId as any, value, { shouldValidate: false, shouldDirty: true, shouldTouch: true })
   }
 
   // Encontrar campos relacionados para exibir

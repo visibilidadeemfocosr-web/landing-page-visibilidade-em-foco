@@ -53,10 +53,10 @@ export function About({ content }: AboutProps) {
           {/* Seções */}
           {aboutSections.map((section, sectionIndex) => (
             <div key={sectionIndex} className={sectionIndex > 0 ? 'mt-8 sm:mt-12' : ''}>
-              {/* Título */}
+          {/* Título */}
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground mb-6 sm:mb-8 text-balance leading-tight">
                 {section.title}
-              </h2>
+          </h2>
 
               {/* Parágrafos */}
               <div className="space-y-4 sm:space-y-6 text-base sm:text-lg leading-relaxed text-muted-foreground">
@@ -92,9 +92,9 @@ export function About({ content }: AboutProps) {
               <ul className="space-y-2 sm:space-y-3 text-sm sm:text-base text-muted-foreground">
                 {objectives.map((objective, index) => (
                   <li key={index} className="flex items-start gap-3">
-                    <span className="text-orange-500 font-bold mt-1">•</span>
+                  <span className="text-orange-500 font-bold mt-1">•</span>
                     <span>{objective}</span>
-                  </li>
+                </li>
                 ))}
               </ul>
             </div>

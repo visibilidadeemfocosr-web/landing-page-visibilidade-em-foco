@@ -6,7 +6,7 @@ import { useInView } from '@/hooks/use-in-view'
 import { PeopleIllustration, SpeakerIllustration } from './CustomShapes'
 
 export function Impact() {
-  const ref = useRef(null)
+  const ref = useRef<HTMLElement>(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
   return (

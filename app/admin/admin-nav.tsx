@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import Link from 'next/link'
 import { 
   LayoutDashboard, 
   Home, 
@@ -32,7 +33,7 @@ export default function AdminNav() {
         const isActive = pathname === item.href || (item.href !== '/admin' && pathname?.startsWith(item.href))
         
         return (
-          <a
+          <Link
             key={item.href}
             href={item.href}
             className={cn(
@@ -44,7 +45,7 @@ export default function AdminNav() {
           >
             <Icon className="w-4 h-4 flex-shrink-0" />
             <span className="hidden sm:inline">{item.label}</span>
-          </a>
+          </Link>
         )
       })}
     </div>

@@ -3,10 +3,10 @@
 import { motion } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { useInView } from '@/hooks/use-in-view'
-import { RegistrationFormLoader } from '@/components/registration-form-loader'
+import { FormModal } from './FormModal'
 
 export function CTA() {
-  const ref = useRef(null)
+  const ref = useRef<HTMLElement>(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [isFormOpen, setIsFormOpen] = useState(false)
 
@@ -153,25 +153,7 @@ export function CTA() {
       </section>
 
       {/* Modal do Formulário */}
-      {isFormOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setIsFormOpen(false)}
-          />
-          <div className="relative bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg shadow-2xl">
-            <button
-              onClick={() => setIsFormOpen(false)}
-              className="absolute top-4 right-4 z-10 text-gray-500 hover:text-gray-700"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <RegistrationFormLoader onSuccess={() => setIsFormOpen(false)} />
-          </div>
-        </div>
-      )}
+      <FormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
     </>
   )
 }
