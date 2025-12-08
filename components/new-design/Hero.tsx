@@ -28,12 +28,12 @@ export function Hero() {
               transition={{ duration: 0.6 }}
               className="relative"
             >
-              <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 relative">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 relative">
                 <Image 
                   src="/logoN.png"
                   alt="Visibilidade em Foco"
-                  width={80}
-                  height={80}
+                  width={96}
+                  height={96}
                   className="w-full h-full object-contain drop-shadow-2xl"
                   unoptimized
                 />

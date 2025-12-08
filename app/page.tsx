@@ -1,36 +1,19 @@
-import { HomeContentWrapper } from "@/components/home-content-wrapper"
-import { createAdminClient } from '@/lib/supabase/admin'
+import { Hero } from '@/components/new-design/Hero'
+import { About } from '@/components/new-design/About'
+import { Importance } from '@/components/new-design/Importance'
+import { Impact } from '@/components/new-design/Impact'
+import { CTA } from '@/components/new-design/CTA'
+import { Footer } from '@/components/new-design/Footer'
 
-const HOME_CONTENT_ID = '00000000-0000-0000-0000-000000000001'
-
-async function getHomeContent() {
-  try {
-    const adminClient = createAdminClient()
-    
-    const { data, error } = await adminClient
-      .from('home_content')
-      .select('content, updated_at')
-      .eq('id', HOME_CONTENT_ID)
-      .single()
-    
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null
-      }
-      console.error('Erro ao carregar conteúdo da home:', error)
-      return null
-    }
-    
-    return data?.content || null
-  } catch (error) {
-    console.error('Erro ao carregar conteúdo da home:', error)
-    return null
-  }
-}
-
-export default async function Home() {
-  // Buscar dados no servidor (SSR)
-  const homeContent = await getHomeContent()
-  
-  return <HomeContentWrapper initialContent={homeContent} />
+export default function Home() {
+  return (
+    <div className="min-h-screen bg-stone-50">
+      <Hero />
+      <About />
+      <Importance />
+      <Impact />
+      <CTA />
+      <Footer />
+    </div>
+  )
 }
