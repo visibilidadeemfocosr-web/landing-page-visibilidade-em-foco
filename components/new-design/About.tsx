@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { useRef } from 'react'
 import { useInView } from '@/hooks/use-in-view'
-import { EyeIllustration, HandIllustration, HeartHandIllustration } from './CustomShapes'
+import { EyeIllustration, RecognitionIcon, HeartHandIllustration } from './CustomShapes'
 
 export function About() {
   const ref = useRef<HTMLElement>(null)
@@ -50,7 +50,7 @@ export function About() {
             <div className="w-32 h-32 mx-auto mb-6 relative">
               <div className="absolute inset-0 bg-orange-100" />
               <div className="absolute inset-4">
-                <HandIllustration />
+                <RecognitionIcon />
               </div>
             </div>
             <h3 className="text-2xl mb-3 tracking-tight">RECONHECIMENTO</h3>

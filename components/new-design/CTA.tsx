@@ -1,15 +1,41 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useInView } from '@/hooks/use-in-view'
-import { FormModal } from './FormModal'
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { RegistrationFormLoader } from '@/components/registration-form-loader'
 import { Instagram, Sparkles, Star, Network } from 'lucide-react'
+import { X } from 'lucide-react'
+import { toast } from 'sonner'
 
 export function CTA() {
   const ref = useRef<HTMLElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
-  const [isFormOpen, setIsFormOpen] = useState(false)
+  const isInView = useInView(ref as React.RefObject<HTMLElement>, { once: true, margin: "-100px" })
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const handleShare = async () => {
+    try {
+      const url = window.location.href
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      toast.success('URL copiada para a área de transferência!')
+      
+      // Resetar o estado após 2 segundos
+      setTimeout(() => {
+        setCopied(false)
+      }, 2000)
+    } catch (err) {
+      toast.error('Erro ao copiar URL')
+      console.error('Erro ao copiar:', err)
+    }
+  }
 
   return (
     <>
@@ -90,19 +116,76 @@ export function CTA() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-                <button 
-                  onClick={() => setIsFormOpen(true)}
-                  className="group bg-pink-500 hover:bg-pink-600 text-white px-12 py-5 text-xl tracking-wide transition-all duration-300 relative overflow-hidden"
-                >
-                  <span className="relative z-10">PARTICIPAR AGORA</span>
-                  <div className="absolute inset-0 bg-white transform translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
-                  <span className="absolute inset-0 flex items-center justify-center text-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 tracking-wide">
-                    PARTICIPAR AGORA
-                  </span>
-                </button>
+                {mounted ? (
+                  <Dialog open={dialogOpen} onOpenChange={setDialogOpen} modal={true}>
+                    <DialogTrigger asChild>
+                      <button 
+                        className="group bg-pink-500 hover:bg-pink-600 text-white px-12 py-5 text-xl tracking-wide transition-all duration-300 relative overflow-hidden"
+                      >
+                        <span className="relative z-10">PARTICIPAR AGORA</span>
+                        <div className="absolute inset-0 bg-white transform translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
+                        <span className="absolute inset-0 flex items-center justify-center text-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 tracking-wide">
+                          PARTICIPAR AGORA
+                        </span>
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent 
+                      className="!max-w-[100vw] w-[100vw] !max-h-[100vh] h-[100vh] !top-0 !left-0 !translate-x-0 !translate-y-0 rounded-none p-0 sm:max-w-[95vw] sm:w-[95vw] sm:max-h-[95vh] sm:h-[95vh] sm:!top-[50%] sm:!left-[50%] sm:!translate-x-[-50%] sm:!translate-y-[-50%] sm:rounded-lg sm:p-6 overflow-hidden flex flex-col bg-white !z-[60]"
+                      showCloseButton={false}
+                    >
+                      {/* DialogTitle oculto para acessibilidade */}
+                      <DialogTitle className="sr-only">Cadastro de Artista</DialogTitle>
+                      
+                      {/* Header com design igual ao FormModal */}
+                      <div className="relative bg-black text-white p-8 md:p-10 flex-shrink-0">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500" style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }} />
+                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-yellow-400 rounded-full opacity-50" />
+                        
+                        <div className="relative z-10">
+                          <h2 className="text-3xl md:text-4xl lg:text-5xl tracking-tight mb-4">
+                            CADASTRO DE ARTISTA
+                          </h2>
+                          <p className="text-gray-300 max-w-3xl">
+                            Preencha o formulário abaixo para fazer parte do mapeamento Visibilidade em Foco. 
+                            Seus dados serão tratados com total segurança e privacidade.
+                          </p>
+                        </div>
 
-                <button className="border-2 border-white text-white hover:bg-white hover:text-black px-12 py-5 text-xl tracking-wide transition-all duration-300">
-                  COMPARTILHAR
+                        <button
+                          onClick={() => setDialogOpen(false)}
+                          className="absolute top-8 right-8 z-20 text-white hover:text-gray-300 transition-colors"
+                        >
+                          <X className="w-8 h-8" />
+                        </button>
+                      </div>
+                      
+                      <div id="form-scroll-container" className="flex-1 overflow-y-auto p-8 md:p-10 lg:p-12 min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+                        <RegistrationFormLoader onSuccess={() => setDialogOpen(false)} />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                ) : (
+                  <button 
+                    className="group bg-pink-500 hover:bg-pink-600 text-white px-12 py-5 text-xl tracking-wide transition-all duration-300 relative overflow-hidden"
+                  >
+                    <span className="relative z-10">PARTICIPAR AGORA</span>
+                    <div className="absolute inset-0 bg-white transform translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
+                    <span className="absolute inset-0 flex items-center justify-center text-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 tracking-wide">
+                      PARTICIPAR AGORA
+                    </span>
+                  </button>
+                )}
+
+                <button 
+                  onClick={handleShare}
+                  className="border-2 border-white text-white hover:bg-white hover:text-black px-12 py-5 text-xl tracking-wide transition-all duration-300 relative overflow-hidden"
+                >
+                  <span className={`relative z-10 transition-opacity duration-300 ${copied ? 'opacity-0' : 'opacity-100'}`}>
+                    COMPARTILHAR
+                  </span>
+                  <span className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${copied ? 'opacity-100' : 'opacity-0'}`}>
+                    COPIADO!
+                  </span>
                 </button>
               </div>
             </div>
@@ -152,9 +235,6 @@ export function CTA() {
           </motion.div>
         </div>
       </section>
-
-      {/* Modal do Formulário */}
-      <FormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} />
     </>
   )
 }

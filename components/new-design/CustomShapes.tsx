@@ -53,6 +53,90 @@ export function HandIllustration() {
   );
 }
 
+export function RecognitionIcon() {
+  return (
+    <svg viewBox="0 0 100 100" fill="none" className="w-full h-full">
+      {/* Frame formado por 4 brackets em L nos cantos (formando uma caixinha) */}
+      {/* Canto superior esquerdo - L correto */}
+      <path 
+        d="M25 25 L25 30 L30 30" 
+        stroke="black" 
+        strokeWidth="3" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        fill="none" 
+      />
+      {/* Canto superior direito - L correto */}
+      <path 
+        d="M75 25 L75 30 L70 30" 
+        stroke="black" 
+        strokeWidth="3" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        fill="none" 
+      />
+      {/* Canto inferior esquerdo - L correto */}
+      <path 
+        d="M25 75 L25 70 L30 70" 
+        stroke="black" 
+        strokeWidth="3" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        fill="none" 
+      />
+      {/* Canto inferior direito - L correto */}
+      <path 
+        d="M75 75 L75 70 L70 70" 
+        stroke="black" 
+        strokeWidth="3" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        fill="none" 
+      />
+      
+      {/* Rosto minimalista dentro da caixinha */}
+      {/* Olhos - duas linhas verticais levemente inclinadas */}
+      <line 
+        x1="38" 
+        y1="42" 
+        x2="38" 
+        y2="47" 
+        stroke="black" 
+        strokeWidth="3" 
+        strokeLinecap="round" 
+      />
+      <line 
+        x1="62" 
+        y1="42" 
+        x2="62" 
+        y2="47" 
+        stroke="black" 
+        strokeWidth="3" 
+        strokeLinecap="round" 
+      />
+      
+      {/* Nariz - linha angular pequena */}
+      <path 
+        d="M50 50 L48 54" 
+        stroke="black" 
+        strokeWidth="3" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+      />
+      
+      {/* Boca - linha curva suave para cima (sorriso) */}
+      <path 
+        d="M38 58 Q50 62 62 58" 
+        stroke="black" 
+        strokeWidth="3" 
+        strokeLinecap="round" 
+        fill="none" 
+      />
+    </svg>
+  );
+}
+
+
 export function EyeIllustration() {
   return (
     <svg viewBox="0 0 100 100" fill="none" className="w-full h-full">
