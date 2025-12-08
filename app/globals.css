@@ -121,12 +121,8 @@
 
   /* Melhorias de touch e mobile */
   button, a, input, select, textarea {
-    -webkit-tap-highlight-color: transparent;
-  }
-  
-  /* touch-action apenas em botões para evitar interferência com radio buttons */
-  button, a[role="button"], input[type="button"], input[type="submit"] {
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* Área de toque mínima recomendada pela Apple (44x44px) */
@@ -215,58 +211,4 @@
   display: block;
   content: "";
   margin-top: 0.5rem;
-}
-
-/* Estilos para formulário no novo design */
-.new-design-form-wrapper form {
-  @apply space-y-8;
-}
-
-.new-design-form-wrapper input[type="text"],
-.new-design-form-wrapper input[type="email"],
-.new-design-form-wrapper input[type="tel"],
-.new-design-form-wrapper input[type="number"],
-.new-design-form-wrapper textarea {
-  @apply w-full px-6 py-4 border-4 border-gray-200 focus:border-purple-600 outline-none text-xl transition-colors bg-white;
-}
-
-.new-design-form-wrapper label {
-  @apply block mb-4;
-}
-
-/* Ajustar fontes das perguntas para seguir identidade do novo design */
-.new-design-form-wrapper .text-lg,
-.new-design-form-wrapper .text-lg.sm\:text-base,
-.new-design-form-wrapper .space-y-3 > div:first-child,
-.new-design-form-wrapper .space-y-4 > div:first-child {
-  font-size: 1.25rem;
-  letter-spacing: -0.025em;
-  font-weight: 600;
-  line-height: 1.25;
-}
-
-.new-design-form-wrapper button[type="submit"] {
-  @apply w-full px-8 py-4 bg-pink-500 hover:bg-pink-600 text-white transition-all duration-300 tracking-wide text-lg;
-}
-
-.new-design-form-wrapper select {
-  @apply w-full px-6 py-4 border-4 border-gray-200 focus:border-purple-600 outline-none text-xl transition-colors bg-white;
-}
-
-.new-design-form-wrapper [role="radiogroup"] {
-  @apply space-y-4;
-}
-
-.new-design-form-wrapper [role="radio"] {
-  @apply w-6 h-6 border-4 border-gray-400;
-}
-
-.new-design-form-wrapper [role="radio"][aria-checked="true"] {
-  @apply border-purple-600;
-}
-
-.new-design-form-wrapper [role="radio"][aria-checked="true"]::before {
-  content: '';
-  @apply absolute w-4 h-4 bg-purple-600 rounded-full;
-  transform: scale(0.5);
 }
