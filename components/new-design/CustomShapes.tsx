@@ -56,37 +56,37 @@ export function HandIllustration() {
 export function RecognitionIcon() {
   return (
     <svg viewBox="0 0 100 100" fill="none" className="w-full h-full">
-      {/* Frame formado por 4 brackets em L nos cantos (formando uma caixinha) */}
-      {/* Canto superior esquerdo - L correto */}
+      {/* Frame formado por 4 brackets em L INVERTIDOS (formato ¬) apontando para fora */}
+      {/* Canto superior esquerdo - ¬ invertido */}
       <path 
-        d="M25 25 L25 30 L30 30" 
+        d="M30 25 L25 25 L25 30" 
         stroke="black" 
         strokeWidth="3" 
         strokeLinecap="round" 
         strokeLinejoin="round" 
         fill="none" 
       />
-      {/* Canto superior direito - L correto */}
+      {/* Canto superior direito - ¬ invertido */}
       <path 
-        d="M75 25 L75 30 L70 30" 
+        d="M70 25 L75 25 L75 30" 
         stroke="black" 
         strokeWidth="3" 
         strokeLinecap="round" 
         strokeLinejoin="round" 
         fill="none" 
       />
-      {/* Canto inferior esquerdo - L correto */}
+      {/* Canto inferior esquerdo - ¬ invertido */}
       <path 
-        d="M25 75 L25 70 L30 70" 
+        d="M30 75 L25 75 L25 70" 
         stroke="black" 
         strokeWidth="3" 
         strokeLinecap="round" 
         strokeLinejoin="round" 
         fill="none" 
       />
-      {/* Canto inferior direito - L correto */}
+      {/* Canto inferior direito - ¬ invertido */}
       <path 
-        d="M75 75 L75 70 L70 70" 
+        d="M70 75 L75 75 L75 70" 
         stroke="black" 
         strokeWidth="3" 
         strokeLinecap="round" 

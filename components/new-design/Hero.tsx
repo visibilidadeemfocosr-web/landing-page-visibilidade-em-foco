@@ -205,7 +205,15 @@ export function Hero() {
                     </button>
                   )}
                   
-                  <button className="border-2 border-black text-black hover:bg-black hover:text-white px-10 py-4 text-lg tracking-wide transition-all duration-300">
+                  <button 
+                    onClick={() => {
+                      const sobreSection = document.getElementById('sobre')
+                      if (sobreSection) {
+                        sobreSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      }
+                    }}
+                    className="border-2 border-black text-black hover:bg-black hover:text-white px-10 py-4 text-lg tracking-wide transition-all duration-300"
+                  >
                     SAIBA MAIS
                   </button>
                 </motion.div>

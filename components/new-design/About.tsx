@@ -118,7 +118,7 @@ export function About() {
                 Ao registrar as <span className="bg-yellow-400 text-black px-2">NOSSAS</span> existências, criamos um arquivo vivo que valida identidades e fortalece redes de apoio.
               </p>
               <p className="text-xl text-gray-300">
-                Este mapeamento não é apenas um levantamento de dados — é um <span className="text-pink-400">ato político de resistência e afirmação</span>.
+                Este mapeamento não é apenas um levantamento de dados — é um <span className="text-yellow-400">ato político de resistência e afirmação</span>.
               </p>
             </div>
           </div>
