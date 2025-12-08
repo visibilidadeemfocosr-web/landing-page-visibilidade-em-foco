@@ -130,7 +130,11 @@ export function Impact() {
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-white rounded-full" />
               </div>
               <div className="text-white text-center relative z-10">
-                <div className="text-8xl md:text-9xl mb-4" style={{ fontWeight: '900', lineHeight: '1' }}>+</div>
+                <div className="flex items-center justify-center mb-4">
+                  <div className="w-32 h-32 bg-pink-300 rounded-full flex items-center justify-center">
+                    <div className="text-6xl md:text-7xl" style={{ fontWeight: '900', lineHeight: '1' }}>+</div>
+                  </div>
+                </div>
                 <div className="text-xl tracking-wider">JUNTOS</div>
               </div>
             </div>

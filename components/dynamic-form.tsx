@@ -1404,7 +1404,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
               <Button
                 type="button"
                 size="lg"
-                className="bg-orange-500 hover:bg-orange-600 text-white py-6 text-lg font-semibold min-h-[56px]"
+                className="bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg font-semibold min-h-[56px]"
                 onClick={() => setIsFromSaoRoque(true)}
               >
                 Sim
@@ -1426,17 +1426,17 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
 
       {/* Mensagem se respondeu "Não" */}
       {isFromSaoRoque === false && (
-        <Alert variant="default" className="bg-orange-500/5 border-orange-500/20">
-          <AlertDescription className="text-base sm:text-lg text-center py-6">
-            <p className="font-semibold text-orange-500 mb-2">Obrigado pelo interesse!</p>
-            <p className="text-foreground">
+        <div className="mb-8 bg-stone-50 p-8 border-l-4 border-purple-600">
+          <div>
+            <h4 className="mb-2 tracking-tight font-semibold text-gray-900">OBRIGADO PELO INTERESSE!</h4>
+            <p className="text-sm text-gray-700 leading-relaxed">
               Este mapeamento é exclusivo para artistas da cidade de <strong>São Roque</strong>.
             </p>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-sm text-gray-700 leading-relaxed mt-2">
               Se você é de outra cidade, agradecemos sua compreensão.
             </p>
-          </AlertDescription>
-        </Alert>
+          </div>
+        </div>
       )}
 
       {/* Formulário completo - só aparece se respondeu "Sim" */}
@@ -1451,17 +1451,17 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
 
           {/* Se CEP não for válido, mostrar apenas mensagem de agradecimento */}
           {cepCityValid === false && (
-            <Alert variant="default" className="bg-orange-500/5 border-orange-500/20">
-              <AlertDescription className="text-base sm:text-lg text-center py-6">
-                <p className="font-semibold text-orange-500 mb-2">Obrigado pelo interesse!</p>
-                <p className="text-foreground">
+            <div className="mb-8 bg-stone-50 p-8 border-l-4 border-purple-600">
+              <div>
+                <h4 className="mb-2 tracking-tight font-semibold text-gray-900">OBRIGADO PELO INTERESSE!</h4>
+                <p className="text-sm text-gray-700 leading-relaxed">
                   Este mapeamento é exclusivo para artistas da cidade de <strong>São Roque</strong>.
                 </p>
-                <p className="text-muted-foreground mt-2">
+                <p className="text-sm text-gray-700 leading-relaxed mt-2">
                   Se você é de outra cidade, agradecemos sua compreensão.
                 </p>
-              </AlertDescription>
-            </Alert>
+              </div>
+            </div>
           )}
 
           {/* Mostrar outras perguntas apenas se CEP for explicitamente válido (true) */}
@@ -1520,8 +1520,8 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                 className={`space-y-6 sm:space-y-8 ${section === currentBlock ? 'block' : 'hidden'}`}
               >
                 {section !== 'Sem seção' && (
-                  <div className="border-b-2 border-orange-500/30 pb-3 -mx-2 sm:-mx-0">
-                    <h3 className="text-xl sm:text-2xl font-bold text-orange-500">{section}</h3>
+                  <div className="border-b-2 border-purple-600/30 pb-3 -mx-2 sm:-mx-0">
+                    <h3 className="text-xl sm:text-2xl font-bold text-purple-600">{section}</h3>
                   </div>
                 )}
                 {(() => {
@@ -1576,18 +1576,18 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                         
                         {/* Mostrar mensagem se a resposta for "Não" ou se não houver resposta ainda */}
                         {(currentRedeSocialAnswer === 'nao' || (!currentRedeSocialAnswer && redeSocialQuestion)) && (
-                          <Alert variant="default" className="bg-blue-500/5 border-blue-500/20 mt-4">
-                            <AlertDescription className="text-base text-center py-4">
-                              <p className="font-semibold text-blue-600 mb-2">
-                                {currentRedeSocialAnswer === 'nao' ? 'Tudo bem!' : 'Atenção'}
-                              </p>
-                              <p className="text-foreground">
+                          <div className="mb-8 bg-stone-50 p-8 border-l-4 border-purple-600 mt-4">
+                            <div>
+                              <h4 className="mb-2 tracking-tight font-semibold text-gray-900">
+                                {currentRedeSocialAnswer === 'nao' ? 'TUDO BEM!' : 'ATENÇÃO'}
+                              </h4>
+                              <p className="text-sm text-gray-700 leading-relaxed">
                                 {currentRedeSocialAnswer === 'nao' 
                                   ? 'Você pode finalizar sua participação mesmo sem participar da rede social. Role até o final, marque a flag de consentimento e clique em "Enviar Participação".'
                                   : 'Selecione "Sim" para preencher os demais campos e participar da rede social de artistas.'}
                               </p>
-                            </AlertDescription>
-                          </Alert>
+                            </div>
+                          </div>
                         )}
                       </>
                     )
@@ -1743,7 +1743,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                   </div>
                   <div className="w-full bg-muted rounded-full h-2">
                     <div
-                      className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                      className="bg-purple-600 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${((currentBlockIndex + 1) / totalBlocks) * 100}%` }}
                     />
                   </div>
@@ -1857,7 +1857,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                         toast.error('Por favor, preencha todos os campos obrigatórios deste bloco')
                       }
                     }}
-                    className={`${currentBlockIndex > 0 ? 'flex-1' : 'w-full'} bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]`}
+                    className={`${currentBlockIndex > 0 ? 'flex-1' : 'w-full'} bg-purple-600 hover:bg-purple-700 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]`}
                   >
                     Continuar
                   </Button>
@@ -1877,7 +1877,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                   </div>
                   <div className="w-full bg-muted rounded-full h-2">
                     <div
-                      className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+                      className="bg-purple-600 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${((currentBlockIndex + 1) / totalBlocks) * 100}%` }}
                     />
                   </div>
@@ -1937,7 +1937,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
 
           <Button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
             disabled={loading || !watch('consent') || isCepInvalid || previewMode}
           >
             {previewMode ? 'Preview - Envio Desabilitado' : loading ? 'Enviando...' : 'Enviar Participação'}
