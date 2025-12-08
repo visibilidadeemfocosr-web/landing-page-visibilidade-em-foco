@@ -3,8 +3,9 @@
 import { motion } from 'framer-motion'
 import { AbstractShape1, StarBurstShape } from './CustomShapes'
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { RegistrationFormLoader } from '@/components/registration-form-loader'
+import { X } from 'lucide-react'
 
 export function Hero() {
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -152,14 +153,35 @@ export function Hero() {
                       </DialogTrigger>
                       <DialogContent 
                         className="!max-w-[100vw] w-[100vw] !max-h-[100vh] h-[100vh] !top-0 !left-0 !translate-x-0 !translate-y-0 rounded-none p-0 sm:max-w-[95vw] sm:w-[95vw] sm:max-h-[95vh] sm:h-[95vh] sm:!top-[50%] sm:!left-[50%] sm:!translate-x-[-50%] sm:!translate-y-[-50%] sm:rounded-lg sm:p-6 overflow-hidden flex flex-col bg-white !z-[60]"
+                        showCloseButton={false}
                       >
-                        <DialogHeader className="flex-shrink-0 pb-4 pt-4 px-4 sm:px-0 border-b bg-white">
-                          <DialogTitle className="text-xl sm:text-2xl font-bold">Cadastro de Artista</DialogTitle>
-                          <DialogDescription className="text-sm sm:text-base leading-relaxed pt-2">
-                            Preencha o formulário abaixo para fazer parte do mapeamento Visibilidade em Foco. Seus dados serão tratados com total segurança e privacidade.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div id="form-scroll-container" className="flex-1 overflow-y-auto px-4 sm:px-0 mt-4 pb-12 sm:pb-4 pb-safe">
+                        {/* DialogTitle oculto para acessibilidade */}
+                        <DialogTitle className="sr-only">Cadastro de Artista</DialogTitle>
+                        
+                        {/* Header com design igual ao FormModal */}
+                        <div className="relative bg-black text-white p-8 md:p-10 flex-shrink-0">
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500" style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }} />
+                          <div className="absolute bottom-0 left-0 w-24 h-24 bg-yellow-400 rounded-full opacity-50" />
+                          
+                          <div className="relative z-10">
+                            <h2 className="text-3xl md:text-4xl lg:text-5xl tracking-tight mb-4">
+                              CADASTRO DE ARTISTA
+                            </h2>
+                            <p className="text-gray-300 max-w-3xl">
+                              Preencha o formulário abaixo para fazer parte do mapeamento Visibilidade em Foco. 
+                              Seus dados serão tratados com total segurança e privacidade.
+                            </p>
+                          </div>
+
+                          <button
+                            onClick={() => setDialogOpen(false)}
+                            className="absolute top-8 right-8 z-20 text-white hover:text-gray-300 transition-colors"
+                          >
+                            <X className="w-8 h-8" />
+                          </button>
+                        </div>
+                        
+                        <div id="form-scroll-container" className="flex-1 overflow-y-auto p-8 md:p-10 lg:p-12 min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
                           <RegistrationFormLoader onSuccess={() => setDialogOpen(false)} />
                         </div>
                       </DialogContent>

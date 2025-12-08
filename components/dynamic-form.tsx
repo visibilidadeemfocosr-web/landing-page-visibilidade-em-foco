@@ -1392,7 +1392,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
               <Button
                 type="button"
                 size="lg"
-                className="bg-orange-500 hover:bg-orange-600 text-white py-6 text-lg font-semibold rounded-full min-h-[56px]"
+                className="bg-orange-500 hover:bg-orange-600 text-white py-6 text-lg font-semibold min-h-[56px]"
                 onClick={() => setIsFromSaoRoque(true)}
               >
                 Sim
@@ -1401,7 +1401,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                 type="button"
                 size="lg"
                 variant="outline"
-                className="border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-6 text-lg font-semibold rounded-full min-h-[56px]"
+                className="border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-6 text-lg font-semibold min-h-[56px]"
                 onClick={() => setIsFromSaoRoque(false)}
               >
                 Não
@@ -1758,7 +1758,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                             }
                           }, 150)
                         }}
-                        className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-6 text-base sm:text-lg font-semibold min-h-[56px] rounded-full"
+                        className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-6 text-base sm:text-lg font-semibold min-h-[56px]"
                       >
                         Voltar
                       </Button>
@@ -1850,7 +1850,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                         toast.error('Por favor, preencha todos os campos obrigatórios deste bloco')
                       }
                     }}
-                    className={`${currentBlockIndex > 0 ? 'flex-1' : 'w-full'} bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98] rounded-full`}
+                    className={`${currentBlockIndex > 0 ? 'flex-1' : 'w-full'} bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]`}
                   >
                     Continuar
                   </Button>
@@ -1889,7 +1889,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                           }
                         }, 150)
                       }}
-                      className="w-full border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-6 text-base sm:text-lg font-semibold min-h-[56px] rounded-full"
+                      className="w-full border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-6 text-base sm:text-lg font-semibold min-h-[56px]"
                     >
                       Voltar
                     </Button>
@@ -1930,7 +1930,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
 
       <Button
         type="submit"
-        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98] rounded-full"
+        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
         disabled={loading || !watch('consent') || isCepInvalid || previewMode}
       >
             {previewMode ? 'Preview - Envio Desabilitado' : loading ? 'Enviando...' : 'Enviar Participação'}
