@@ -20,7 +20,7 @@ export function Hero() {
     <>
       <section className="relative min-h-screen bg-stone-50 overflow-hidden">
         {/* Header/Nav */}
-        <nav className="absolute top-0 left-0 right-0 z-50 p-8">
+        <nav className="absolute top-0 left-0 right-0 z-50 p-4 sm:p-6 md:p-8">
           <div className="max-w-7xl mx-auto flex justify-between items-start">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -58,7 +58,7 @@ export function Hero() {
         {/* Formas geométricas de fundo */}
         <div className="absolute inset-0">
           <motion.div
-            className="absolute top-20 right-10 w-32 h-32 opacity-80"
+            className="absolute top-20 right-10 w-32 h-32 opacity-80 hidden sm:block"
             animate={{ rotate: 360 }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           >
@@ -66,7 +66,7 @@ export function Hero() {
           </motion.div>
 
           <motion.div
-            className="absolute bottom-40 left-20 w-48 h-48 opacity-60"
+            className="absolute bottom-40 left-20 w-48 h-48 opacity-60 hidden md:block"
             animate={{ rotate: -360 }}
             transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
           >
@@ -75,21 +75,21 @@ export function Hero() {
 
           {/* Blocos de cor sólida */}
           <motion.div
-            className="absolute top-1/4 right-1/4 w-24 h-24 bg-pink-500"
+            className="absolute top-1/4 right-1/4 w-16 h-16 sm:w-24 sm:h-24 bg-pink-500 opacity-60 sm:opacity-100"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
           />
           
           <motion.div
-            className="absolute bottom-1/3 left-1/3 w-16 h-16 bg-blue-600 rounded-full"
+            className="absolute bottom-1/3 left-1/3 w-12 h-12 sm:w-16 sm:h-16 bg-blue-600 rounded-full opacity-60 sm:opacity-100"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.8, delay: 0.7 }}
           />
 
           <motion.div
-            className="absolute top-1/2 left-10 w-20 h-32 bg-orange-500"
+            className="absolute top-1/2 left-4 sm:left-10 w-16 h-24 sm:w-20 sm:h-32 bg-orange-500 opacity-60 sm:opacity-100"
             initial={{ x: -100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -99,39 +99,39 @@ export function Hero() {
 
         {/* Conteúdo principal */}
         <div className="relative z-10 min-h-screen flex items-center">
-          <div className="max-w-7xl mx-auto px-8 py-32 w-full">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-20 sm:py-24 md:py-32 w-full">
+            <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
               {/* Lado esquerdo - Texto */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
               >
-                <div className="mb-8">
-                  <div className="inline-block bg-purple-600 text-white px-6 py-2 text-sm tracking-wider mb-6">
+                <div className="mb-6 sm:mb-8">
+                  <div className="inline-block bg-purple-600 text-white px-4 sm:px-6 py-2 text-xs sm:text-sm tracking-wider mb-4 sm:mb-6">
                     1º MAPEAMENTO CULTURAL
                   </div>
                   
-                  <h1 className="space-y-2 mb-8">
-                    <div className="text-6xl md:text-7xl lg:text-8xl text-black leading-none tracking-tight">
+                  <h1 className="space-y-1 sm:space-y-2 mb-6 sm:mb-8">
+                    <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-black leading-none tracking-tight">
                       ARTISTAS
                     </div>
-                    <div className="text-6xl md:text-7xl lg:text-8xl leading-none tracking-tight relative inline-block">
+                    <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-none tracking-tight relative inline-block">
                       <span className="text-black">LGB</span>
                       <span className="relative inline-block">
                         <span className="text-black">T</span>
-                        <div className="absolute -top-4 -right-6 w-12 h-12 bg-yellow-400 -z-10" />
+                        <div className="absolute -top-2 -right-4 sm:-top-4 sm:-right-6 w-8 h-8 sm:w-12 sm:h-12 bg-yellow-400 -z-10" />
                       </span>
                       <span className="text-black">QIAPN+</span>
                     </div>
-                    <div className="text-4xl md:text-5xl text-gray-700 tracking-tight">
+                    <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-gray-700 tracking-tight">
                       de São Roque
                     </div>
                   </h1>
 
-                  <div className="relative mb-8">
-                    <div className="absolute -left-4 top-0 bottom-0 w-1 bg-pink-500" />
-                    <p className="text-xl md:text-2xl text-gray-800 pl-8">
+                  <div className="relative mb-6 sm:mb-8">
+                    <div className="absolute -left-2 sm:-left-4 top-0 bottom-0 w-0.5 sm:w-1 bg-pink-500" />
+                    <p className="text-lg sm:text-xl md:text-2xl text-gray-800 pl-4 sm:pl-6 md:pl-8">
                       Reconhecer. Documentar. Celebrar.
                       <br />
                       <strong>Sua voz importa.</strong>
@@ -212,14 +212,14 @@ export function Hero() {
                         sobreSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
                       }
                     }}
-                    className="border-2 border-black text-black hover:bg-black hover:text-white px-10 py-4 text-lg tracking-wide transition-all duration-300"
+                    className="border-2 border-black text-black hover:bg-black hover:text-white px-6 sm:px-8 md:px-10 py-3 sm:py-4 text-base sm:text-lg tracking-wide transition-all duration-300 active:scale-95 w-full sm:w-auto"
                   >
                     SAIBA MAIS
                   </button>
                 </motion.div>
 
-                <div className="mt-8 bg-black text-white px-6 py-4 inline-block">
-                  <p className="text-sm tracking-wider">
+                <div className="mt-6 sm:mt-8 bg-black text-white px-4 sm:px-6 py-3 sm:py-4 inline-block">
+                  <p className="text-xs sm:text-sm tracking-wider">
                     <span className="text-yellow-400">15/12/2025</span> até <span className="text-yellow-400">15/02/2026</span>
                   </p>
                 </div>
@@ -287,14 +287,14 @@ export function Hero() {
 
         {/* Elemento de scroll indicator */}
         <motion.div
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+          className="absolute bottom-4 sm:bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 sm:gap-2"
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
-          <div className="w-6 h-10 border-2 border-black rounded-full flex justify-center pt-2">
-            <div className="w-1 h-2 bg-black rounded-full" />
+          <div className="w-5 h-8 sm:w-6 sm:h-10 border-2 border-black rounded-full flex justify-center pt-1.5 sm:pt-2">
+            <div className="w-0.5 h-1.5 sm:w-1 sm:h-2 bg-black rounded-full" />
           </div>
-          <span className="text-xs tracking-widest text-gray-600">SCROLL</span>
+          <span className="text-[10px] sm:text-xs tracking-widest text-gray-600">SCROLL</span>
         </motion.div>
       </section>
     </>

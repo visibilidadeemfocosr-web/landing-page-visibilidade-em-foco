@@ -1400,11 +1400,11 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                 <span className="text-red-500 ml-1">*</span>
               </div>
               
-              <div className="grid grid-cols-2 gap-4 mt-6">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-6">
               <Button
                 type="button"
                 size="lg"
-                className="bg-purple-600 hover:bg-purple-700 text-white py-6 text-lg font-semibold min-h-[56px]"
+                className="bg-purple-600 hover:bg-purple-700 text-white py-4 sm:py-5 md:py-6 text-base sm:text-lg font-semibold min-h-[48px] sm:min-h-[56px] touch-manipulation active:scale-95"
                 onClick={() => setIsFromSaoRoque(true)}
               >
                 Sim
@@ -1413,7 +1413,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                 type="button"
                 size="lg"
                 variant="outline"
-                className="border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-6 text-lg font-semibold min-h-[56px]"
+                className="border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-4 sm:py-5 md:py-6 text-base sm:text-lg font-semibold min-h-[48px] sm:min-h-[56px] touch-manipulation active:scale-95"
                 onClick={() => setIsFromSaoRoque(false)}
               >
                 Não

@@ -10,30 +10,40 @@ export function Impact() {
   const isInView = useInView(ref as React.RefObject<HTMLElement>, { once: true, margin: "-100px" })
 
   return (
-    <section ref={ref} id="impacto" className="py-24 bg-white relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-8">
+    <section ref={ref} id="impacto" className="py-12 sm:py-16 md:py-20 lg:py-24 bg-white relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="mb-20"
+          className="mb-12 sm:mb-16 md:mb-20"
         >
-          <div className="text-sm tracking-widest text-gray-500 mb-4">03 / IMPACTO</div>
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
+          <div className="text-xs sm:text-sm tracking-widest text-gray-500 mb-3 sm:mb-4">03 / IMPACTO</div>
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-start">
             <div>
-              <h2 className="text-5xl md:text-6xl lg:text-7xl tracking-tight leading-tight">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl tracking-tight leading-tight">
                 <div className="text-black">A IMPORTÂNCIA</div>
                 <div className="text-black">DE</div>
                 <div className="relative inline-block">
-                  <span className="text-black">EXISTIR</span>
-                  <div className="absolute -bottom-2 left-0 right-0 h-3 bg-yellow-400 -z-10" />
+                  <span className="relative inline-block text-black" style={{ zIndex: 2 }}>
+                    EXISTIR
+                  </span>
+                  <span 
+                    className="absolute bottom-0 left-0 right-0 bg-yellow-400 block" 
+                    style={{ 
+                      height: '12px',
+                      transform: 'translateY(4px)',
+                      zIndex: 1,
+                      pointerEvents: 'none'
+                    }} 
+                  />
                 </div>
                 <div className="text-black">E RESISTIR</div>
               </h2>
             </div>
             <div className="flex items-end h-full">
-              <p className="text-xl md:text-2xl text-gray-700 leading-relaxed">
+              <p className="text-lg sm:text-xl md:text-2xl text-gray-700 leading-relaxed">
                 Muito mais que números e estatísticas — um movimento de validação, resistência e transformação.
               </p>
             </div>
@@ -45,37 +55,37 @@ export function Impact() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="grid md:grid-cols-4 gap-6 mb-20"
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-16 md:mb-20"
         >
-          <div className="bg-orange-500 p-8 text-white aspect-square flex flex-col justify-between">
-            <div className="text-sm tracking-widest">01</div>
+          <div className="bg-orange-500 p-4 sm:p-6 md:p-8 text-white aspect-square flex flex-col justify-between">
+            <div className="text-xs sm:text-sm tracking-widest">01</div>
             <div>
-              <div className="text-3xl tracking-tight mb-2">RESISTÊNCIA</div>
-              <p className="text-sm text-orange-100">Contra o apagamento histórico</p>
+              <div className="text-xl sm:text-2xl md:text-3xl tracking-tight mb-1 sm:mb-2">RESISTÊNCIA</div>
+              <p className="text-xs sm:text-sm text-orange-100">Contra o apagamento histórico</p>
             </div>
           </div>
 
-          <div className="bg-purple-600 p-8 text-white aspect-square flex flex-col justify-between">
-            <div className="text-sm tracking-widest">02</div>
+          <div className="bg-purple-600 p-4 sm:p-6 md:p-8 text-white aspect-square flex flex-col justify-between">
+            <div className="text-xs sm:text-sm tracking-widest">02</div>
             <div>
-              <div className="text-3xl tracking-tight mb-2">VISIBILIDADE</div>
-              <p className="text-sm text-purple-100">Reconhecimento aos artistas</p>
+              <div className="text-xl sm:text-2xl md:text-3xl tracking-tight mb-1 sm:mb-2">VISIBILIDADE</div>
+              <p className="text-xs sm:text-sm text-purple-100">Reconhecimento aos artistas</p>
             </div>
           </div>
 
-          <div className="bg-blue-600 p-8 text-white aspect-square flex flex-col justify-between">
-            <div className="text-sm tracking-widest">03</div>
+          <div className="bg-blue-600 p-4 sm:p-6 md:p-8 text-white aspect-square flex flex-col justify-between">
+            <div className="text-xs sm:text-sm tracking-widest">03</div>
             <div>
-              <div className="text-3xl tracking-tight mb-2">CONEXÃO</div>
-              <p className="text-sm text-blue-100">Fortalecer a rede local</p>
+              <div className="text-xl sm:text-2xl md:text-3xl tracking-tight mb-1 sm:mb-2">CONEXÃO</div>
+              <p className="text-xs sm:text-sm text-blue-100">Fortalecer a rede local</p>
             </div>
           </div>
 
-          <div className="bg-pink-500 p-8 text-white aspect-square flex flex-col justify-between">
-            <div className="text-sm tracking-widest">04</div>
+          <div className="bg-pink-500 p-4 sm:p-6 md:p-8 text-white aspect-square flex flex-col justify-between">
+            <div className="text-xs sm:text-sm tracking-widest">04</div>
             <div>
-              <div className="text-3xl tracking-tight mb-2">VOZ</div>
-              <p className="text-sm text-pink-100">Amplificar histórias</p>
+              <div className="text-xl sm:text-2xl md:text-3xl tracking-tight mb-1 sm:mb-2">VOZ</div>
+              <p className="text-xs sm:text-sm text-pink-100">Amplificar histórias</p>
             </div>
           </div>
         </motion.div>
