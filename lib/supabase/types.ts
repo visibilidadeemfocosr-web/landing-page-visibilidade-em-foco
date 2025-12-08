@@ -48,7 +48,7 @@ export type LogoPosition =
   | 'rodape-esquerda' | 'rodape-centro' | 'rodape-direita'
 export type LogoSize = 'pequena' | 'media' | 'grande'
 export type LogoVariant = 'black' | 'color' | 'gradient' | 'white'
-export type DecorativeEffect = 'none' | 'blobs' | 'grid' | 'gradient'
+export type DecorativeEffect = 'none' | 'blobs' | 'grid' | 'gradient' | 'geometric' | 'geometric-left' | 'geometric-right'
 
 export type DecorativeElement = 
   | 'none' 

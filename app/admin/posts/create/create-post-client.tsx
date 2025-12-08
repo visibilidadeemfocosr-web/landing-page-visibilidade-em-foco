@@ -74,7 +74,7 @@ export function CreatePostClient({ editPostId }: CreatePostClientProps = {}) {
       }
     ],
     currentSlideIndex: 0,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fafaf9',
     textColor: '#1f2937',
     titleColor: '#1f2937',
     subtitleColor: '#4b5563',
@@ -82,7 +82,7 @@ export function CreatePostClient({ editPostId }: CreatePostClientProps = {}) {
     logoPosition: 'topo-direita',
     logoSize: 'media',
     logoVariant: 'black',
-    decorativeEffect: 'none',
+    decorativeEffect: 'geometric',
     caption: '',
   })
   
@@ -1457,6 +1457,30 @@ ${slide1.ctaLink ? `🔗 ${slide1.ctaLink}` : ''}
                       <div className="text-xs text-muted-foreground">Padrão de pontos</div>
                     </Label>
                   </div>
+                  
+                  <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 cursor-pointer">
+                    <RadioGroupItem value="geometric" id="effect-geometric" />
+                    <Label htmlFor="effect-geometric" className="cursor-pointer flex-1">
+                      <div className="font-medium">Geométrico</div>
+                      <div className="text-xs text-muted-foreground">Centro/Misto</div>
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 cursor-pointer">
+                    <RadioGroupItem value="geometric-left" id="effect-geometric-left" />
+                    <Label htmlFor="effect-geometric-left" className="cursor-pointer flex-1">
+                      <div className="font-medium">Geométrico Esquerda</div>
+                      <div className="text-xs text-muted-foreground">Formas à esquerda</div>
+                    </Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 cursor-pointer">
+                    <RadioGroupItem value="geometric-right" id="effect-geometric-right" />
+                    <Label htmlFor="effect-geometric-right" className="cursor-pointer flex-1">
+                      <div className="font-medium">Geométrico Direita</div>
+                      <div className="text-xs text-muted-foreground">Formas à direita</div>
+                    </Label>
+                  </div>
                 </RadioGroup>
               </div>
             </CardContent>
@@ -1662,6 +1686,376 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
           />
         )
       
+      case 'geometric':
+        return (
+          <>
+            {/* Grid pattern de fundo */}
+            <div 
+              className="absolute inset-0"
+              style={{
+                backgroundImage: 'linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)',
+                backgroundSize: '50px 50px',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Blobs decorativos */}
+            <div 
+              className="absolute -top-20 -left-20 w-64 h-64 rounded-full blur-3xl"
+              style={{
+                background: 'linear-gradient(to bottom right, rgba(192, 132, 252, 0.20), rgba(236, 72, 153, 0.20))',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            <div 
+              className="absolute -bottom-20 -right-20 w-64 h-64 rounded-full blur-3xl"
+              style={{
+                background: 'linear-gradient(to bottom right, rgba(192, 132, 252, 0.20), rgba(168, 85, 247, 0.15))',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Formas geométricas decorativas - estilo Hero (centro/misto) */}
+            {/* Diamante roxo no canto superior direito */}
+            <div 
+              className="absolute"
+              style={{
+                top: '64px',
+                right: '64px',
+                width: '96px',
+                height: '96px',
+                background: '#9333ea',
+                opacity: 0.3,
+                clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Círculo amarelo */}
+            <div 
+              className="absolute rounded-full"
+              style={{
+                bottom: '96px',
+                left: '48px',
+                width: '64px',
+                height: '64px',
+                background: '#facc15',
+                opacity: 0.4,
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Trapézio laranja */}
+            <div 
+              className="absolute"
+              style={{
+                bottom: '128px',
+                left: '96px',
+                width: '80px',
+                height: '96px',
+                background: '#f97316',
+                opacity: 0.3,
+                clipPath: 'polygon(0 0, 100% 25%, 100% 100%, 0 75%)',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Círculo rosa pequeno */}
+            <div 
+              className="absolute rounded-full"
+              style={{
+                top: '33.33%',
+                right: '25%',
+                width: '48px',
+                height: '48px',
+                background: '#ec4899',
+                opacity: 0.35,
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Círculo azul */}
+            <div 
+              className="absolute rounded-full"
+              style={{
+                top: '50%',
+                right: '48px',
+                width: '56px',
+                height: '56px',
+                background: '#2563eb',
+                opacity: 0.3,
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+          </>
+        )
+      
+      case 'geometric-left':
+        return (
+          <>
+            {/* Grid pattern de fundo */}
+            <div 
+              className="absolute inset-0"
+              style={{
+                backgroundImage: 'linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)',
+                backgroundSize: '50px 50px',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Blob decorativo à esquerda */}
+            <div 
+              className="absolute -top-32 -left-32 w-80 h-80 rounded-full blur-3xl"
+              style={{
+                background: 'linear-gradient(to bottom right, rgba(192, 132, 252, 0.25), rgba(236, 72, 153, 0.20))',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            <div 
+              className="absolute bottom-0 -left-40 w-96 h-96 rounded-full blur-3xl"
+              style={{
+                background: 'linear-gradient(to bottom right, rgba(168, 85, 247, 0.20), rgba(236, 72, 153, 0.15))',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Formas geométricas concentradas à ESQUERDA */}
+            {/* Diamante roxo no canto superior esquerdo */}
+            <div 
+              className="absolute"
+              style={{
+                top: '80px',
+                left: '32px',
+                width: '88px',
+                height: '88px',
+                background: '#9333ea',
+                opacity: 0.35,
+                clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Círculo amarelo grande */}
+            <div 
+              className="absolute rounded-full"
+              style={{
+                top: '200px',
+                left: '64px',
+                width: '72px',
+                height: '72px',
+                background: '#facc15',
+                opacity: 0.45,
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Trapézio laranja */}
+            <div 
+              className="absolute"
+              style={{
+                bottom: '160px',
+                left: '24px',
+                width: '96px',
+                height: '112px',
+                background: '#f97316',
+                opacity: 0.35,
+                clipPath: 'polygon(0 0, 100% 30%, 100% 100%, 0 70%)',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Círculo rosa médio */}
+            <div 
+              className="absolute rounded-full"
+              style={{
+                top: '40%',
+                left: '120px',
+                width: '56px',
+                height: '56px',
+                background: '#ec4899',
+                opacity: 0.4,
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Retângulo azul vertical */}
+            <div 
+              className="absolute rounded-full"
+              style={{
+                bottom: '220px',
+                left: '96px',
+                width: '48px',
+                height: '80px',
+                background: '#2563eb',
+                opacity: 0.35,
+                clipPath: 'polygon(0 0, 100% 20%, 100% 100%, 0 80%)',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Hexágono roxo pequeno */}
+            <div 
+              className="absolute"
+              style={{
+                top: '280px',
+                left: '160px',
+                width: '52px',
+                height: '52px',
+                background: '#a855f7',
+                opacity: 0.3,
+                clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+          </>
+        )
+      
+      case 'geometric-right':
+        return (
+          <>
+            {/* Grid pattern de fundo */}
+            <div 
+              className="absolute inset-0"
+              style={{
+                backgroundImage: 'linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)',
+                backgroundSize: '50px 50px',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Blobs decorativos à direita */}
+            <div 
+              className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-3xl"
+              style={{
+                background: 'linear-gradient(to bottom left, rgba(192, 132, 252, 0.25), rgba(236, 72, 153, 0.20))',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            <div 
+              className="absolute bottom-0 -right-40 w-96 h-96 rounded-full blur-3xl"
+              style={{
+                background: 'linear-gradient(to bottom left, rgba(168, 85, 247, 0.20), rgba(236, 72, 153, 0.15))',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Formas geométricas concentradas à DIREITA */}
+            {/* Estrela roxa no canto superior direito */}
+            <div 
+              className="absolute"
+              style={{
+                top: '72px',
+                right: '40px',
+                width: '104px',
+                height: '104px',
+                background: '#9333ea',
+                opacity: 0.35,
+                clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Círculo amarelo grande */}
+            <div 
+              className="absolute rounded-full"
+              style={{
+                top: '220px',
+                right: '56px',
+                width: '80px',
+                height: '80px',
+                background: '#facc15',
+                opacity: 0.45,
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Paralelogramo laranja */}
+            <div 
+              className="absolute"
+              style={{
+                bottom: '140px',
+                right: '32px',
+                width: '112px',
+                height: '88px',
+                background: '#f97316',
+                opacity: 0.35,
+                clipPath: 'polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%)',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Círculo rosa médio */}
+            <div 
+              className="absolute rounded-full"
+              style={{
+                top: '42%',
+                right: '132px',
+                width: '60px',
+                height: '60px',
+                background: '#ec4899',
+                opacity: 0.4,
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Losango azul */}
+            <div 
+              className="absolute"
+              style={{
+                bottom: '240px',
+                right: '104px',
+                width: '64px',
+                height: '64px',
+                background: '#2563eb',
+                opacity: 0.35,
+                clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+            
+            {/* Triângulo invertido roxo */}
+            <div 
+              className="absolute"
+              style={{
+                top: '320px',
+                right: '168px',
+                width: '56px',
+                height: '56px',
+                background: '#a855f7',
+                opacity: 0.3,
+                clipPath: 'polygon(50% 100%, 0 0, 100% 0)',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+          </>
+        )
+      
       default:
         return null
     }
@@ -1676,13 +2070,18 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
   }
   
+  // Se qualquer efeito geométrico estiver ativo, usar fundo stone-50
+  const backgroundColor = ['geometric', 'geometric-left', 'geometric-right'].includes(globalSettings.decorativeEffect)
+    ? '#fafaf9' 
+    : globalSettings.backgroundColor
+
   return (
     <div
       ref={ref}
       data-post-preview="true"
       className="w-full h-full relative flex flex-col items-center justify-center p-8 pb-20 overflow-hidden"
       style={{
-        backgroundColor: globalSettings.backgroundColor,
+        backgroundColor: backgroundColor,
         color: globalSettings.textColor,
       }}
     >
@@ -1738,7 +2137,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
         {/* Título */}
         {slide.title && (
           <h1 
-            className="font-black leading-tight"
+            className="font-black leading-tight tracking-tight"
             style={{ 
               fontSize: slide.title.length > 30 ? '2rem' : '2.5rem',
               color: globalSettings.titleColor,
@@ -1763,7 +2162,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
         {/* Subtítulo */}
         {slide.subtitle && (
           <h2 
-            className="font-semibold text-xl"
+            className="font-semibold text-xl tracking-tight"
             style={{ 
               color: globalSettings.subtitleColor,
               textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
@@ -1776,7 +2175,7 @@ const PostPreview = forwardRef<HTMLDivElement, PostPreviewProps>(({ slide, globa
         {/* Descrição */}
         {slide.description && (
           <p 
-            className="text-lg leading-relaxed max-w-md"
+            className="text-lg leading-relaxed max-w-md tracking-tight"
             style={{ 
               color: globalSettings.descriptionColor,
               textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
