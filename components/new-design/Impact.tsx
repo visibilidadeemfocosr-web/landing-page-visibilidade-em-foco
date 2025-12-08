@@ -1,8 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useInView } from 'framer-motion'
 import { useRef } from 'react'
+import { useInView } from '@/hooks/use-in-view'
 import { PeopleIllustration, SpeakerIllustration } from './CustomShapes'
 
 export function Impact() {

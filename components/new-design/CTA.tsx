@@ -1,8 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useInView } from 'framer-motion'
 import { useRef, useState } from 'react'
+import { useInView } from '@/hooks/use-in-view'
 import { RegistrationFormLoader } from '@/components/registration-form-loader'
 
 export function CTA() {
