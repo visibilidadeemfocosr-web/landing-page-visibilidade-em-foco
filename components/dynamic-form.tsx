@@ -650,7 +650,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
         
         return (
           <div key={fieldId} className="space-y-3">
-            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed tracking-tight">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
             </div>
@@ -685,7 +685,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
         const charLimit = question.max_length
         return (
           <div key={fieldId} className="space-y-3">
-            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed tracking-tight">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
             </div>
@@ -715,7 +715,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       case 'number':
         return (
           <div key={fieldId} className="space-y-3">
-            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed tracking-tight">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
             </div>
@@ -739,7 +739,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       case 'select':
         return (
           <div key={fieldId} className="space-y-3">
-            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed tracking-tight">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
             </div>
@@ -816,7 +816,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       case 'radio':
         return (
           <div key={fieldId} className="space-y-4">
-            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed tracking-tight block">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
             </div>
@@ -903,7 +903,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
           
           return (
             <div key={fieldId} className="space-y-4">
-              <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
+              <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed tracking-tight block">
                 <FormattedText html={question.text} />
                 {question.required && <span className="text-red-500 ml-1">*</span>}
               </div>
@@ -1025,7 +1025,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
         
         return (
           <div key={fieldId} className="space-y-4">
-            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed tracking-tight block">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
             </div>
@@ -1069,7 +1069,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       case 'scale':
         return (
           <div key={fieldId} className="space-y-4">
-            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed tracking-tight block">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
               <span className="ml-2 text-sm sm:text-base text-muted-foreground font-normal">
@@ -1105,7 +1105,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       case 'image':
         return (
           <div key={fieldId} className="space-y-3">
-            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed tracking-tight block">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
             </div>
@@ -1173,7 +1173,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
         
         return (
           <div key={fieldId} className="space-y-4">
-            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
+            <div className="text-lg sm:text-base font-semibold text-foreground leading-relaxed tracking-tight block">
               <FormattedText html={question.text} />
               {question.required && <span className="text-red-500 ml-1">*</span>}
               {question.required && (
@@ -1379,16 +1379,28 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onError)} noValidate className="space-y-6 pb-12 sm:pb-6 mb-4 sm:mb-0">
-      {/* Pergunta inicial - filtro de São Roque */}
+      {/* Informativo de Privacidade - antes da primeira pergunta */}
       {isFromSaoRoque === null && (
-        <div className="space-y-6">
-          <div className="space-y-4">
-            <div className="text-xl sm:text-2xl font-bold text-foreground leading-relaxed font-heading">
-              Você responde este formulário como pessoa artista LGBTQIAPN+ morador(a/e) do município de São Roque?
-              <span className="text-red-500 ml-1">*</span>
+        <>
+          <div className="mb-8 bg-stone-50 p-8 border-l-4 border-purple-600">
+            <div>
+              <h4 className="mb-2 tracking-tight font-semibold text-gray-900">PRIVACIDADE E PROTEÇÃO DE DADOS:</h4>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                Seus dados serão utilizados exclusivamente para o projeto Visibilidade em Foco e não serão compartilhados com terceiros sem seu consentimento. 
+                Você pode solicitar a remoção das suas informações a qualquer momento.
+              </p>
             </div>
-            
-            <div className="grid grid-cols-2 gap-4 mt-6">
+          </div>
+          
+          {/* Pergunta inicial - filtro de São Roque */}
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <div className="text-xl sm:text-2xl font-bold text-foreground leading-relaxed font-heading">
+                Você responde este formulário como pessoa artista LGBTQIAPN+ morador(a/e) do município de São Roque?
+                <span className="text-red-500 ml-1">*</span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 mt-6">
               <Button
                 type="button"
                 size="lg"
@@ -1409,6 +1421,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             </div>
           </div>
         </div>
+        </>
       )}
 
       {/* Mensagem se respondeu "Não" */}
@@ -1429,12 +1442,6 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
       {/* Formulário completo - só aparece se respondeu "Sim" */}
       {isFromSaoRoque === true && (
         <>
-          <Alert className="text-left">
-            <AlertDescription className="text-xs sm:text-sm leading-relaxed">
-              <strong>Privacidade e Proteção de Dados:</strong> Seus dados serão utilizados exclusivamente para o projeto Visibilidade em Foco e não serão compartilhados com terceiros sem seu consentimento. Você pode solicitar a remoção das suas informações a qualquer momento.
-            </AlertDescription>
-          </Alert>
-
           {/* Mostrar a pergunta CEP apenas quando ainda não avançou para os outros blocos */}
           {cepQuestion && !showOtherQuestions && (
             <div className="space-y-6 sm:space-y-8">
@@ -1898,7 +1905,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
               </div>
             )}
           </div>
-        );
+        )
       })()}
 
       {/* Mostrar consentimento e botão apenas se CEP for válido E se estiver no último bloco */}
@@ -1922,17 +1929,17 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
               Eu concordo com o uso das minhas informações para o projeto Visibilidade em Foco e estou ciente dos meus direitos de privacidade conforme a LGPD. *
             </label>
           </div>
-      {errors.consent?.message && (
-        <p className="text-sm text-red-500 ml-11">
-          {String(errors.consent.message)}
-        </p>
-      )}
+          {errors.consent?.message && (
+            <p className="text-sm text-red-500 ml-11">
+              {String(errors.consent.message)}
+            </p>
+          )}
 
-      <Button
-        type="submit"
-        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
-        disabled={loading || !watch('consent') || isCepInvalid || previewMode}
-      >
+          <Button
+            type="submit"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
+            disabled={loading || !watch('consent') || isCepInvalid || previewMode}
+          >
             {previewMode ? 'Preview - Envio Desabilitado' : loading ? 'Enviando...' : 'Enviar Participação'}
           </Button>
 
@@ -2179,7 +2186,7 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
   return (
     <div className="space-y-4">
       <div className="space-y-3">
-        <Label htmlFor={fieldId} className="text-lg sm:text-base font-semibold text-foreground leading-relaxed block">
+        <Label htmlFor={fieldId} className="text-lg sm:text-base font-semibold text-foreground leading-relaxed tracking-tight block">
           <FormattedText html={question.text} />
           {question.required && <span className="text-red-500 ml-1">*</span>}
         </Label>

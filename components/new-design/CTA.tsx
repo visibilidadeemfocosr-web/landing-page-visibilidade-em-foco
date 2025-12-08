@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { useInView } from '@/hooks/use-in-view'
 import { FormModal } from './FormModal'
+import { Instagram, Sparkles, Star, Network } from 'lucide-react'
 
 export function CTA() {
   const ref = useRef<HTMLElement>(null)
@@ -131,21 +132,21 @@ export function CTA() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-12">
-              <div className="bg-purple-600 p-6 text-white">
+              <div className="bg-purple-600 p-6 text-white flex flex-col items-center justify-center text-center">
                 <div className="text-sm tracking-widest mb-2">INSTAGRAM</div>
-                <div className="text-2xl">📸</div>
+                <Instagram className="w-8 h-8" />
               </div>
-              <div className="bg-pink-500 p-6 text-white">
+              <div className="bg-pink-500 p-6 text-white flex flex-col items-center justify-center text-center">
                 <div className="text-sm tracking-widest mb-2">HISTÓRIAS</div>
-                <div className="text-2xl">✨</div>
+                <Sparkles className="w-8 h-8" />
               </div>
-              <div className="bg-orange-500 p-6 text-white">
+              <div className="bg-orange-500 p-6 text-white flex flex-col items-center justify-center text-center">
                 <div className="text-sm tracking-widest mb-2">DESTAQUES</div>
-                <div className="text-2xl">🎨</div>
+                <Star className="w-8 h-8" />
               </div>
-              <div className="bg-blue-600 p-6 text-white">
+              <div className="bg-blue-600 p-6 text-white flex flex-col items-center justify-center text-center">
                 <div className="text-sm tracking-widest mb-2">CONEXÕES</div>
-                <div className="text-2xl">🤝</div>
+                <Network className="w-8 h-8" />
               </div>
             </div>
           </motion.div>

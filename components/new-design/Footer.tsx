@@ -1,5 +1,8 @@
 'use client'
 
+import Link from 'next/link'
+import Image from 'next/image'
+
 export function Footer() {
   return (
     <footer className="bg-black text-white py-16">
@@ -8,12 +11,21 @@ export function Footer() {
           {/* Logo e descrição */}
           <div className="md:col-span-2">
             <div className="mb-6 relative inline-block">
-              <div className="text-2xl tracking-tight leading-tight">
-                <div>VISIBILIDADE</div>
-                <div>EM FOCO</div>
+              <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 relative">
+                <Image 
+                  src="/logoN.png"
+                  alt="Visibilidade em Foco"
+                  width={112}
+                  height={112}
+                  className="w-full h-full object-contain"
+                  style={{ 
+                    filter: 'brightness(0) invert(1)',
+                  }}
+                  unoptimized
+                />
+                <div className="absolute -top-2 -right-6 w-4 h-4 bg-yellow-400 rounded-full" />
+                <div className="absolute -bottom-2 -left-4 w-6 h-6 bg-purple-600 rounded-full" />
               </div>
-              <div className="absolute -top-2 -right-6 w-4 h-4 bg-yellow-400 rounded-full" />
-              <div className="absolute -bottom-2 -left-4 w-6 h-6 bg-purple-600" />
             </div>
             <p className="text-gray-400 max-w-md leading-relaxed">
               1º Mapeamento Cultural de Artistas LGBTQIAPN+ do município de São Roque. Um projeto de resistência, visibilidade e celebração.
@@ -34,7 +46,7 @@ export function Footer() {
                 <a href="#participar" className="text-gray-300 hover:text-white transition-colors">Participar</a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors">FAQ</a>
+                <Link href="/admin/login" className="text-gray-300 hover:text-white transition-colors">Acesso Admin</Link>
               </li>
             </ul>
           </div>
@@ -56,6 +68,41 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Seção de Apoio e Realização */}
+        <div className="py-8 sm:py-10 border-y border-gray-800 mb-8">
+          <p className="text-center text-xs sm:text-sm font-semibold text-gray-500 mb-6 uppercase tracking-wider">
+            Apoio e Realização
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 md:gap-12">
+            <div className="h-12 sm:h-14 md:h-16 lg:h-20 flex items-center">
+              <Image 
+                src="/prefeitura.png"
+                alt="Prefeitura de São Roque"
+                width={180}
+                height={80}
+                className="h-full w-auto object-contain"
+                style={{ 
+                  filter: 'brightness(0) invert(1)',
+                }}
+                unoptimized
+              />
+            </div>
+            <div className="h-12 sm:h-14 md:h-16 lg:h-20 flex items-center">
+              <Image 
+                src="/pnab.png"
+                alt="PNAB"
+                width={180}
+                height={80}
+                className="h-full w-auto object-contain"
+                style={{ 
+                  filter: 'brightness(0) invert(1)',
+                }}
+                unoptimized
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Divider */}
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -64,7 +111,7 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <span>Feito com</span>
-              <div className="w-4 h-4 bg-pink-500 rounded-full" />
+              <span>❤️</span>
               <span>para a comunidade</span>
             </div>
           </div>

@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { RegistrationFormLoader } from '@/components/registration-form-loader'
 import { X } from 'lucide-react'
+import Image from 'next/image'
 
 export function Hero() {
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -27,12 +28,18 @@ export function Hero() {
               transition={{ duration: 0.6 }}
               className="relative"
             >
-              <div className="text-black tracking-tight leading-tight">
-                <div className="text-xl">VISIBILIDADE</div>
-                <div className="text-xl">EM FOCO</div>
+              <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 relative">
+                <Image 
+                  src="/logoN.png"
+                  alt="Visibilidade em Foco"
+                  width={80}
+                  height={80}
+                  className="w-full h-full object-contain drop-shadow-2xl"
+                  unoptimized
+                />
+                <div className="absolute -top-2 -right-8 w-6 h-6 bg-yellow-400 rounded-full" />
+                <div className="absolute -bottom-1 -left-4 w-8 h-8 bg-purple-600 rounded-full" />
               </div>
-              <div className="absolute -top-2 -right-8 w-6 h-6 bg-yellow-400 rounded-full" />
-              <div className="absolute -bottom-1 -left-4 w-8 h-8 bg-purple-600 rounded-full" />
             </motion.div>
 
             <motion.div
