@@ -7,7 +7,7 @@ import { PeopleIllustration, SpeakerIllustration } from './CustomShapes'
 
 export function Impact() {
   const ref = useRef<HTMLElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const isInView = useInView(ref as React.RefObject<HTMLElement>, { once: true, margin: "-100px" })
 
   return (
     <section ref={ref} id="impacto" className="py-24 bg-white relative overflow-hidden">

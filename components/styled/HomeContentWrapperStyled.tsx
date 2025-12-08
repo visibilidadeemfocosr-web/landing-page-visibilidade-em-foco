@@ -2,9 +2,9 @@
 
 import { useHomeContent } from '@/lib/hooks/use-home-content'
 import { HeroStyled } from './HeroStyled'
-import { About } from './about'
-import { Impact } from './impact'
-import { Footer } from './footer'
+import { About } from '../about'
+import { Impact } from '../impact'
+import { Footer } from '../footer'
 
 interface HomeContentWrapperStyledProps {
   initialContent?: any
