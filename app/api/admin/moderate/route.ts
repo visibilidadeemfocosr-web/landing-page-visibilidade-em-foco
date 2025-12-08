@@ -74,7 +74,7 @@ export async function GET() {
     // Buscar status de moderação
     const { data: moderationStatuses } = await adminClient
       .from('moderation_queue')
-      .select('submission_id, status, edited_bio, moderator_notes, edited_instagram, edited_facebook, edited_linkedin')
+      .select('submission_id, status, edited_bio, moderator_notes, edited_instagram, edited_facebook, edited_linkedin, edited_caption')
       .in('submission_id', submissionIds)
 
     // Buscar photo_crop e cropped_photo_url das submissions
@@ -151,6 +151,7 @@ export async function GET() {
         linkedin,
         status: moderation?.status || 'pending',
         moderator_notes: moderation?.moderator_notes || null,
+        edited_caption: moderation?.edited_caption || null,
         created_at: submissionAnswers[0]?.id || null,
       })
     })
@@ -178,7 +179,7 @@ export async function PATCH(request: Request) {
   try {
     const adminClient = createAdminClient()
     const body = await request.json()
-    const { submission_id, status, edited_bio, moderator_notes, edited_instagram, edited_facebook, edited_linkedin } = body
+    const { submission_id, status, edited_bio, moderator_notes, edited_instagram, edited_facebook, edited_linkedin, edited_caption } = body
 
     if (!submission_id || !status) {
       return NextResponse.json(
@@ -217,6 +218,10 @@ export async function PATCH(request: Request) {
 
     if (edited_linkedin !== undefined) {
       updateData.edited_linkedin = edited_linkedin
+    }
+
+    if (edited_caption !== undefined) {
+      updateData.edited_caption = edited_caption
     }
 
     if (status === 'approved' || status === 'rejected') {

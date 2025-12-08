@@ -94,7 +94,15 @@ export async function createMediaContainer(
     if (!response.ok) {
       const error = await response.json();
       console.error('Erro na resposta da API:', error);
-      throw new Error(`Erro ao criar container de mídia: ${error.error?.message || 'Erro desconhecido'}`);
+      const errorMessage = error.error?.message || 'Erro desconhecido';
+      
+      // Preservar a mensagem original do erro
+      const fullError = new Error(`Erro ao criar container de mídia: ${errorMessage}`);
+      if (error.error?.code) {
+        (fullError as any).code = error.error.code;
+      }
+      
+      throw fullError;
     }
     
     const data = await response.json();
@@ -133,7 +141,14 @@ export async function createCarouselChild(
     
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(`Erro ao criar item do carousel: ${error.error?.message || 'Erro desconhecido'}`);
+      const errorMessage = error.error?.message || 'Erro desconhecido';
+      
+      const fullError = new Error(`Erro ao criar item do carousel: ${errorMessage}`);
+      if (error.error?.code) {
+        (fullError as any).code = error.error.code;
+      }
+      
+      throw fullError;
     }
     
     const data = await response.json();
@@ -171,24 +186,42 @@ export async function publishMedia(
     
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(`Erro ao publicar mídia: ${error.error?.message || 'Erro desconhecido'}`);
+      const errorMessage = error.error?.message || 'Erro desconhecido';
+      
+      // Preservar a mensagem original do erro para melhor tratamento no frontend
+      const fullError = new Error(`Erro ao publicar mídia: ${errorMessage}`);
+      // Adicionar código de erro se disponível
+      if (error.error?.code) {
+        (fullError as any).code = error.error.code;
+      }
+      if (error.error?.error_subcode) {
+        (fullError as any).errorSubcode = error.error.error_subcode;
+      }
+      
+      throw fullError;
     }
     
     const data = await response.json();
     
-    // Obtém o permalink do post publicado
-    const mediaResponse = await fetch(
-      `${INSTAGRAM_GRAPH_API}/${data.id}?fields=permalink&access_token=${accessToken}`
-    );
-    
-    if (mediaResponse.ok) {
-      const mediaData = await mediaResponse.json();
-      return {
-        id: data.id,
-        permalink: mediaData.permalink,
-      };
+    // Obtém o permalink do post publicado (opcional - não falha se der erro)
+    try {
+      const mediaResponse = await fetch(
+        `${INSTAGRAM_GRAPH_API}/${data.id}?fields=permalink&access_token=${accessToken}`
+      );
+      
+      if (mediaResponse.ok) {
+        const mediaData = await mediaResponse.json();
+        return {
+          id: data.id,
+          permalink: mediaData.permalink,
+        };
+      }
+    } catch (permalinkError) {
+      // Ignorar erro ao buscar permalink - o post já foi publicado com sucesso
+      console.warn('Aviso: Post publicado com sucesso, mas não foi possível obter o permalink:', permalinkError);
     }
     
+    // Retornar apenas o ID - o post foi publicado com sucesso mesmo sem permalink
     return { id: data.id };
   } catch (error) {
     console.error('Erro ao publicar mídia:', error);

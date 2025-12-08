@@ -252,6 +252,72 @@ export async function POST(request: NextRequest) {
       pointer-events: none;
     }
     
+    /* Formas geométricas decorativas - estilo Hero */
+    .geo-shape-1 {
+      position: absolute;
+      top: 64px;
+      right: 64px;
+      width: 96px;
+      height: 96px;
+      background: #9333ea;
+      opacity: 0.3;
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    .geo-shape-2 {
+      position: absolute;
+      bottom: 96px;
+      left: 48px;
+      width: 64px;
+      height: 64px;
+      background: #facc15;
+      border-radius: 50%;
+      opacity: 0.4;
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    .geo-shape-3 {
+      position: absolute;
+      bottom: 128px;
+      left: 96px;
+      width: 80px;
+      height: 96px;
+      background: #f97316;
+      opacity: 0.3;
+      clip-path: polygon(0 0, 100% 25%, 100% 100%, 0 75%);
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    .geo-shape-4 {
+      position: absolute;
+      top: 33.33%;
+      right: 25%;
+      width: 48px;
+      height: 48px;
+      background: #ec4899;
+      border-radius: 50%;
+      opacity: 0.35;
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    .geo-shape-5 {
+      position: absolute;
+      top: 50%;
+      right: 48px;
+      width: 56px;
+      height: 56px;
+      background: #2563eb;
+      border-radius: 50%;
+      opacity: 0.3;
+      z-index: 0;
+      pointer-events: none;
+    }
+    
     /* Logo */
     .logo-container {
       position: absolute;
@@ -561,6 +627,11 @@ export async function POST(request: NextRequest) {
     <div class="grid-pattern"></div>
     <div class="blob-1"></div>
     <div class="blob-2"></div>
+    <div class="geo-shape-1"></div>
+    <div class="geo-shape-2"></div>
+    <div class="geo-shape-3"></div>
+    <div class="geo-shape-4"></div>
+    <div class="geo-shape-5"></div>
     
     ${logoBase64 ? `
     <div class="logo-container">
@@ -658,7 +729,7 @@ export async function POST(request: NextRequest) {
       await page.setViewport({ width, height })
       await page.setContent(htmlContent, {
         waitUntil: 'networkidle0',
-        timeout: 30000
+        timeout: 60000 // Aumentar timeout para 60s
       })
 
       // Aguardar renderização completa
@@ -703,10 +774,22 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('Erro ao gerar imagem:', error)
+    const errorMessage = error?.message || 'Erro desconhecido'
+    const errorStack = error?.stack || ''
+    
+    // Log detalhado para debug
+    console.error('Detalhes do erro:', {
+      message: errorMessage,
+      name: error?.name,
+      stack: errorStack.substring(0, 500) // Primeiros 500 chars do stack
+    })
+    
     return NextResponse.json(
       {
-        error: 'Erro ao gerar imagem: ' + (error.message || 'Erro desconhecido'),
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        success: false,
+        error: 'Erro ao gerar imagem: ' + errorMessage,
+        message: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? errorStack : undefined
       },
       { status: 500 }
     )

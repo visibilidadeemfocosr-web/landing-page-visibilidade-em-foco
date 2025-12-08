@@ -35,6 +35,7 @@ interface ArtistData {
   photo?: string | null
   original_photo?: string | null
   photo_crop?: CropData | null
+  edited_caption?: string | null
 }
 
 export default function AdminModeratePreviewClient() {
@@ -53,7 +54,8 @@ export default function AdminModeratePreviewClient() {
     photo: PLACEHOLDER_IMAGE,
     isEditing: false,
     status: 'pending' as string,
-    moderator_notes: null as string | null
+    moderator_notes: null as string | null,
+    edited_caption: null as string | null
   })
 
   // Carregar dados se houver submission_id na URL
@@ -85,9 +87,13 @@ export default function AdminModeratePreviewClient() {
           photo: artist.photo || PLACEHOLDER_IMAGE,
           isEditing: false,
           status: (artist as any).status || 'pending',
-          moderator_notes: (artist as any).moderator_notes || null
+          moderator_notes: (artist as any).moderator_notes || null,
+          edited_caption: (artist as any).edited_caption || null
         })
         setEditedBio(artist.bio || artist.original_bio || '')
+        // Carregar legenda editada ou usar a gerada
+        const caption = (artist as any).edited_caption || generateInstagramCaptionForArtist(artist)
+        setEditedCaption(caption)
         // Guardar foto original para usar no editor
         setOriginalPhoto(artist.original_photo || artist.photo || '')
         // Carregar crop se existir
@@ -142,6 +148,8 @@ export default function AdminModeratePreviewClient() {
     facebook: previewData.facebook || '',
     linkedin: previewData.linkedin || ''
   })
+  const [isEditingCaption, setIsEditingCaption] = useState(false)
+  const [editedCaption, setEditedCaption] = useState<string>('')
   const [activePost, setActivePost] = useState<'first' | 'second'>('first')
   const [cropEditorOpen, setCropEditorOpen] = useState(false)
   const [photoCrop, setPhotoCrop] = useState<CropData | null>(null)
@@ -173,7 +181,63 @@ export default function AdminModeratePreviewClient() {
     return <Sparkles className="w-6 h-6" />
   }
 
-  // Função para gerar a legenda do Instagram
+  // Função helper para gerar legenda a partir de dados do artista
+  const generateInstagramCaptionForArtist = (artist: ArtistData) => {
+    const bio = artist.bio || artist.original_bio || ''
+    const lines: string[] = []
+    
+    // Nome do artista
+    lines.push(artist.name || 'Nome do Artista')
+    lines.push('')
+    
+    // Linguagens artísticas
+    if (artist.main_artistic_language) {
+      lines.push(`Linguagem Principal: ${getShortLanguage(artist.main_artistic_language)}`)
+    }
+    if (artist.other_artistic_languages) {
+      lines.push(`Outras Linguagens: ${artist.other_artistic_languages}`)
+    }
+    if (artist.main_artistic_language || artist.other_artistic_languages) {
+      lines.push('')
+    }
+    
+    // Bio
+    lines.push(bio)
+    lines.push('')
+    lines.push('━━━━━━━━━━━━━━━━━━━━')
+    lines.push('')
+    lines.push('Entre em contato:')
+    lines.push('')
+    
+    // Redes sociais
+    if (artist.instagram) {
+      const instagramHandle = artist.instagram.startsWith('@') 
+        ? artist.instagram 
+        : `@${artist.instagram.replace('https://instagram.com/', '').replace('instagram.com/', '')}`
+      lines.push(`Instagram: ${instagramHandle}`)
+    }
+    if (artist.facebook) {
+      const facebookLink = artist.facebook.startsWith('http') 
+        ? artist.facebook 
+        : `https://${artist.facebook}`
+      lines.push(`Facebook: ${facebookLink}`)
+    }
+    if (artist.linkedin) {
+      const linkedinLink = artist.linkedin.startsWith('http') 
+        ? artist.linkedin 
+        : `https://${artist.linkedin}`
+      lines.push(`LinkedIn: ${linkedinLink}`)
+    }
+    
+    lines.push('')
+    lines.push('━━━━━━━━━━━━━━━━━━━━')
+    lines.push('')
+    lines.push('#VisibilidadeEmFoco #SãoRoque #ArteLGBTQIA+')
+    
+    return lines.join('\n')
+  }
+
+  // Função para gerar a legenda do Instagram (usando dados atuais)
   const generateInstagramCaption = () => {
     const bio = previewData.isEditing ? editedBio : previewData.bio
     const lines: string[] = []
@@ -230,7 +294,7 @@ export default function AdminModeratePreviewClient() {
   }
 
   const handleCopyCaption = () => {
-    const caption = generateInstagramCaption()
+    const caption = isEditingCaption ? editedCaption : (previewData as any).edited_caption || generateInstagramCaption()
     navigator.clipboard.writeText(caption)
     toast.success('Legenda copiada para a área de transferência!')
   }
@@ -266,7 +330,8 @@ export default function AdminModeratePreviewClient() {
       })
 
       if (!post1Response.ok) {
-        throw new Error('Erro ao gerar Post 1')
+        const errorData = await post1Response.json().catch(() => ({ error: 'Erro desconhecido ao gerar Post 1' }))
+        throw new Error(errorData.error || errorData.message || `Erro ao gerar Post 1: ${post1Response.status} ${post1Response.statusText}`)
       }
 
       const post1Data = await post1Response.json()
@@ -291,7 +356,8 @@ export default function AdminModeratePreviewClient() {
       })
 
       if (!post2Response.ok) {
-        throw new Error('Erro ao gerar Post 2')
+        const errorData = await post2Response.json().catch(() => ({ error: 'Erro desconhecido ao gerar Post 2' }))
+        throw new Error(errorData.error || errorData.message || `Erro ao gerar Post 2: ${post2Response.status} ${post2Response.statusText}`)
       }
 
       const post2Data = await post2Response.json()
@@ -318,8 +384,8 @@ export default function AdminModeratePreviewClient() {
       
       toast.info('📱 Publicando no Instagram...')
       
-      // 3. Publicar no Instagram
-      const caption = generateInstagramCaption()
+      // 3. Publicar no Instagram (usar legenda editada se existir)
+      const caption = isEditingCaption ? editedCaption : (previewData as any).edited_caption || generateInstagramCaption()
       
       const publishResponse = await fetch('/api/instagram/publish', {
         method: 'POST',
@@ -332,38 +398,73 @@ export default function AdminModeratePreviewClient() {
       })
 
       if (!publishResponse.ok) {
-        const errorData = await publishResponse.json()
-        throw new Error(errorData.details || 'Erro ao publicar no Instagram')
+        const errorData = await publishResponse.json().catch(() => ({}))
+        const errorMessage = errorData.details || errorData.error || 'Erro ao publicar no Instagram'
+        
+        // Verificar se é erro de limite de requisições
+        if (errorMessage.toLowerCase().includes('request limit') || 
+            errorMessage.toLowerCase().includes('rate limit') ||
+            errorMessage.toLowerCase().includes('quota') ||
+            errorMessage.toLowerCase().includes('application request limit')) {
+          throw new Error('Limite de requisições da API do Instagram atingido. Aguarde algumas horas ou tente novamente mais tarde. A API do Instagram permite até 25 posts por dia por conta.')
+        }
+        
+        throw new Error(errorMessage)
       }
 
       const publishData = await publishResponse.json()
       
-      // 4. Atualizar status na moderação
-      const moderateResponse = await fetch('/api/admin/moderate', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          submission_id: submissionId,
-          status: 'published',
-          instagram_post_id: publishData.data.id,
-        }),
-      })
+      // Verificar se a publicação foi bem-sucedida mesmo se houve algum erro parcial
+      if (publishData.success && publishData.data?.id) {
+        // 4. Atualizar status na moderação
+        try {
+          const moderateResponse = await fetch('/api/admin/moderate', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              submission_id: submissionId,
+              status: 'published',
+              instagram_post_id: publishData.data.id,
+            }),
+          })
 
-      if (!moderateResponse.ok) {
-        console.warn('Erro ao atualizar status na moderação')
-      }
+          if (!moderateResponse.ok) {
+            console.warn('Erro ao atualizar status na moderação, mas o post foi publicado')
+          }
+        } catch (updateError) {
+          console.warn('Erro ao atualizar status na moderação:', updateError)
+        }
 
-      toast.success('✅ Post publicado no Instagram com sucesso!')
-      
-      // 5. Abrir o post no Instagram
-      if (publishData.data?.permalink) {
-        setTimeout(() => {
-          window.open(publishData.data.permalink, '_blank')
-        }, 1000)
+        toast.success('✅ Post publicado no Instagram com sucesso!')
+        
+        // 5. Abrir o post no Instagram (se tiver permalink)
+        if (publishData.data?.permalink) {
+          setTimeout(() => {
+            window.open(publishData.data.permalink, '_blank')
+          }, 1000)
+        } else {
+          // Se não tiver permalink, informar que foi publicado mas sem link
+          console.info('Post publicado com ID:', publishData.data.id, '- Permalink não disponível (possivelmente devido ao limite de requisições)')
+        }
+      } else {
+        throw new Error('Resposta inválida da API de publicação')
       }
     } catch (error: any) {
       console.error('Erro ao publicar no Instagram:', error)
-      toast.error('❌ Erro ao publicar: ' + error.message)
+      
+      // Mensagem de erro mais detalhada
+      let errorMessage = error.message || 'Erro desconhecido ao publicar no Instagram'
+      
+      // Se for erro de limite, mostrar mensagem especial
+      if (errorMessage.includes('Limite de requisições')) {
+        toast.error('⏰ ' + errorMessage, {
+          duration: 8000, // Mostrar por mais tempo
+        })
+      } else {
+        toast.error('❌ Erro ao publicar: ' + errorMessage, {
+          duration: 6000,
+        })
+      }
     } finally {
       setLoading(false)
     }
@@ -1066,10 +1167,32 @@ export default function AdminModeratePreviewClient() {
               <div className="absolute -top-20 -left-20 w-64 h-64 bg-gradient-to-br from-purple-200/20 to-pink-200/20 rounded-full blur-3xl" />
               <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-gradient-to-br from-purple-200/20 to-purple-300/15 rounded-full blur-3xl" />
               
+              {/* Formas geométricas decorativas - estilo Hero */}
+              {/* Diamante roxo no canto superior direito */}
+              <div 
+                className="absolute top-16 right-16 w-24 h-24 bg-purple-600 opacity-30 z-0"
+                style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
+              />
+              
+              {/* Círculo amarelo */}
+              <div className="absolute bottom-24 left-12 w-16 h-16 bg-yellow-400 rounded-full opacity-40 z-0" />
+              
+              {/* Trapézio laranja */}
+              <div 
+                className="absolute bottom-32 left-24 w-20 h-24 bg-orange-500 opacity-30 z-0"
+                style={{ clipPath: 'polygon(0 0, 100% 25%, 100% 100%, 0 75%)' }}
+              />
+              
+              {/* Círculo rosa pequeno */}
+              <div className="absolute top-1/3 right-1/4 w-12 h-12 bg-pink-500 rounded-full opacity-35 z-0" />
+              
+              {/* Círculo azul */}
+              <div className="absolute top-1/2 right-12 w-14 h-14 bg-blue-600 rounded-full opacity-30 z-0" />
+              
               {/* Conteúdo do post */}
-              <div className="relative z-0 h-full flex flex-col p-8">
+              <div className="relative z-10 h-full flex flex-col p-8">
                 {/* Logo no canto superior esquerdo */}
-                <div className="absolute top-4 left-4 w-22 h-22 z-[1]">
+                <div className="absolute top-4 left-4 w-22 h-22 z-20">
                   <Image
                     src="/logoN.png?v=2"
                     alt="Visibilidade em Foco"
@@ -1089,7 +1212,7 @@ export default function AdminModeratePreviewClient() {
                 </div>
 
                 {/* Ícone da linguagem artística no canto superior direito */}
-                <div className="absolute top-4 right-4 z-[1]">
+                <div className="absolute top-4 right-4 z-20">
                   <div className="bg-purple-600 rounded-full p-3 shadow-lg border-2 border-purple-600/30">
                     <div className="text-white">
                       {getLanguageIcon(previewData.mainArtisticLanguage)}
@@ -1505,29 +1628,123 @@ export default function AdminModeratePreviewClient() {
             <div className="pt-4 border-t space-y-3">
               <div className="flex items-center justify-between">
                 <Label className="text-base font-semibold">Legenda do Instagram</Label>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleCopyCaption}
-                  className="gap-2"
-                >
-                  <Copy className="w-4 h-4" />
-                  Copiar
-                </Button>
+                <div className="flex gap-2">
+                  {isEditingCaption ? (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={async () => {
+                          if (!submissionId) {
+                            toast.error('ID de submissão não encontrado')
+                            return
+                          }
+                          
+                          try {
+                            const response = await fetch('/api/admin/moderate', {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                submission_id: submissionId,
+                                status: previewData.status || 'pending',
+                                edited_caption: editedCaption,
+                                moderator_notes: previewData.moderator_notes || null
+                              }),
+                            })
+
+                            if (!response.ok) {
+                              const errorData = await response.json().catch(() => ({ 
+                                error: `Erro ${response.status}: ${response.statusText}` 
+                              }))
+                              const errorMessage = errorData.error || errorData.details || `Erro ao salvar legenda: ${response.status} ${response.statusText}`
+                              console.error('Erro ao salvar legenda - resposta:', errorData)
+                              throw new Error(errorMessage)
+                            }
+
+                            const result = await response.json()
+                            
+                            // Atualizar previewData com a legenda editada
+                            setPreviewData({ ...previewData, edited_caption: editedCaption })
+                            setIsEditingCaption(false)
+                            toast.success('Legenda salva com sucesso!')
+                          } catch (error: any) {
+                            console.error('Erro ao salvar legenda:', error)
+                            const errorMessage = error?.message || 'Erro desconhecido ao salvar legenda'
+                            toast.error('Erro ao salvar legenda: ' + errorMessage)
+                          }
+                        }}
+                      >
+                        <Check className="w-4 h-4 mr-1" />
+                        Salvar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          const currentCaption = (previewData as any).edited_caption || generateInstagramCaption()
+                          setEditedCaption(currentCaption)
+                          setIsEditingCaption(false)
+                        }}
+                      >
+                        <X className="w-4 h-4 mr-1" />
+                        Cancelar
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          const currentCaption = (previewData as any).edited_caption || generateInstagramCaption()
+                          setEditedCaption(currentCaption)
+                          setIsEditingCaption(true)
+                        }}
+                      >
+                        <Edit2 className="w-4 h-4 mr-1" />
+                        Editar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleCopyCaption}
+                        className="gap-2"
+                      >
+                        <Copy className="w-4 h-4" />
+                        Copiar
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
               <div className="relative">
-                <Textarea
-                  value={generateInstagramCaption()}
-                  readOnly
-                  rows={12}
-                  className="font-mono text-sm bg-muted resize-none"
-                  onClick={(e) => {
-                    // Selecionar todo o texto ao clicar
-                    e.currentTarget.select()
-                  }}
-                />
+                {isEditingCaption ? (
+                  <Textarea
+                    value={editedCaption}
+                    onChange={(e) => setEditedCaption(e.target.value)}
+                    rows={12}
+                    className="font-mono text-sm resize-none"
+                    placeholder="Digite a legenda do Instagram..."
+                  />
+                ) : (
+                  <Textarea
+                    value={(previewData as any).edited_caption || generateInstagramCaption()}
+                    readOnly
+                    rows={12}
+                    className="font-mono text-sm bg-muted resize-none"
+                    onClick={(e) => {
+                      // Selecionar todo o texto ao clicar
+                      e.currentTarget.select()
+                    }}
+                  />
+                )}
                 <p className="text-xs text-muted-foreground mt-2">
                   💡 Esta legenda será usada ao publicar no Instagram. Os links podem ser copiados pelos usuários.
+                  {isEditingCaption && (
+                    <span className="block mt-1">
+                      <strong>Editando:</strong> Clique em "Salvar" para salvar as alterações.
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
