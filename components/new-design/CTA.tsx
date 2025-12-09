@@ -87,7 +87,7 @@ export function CTA() {
             <div className="bg-white p-6 sm:p-8 md:p-10 border-l-4 sm:border-l-6 md:border-l-8 border-orange-500">
               <div className="text-xs sm:text-sm tracking-widest text-gray-500 mb-3 sm:mb-4">TEMPO ESTIMADO</div>
               <div className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-3 sm:mb-4 tracking-tight">
-                10<span className="text-orange-500">-</span>15
+                5<span className="text-orange-500">-</span>10
               </div>
               <div className="text-lg sm:text-xl md:text-2xl text-gray-600">minutos para responder</div>
             </div>
