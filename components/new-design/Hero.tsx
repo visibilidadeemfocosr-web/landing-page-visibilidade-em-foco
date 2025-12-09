@@ -268,13 +268,13 @@ export function Hero() {
                   />
 
                   <motion.div
-                    className="absolute bottom-32 right-20 w-48 h-48 bg-yellow-400 rounded-full"
+                    className="absolute bottom-32 right-10 w-48 h-48 bg-yellow-400 rounded-full"
                     animate={{ scale: [1, 1.1, 1] }}
                     transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                   />
 
                   <motion.div
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-orange-500"
+                    className="absolute top-1/2 left-[55%] -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-orange-500"
                     animate={{ rotate: [0, 180, 360] }}
                     transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
                   />
