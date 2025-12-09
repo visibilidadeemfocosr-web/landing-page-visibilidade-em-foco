@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useRef } from 'react'
 import { useInView } from '@/hooks/use-in-view'
 import { EyeIllustration, RecognitionIcon, HeartHandIllustration } from './CustomShapes'
+import { AudioDescriptionButton } from '@/components/accessibility/AudioDescriptionButton'
 
 export function About() {
   const ref = useRef<HTMLElement>(null)
@@ -106,16 +107,32 @@ export function About() {
           <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
             <div className="bg-stone-100 p-6 sm:p-8 relative">
               <div className="absolute top-0 left-0 w-12 sm:w-16 h-1 bg-purple-600" />
-              <p className="text-base sm:text-lg text-gray-800 leading-relaxed">
-                Historicamente, artistas LGBTQIAPN+ enfrentam o apagamento de suas trajetórias e a invisibilização de suas obras. Em cidades do interior, essa realidade é ainda mais profunda.
-              </p>
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <p className="text-base sm:text-lg text-gray-800 leading-relaxed flex-1">
+                  Historicamente, artistas LGBTQIAPN+ enfrentam o apagamento de suas trajetórias e a invisibilização de suas obras. Em cidades do interior, essa realidade é ainda mais profunda.
+                </p>
+                <AudioDescriptionButton
+                  text="Historicamente, artistas LGBTQIAPN+ enfrentam o apagamento de suas trajetórias e a invisibilização de suas obras. Em cidades do interior, essa realidade é ainda mais profunda."
+                  sectionId="about-historical"
+                  variant="icon-only"
+                  className="flex-shrink-0"
+                />
+              </div>
             </div>
 
             <div className="bg-stone-100 p-6 sm:p-8 relative">
               <div className="absolute top-0 left-0 w-12 sm:w-16 h-1 bg-orange-500" />
-              <p className="text-base sm:text-lg text-gray-800 leading-relaxed">
-                O Visibilidade em Foco nasce para mapear e conhecer melhor os artistas LGBTQIAPN+ de São Roque, entendendo suas potências, barreiras e perspectivas.
-              </p>
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <p className="text-base sm:text-lg text-gray-800 leading-relaxed flex-1">
+                  O Visibilidade em Foco nasce para mapear e conhecer melhor os artistas LGBTQIAPN+ de São Roque, entendendo suas potências, barreiras e perspectivas.
+                </p>
+                <AudioDescriptionButton
+                  text="O Visibilidade em Foco nasce para mapear e conhecer melhor os artistas LGBTQIAPN+ de São Roque, entendendo suas potências, barreiras e perspectivas."
+                  sectionId="about-project"
+                  variant="icon-only"
+                  className="flex-shrink-0"
+                />
+              </div>
             </div>
           </div>
 
@@ -124,9 +141,17 @@ export function About() {
             <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 w-24 h-24 sm:w-32 sm:h-32 bg-pink-500 opacity-60 sm:opacity-100" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} aria-hidden="true" />
             
             <div className="relative z-10 max-w-4xl">
-              <p className="text-xl sm:text-2xl md:text-3xl leading-relaxed mb-4 sm:mb-6">
-                Ao registrar as <span className="bg-yellow-400 text-black px-2">NOSSAS</span> existências, criamos um arquivo vivo que valida identidades e fortalece redes de apoio.
-              </p>
+              <div className="flex items-start justify-between gap-4 mb-4 sm:mb-6">
+                <p className="text-xl sm:text-2xl md:text-3xl leading-relaxed flex-1">
+                  Ao registrar as <span className="bg-yellow-400 text-black px-2">NOSSAS</span> existências, criamos um arquivo vivo que valida identidades e fortalece redes de apoio.
+                </p>
+                <AudioDescriptionButton
+                  text="Ao registrar as nossas existências, criamos um arquivo vivo que valida identidades e fortalece redes de apoio. Este mapeamento não é apenas um levantamento de dados — é um ato político de resistência e afirmação."
+                  sectionId="about-resistance"
+                  variant="icon-only"
+                  className="flex-shrink-0"
+                />
+              </div>
               <p className="text-lg sm:text-xl text-gray-300">
                 Este mapeamento não é apenas um levantamento de dados — é um <span className="text-yellow-400">ato político de resistência e afirmação</span>.
               </p>
@@ -151,8 +176,7 @@ export function About() {
 
             <div className="order-1 md:order-2 space-y-3 sm:space-y-4">
               <p className="text-base sm:text-lg text-gray-800 leading-relaxed">
-                Através da nossa rede social{' '}
-                <span className="bg-purple-600 text-white px-2 py-1 text-sm sm:text-base">@visibilidadeemfocosr</span>, daremos destaque a cada pessoa que quiser fazer parte dessa rede.
+                Através das nossas redes sociais, daremos destaque a cada pessoa que quiser fazer parte dessa iniciativa.
               </p>
               <p className="text-base sm:text-lg text-gray-800 leading-relaxed">
                 Vamos contar histórias, mostrar trajetórias, divulgar trabalhos e aproximar artistas LGBTQIAPN+ do mercado cultural da cidade.
