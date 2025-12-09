@@ -74,9 +74,35 @@ export function Footer() {
         {/* Seção de Realização e Programa */}
         <div className="py-8 sm:py-10 border-b border-gray-800 mb-8">
           <p className="text-center text-xs sm:text-sm font-semibold text-gray-500 mb-6 uppercase tracking-wider">
-            Realização e Programa
+            Realização
           </p>
           <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 md:gap-12">
+            <div className="h-14 sm:h-18 md:h-20 lg:h-24 flex items-center">
+              <Image 
+                src="/pnab.png"
+                alt="PNAB"
+                width={220}
+                height={100}
+                className="h-full w-auto object-contain"
+                style={{ 
+                  filter: 'brightness(0) invert(1)',
+                }}
+                unoptimized
+              />
+            </div>
+            <div className="h-12 sm:h-14 md:h-16 lg:h-20 flex items-center">
+              <Image 
+                src="/cultpref.png"
+                alt="Cultura Prefeitura"
+                width={180}
+                height={80}
+                className="h-full w-auto object-contain"
+                style={{ 
+                  filter: 'brightness(0) invert(1)',
+                }}
+                unoptimized
+              />
+            </div>
             <div className="h-12 sm:h-14 md:h-16 lg:h-20 flex items-center">
               <Image 
                 src="/prefeitura.png"
@@ -92,8 +118,8 @@ export function Footer() {
             </div>
             <div className="h-12 sm:h-14 md:h-16 lg:h-20 flex items-center">
               <Image 
-                src="/pnab.png"
-                alt="PNAB"
+                src="/mincgov.png"
+                alt="Ministério da Cultura"
                 width={180}
                 height={80}
                 className="h-full w-auto object-contain"

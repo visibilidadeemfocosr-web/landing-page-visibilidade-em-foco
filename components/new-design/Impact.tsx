@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useRef } from 'react'
 import { useInView } from '@/hooks/use-in-view'
 import { PeopleIllustration, SpeakerIllustration } from './CustomShapes'
+import { AudioDescriptionButton } from '@/components/accessibility/AudioDescriptionButton'
 
 export function Impact() {
   const ref = useRef<HTMLElement>(null)
@@ -102,6 +103,13 @@ export function Impact() {
             <div className="absolute top-0 right-0 w-32 h-32 opacity-30" aria-hidden="true">
               <PeopleIllustration />
             </div>
+            <div className="absolute bottom-4 right-4 z-20">
+              <AudioDescriptionButton
+                text="Comunidade: Criar espaços de encontro, troca e fortalecimento mútuo entre artistas LGBTQIAPN+."
+                sectionId="impact-community"
+                variant="icon-only"
+              />
+            </div>
             <div className="relative z-10">
               <h3 className="text-3xl mb-6 tracking-tight">COMUNIDADE</h3>
               <p className="text-lg text-gray-700 leading-relaxed mb-4">
@@ -114,6 +122,13 @@ export function Impact() {
           <div className="bg-stone-100 p-12 relative">
             <div className="absolute top-0 right-0 w-32 h-32 opacity-30" aria-hidden="true">
               <SpeakerIllustration />
+            </div>
+            <div className="absolute bottom-4 right-4 z-20">
+              <AudioDescriptionButton
+                text="Amplificação: Dar voz, palco e reconhecimento para quem sempre esteve aqui, criando e resistindo."
+                sectionId="impact-amplification"
+                variant="icon-only"
+              />
             </div>
             <div className="relative z-10">
               <h3 className="text-3xl mb-6 tracking-tight">AMPLIFICAÇÃO</h3>
@@ -151,7 +166,14 @@ export function Impact() {
             </div>
 
             {/* Bloco de texto */}
-            <div className="md:col-span-3 bg-black text-white p-12 flex flex-col justify-center">
+            <div className="md:col-span-3 bg-black text-white p-12 flex flex-col justify-center relative">
+              <div className="absolute bottom-4 right-4">
+                <AudioDescriptionButton
+                  text="Este mapeamento é muito mais que dados. É sobre validar existências, fortalecer identidades e construir um futuro onde artistas LGBTQIAPN+ tenham o reconhecimento e espaço que merecem. Transformar a realidade cultural."
+                  sectionId="impact-final"
+                  variant="icon-only"
+                />
+              </div>
               <h3 className="text-3xl md:text-4xl mb-6 tracking-tight leading-tight">
                 Este mapeamento é muito mais que dados
               </h3>

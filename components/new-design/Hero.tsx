@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/
 import { RegistrationFormLoader } from '@/components/registration-form-loader'
 import { X } from 'lucide-react'
 import Image from 'next/image'
+import { AudioDescriptionButton } from '@/components/accessibility/AudioDescriptionButton'
 
 export function Hero() {
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -18,7 +19,7 @@ export function Hero() {
 
   return (
     <>
-      <section className="relative min-h-screen bg-stone-50 overflow-hidden">
+      <section className="relative min-h-screen bg-stone-50 overflow-hidden" id="hero-section">
         {/* Header/Nav */}
         <nav className="absolute top-0 left-0 right-0 z-50 p-4 sm:p-6 md:p-8">
           <div className="max-w-7xl mx-auto flex justify-between items-start">
@@ -136,11 +137,13 @@ export function Hero() {
 
                   <div className="relative mb-6 sm:mb-8">
                     <div className="absolute -left-2 sm:-left-4 top-0 bottom-0 w-0.5 sm:w-1 bg-pink-500" />
-                    <p className="text-lg sm:text-xl md:text-2xl text-gray-800 pl-4 sm:pl-6 md:pl-8">
-                      Reconhecer. Documentar. Celebrar.
-                      <br />
-                      <strong>Sua voz importa.</strong>
-                    </p>
+                    <div className="pl-4 sm:pl-6 md:pl-8">
+                      <p className="text-lg sm:text-xl md:text-2xl text-gray-800">
+                        Reconhecer. Documentar. Celebrar.
+                        <br />
+                        <strong>Sua voz importa.</strong>
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -306,6 +309,15 @@ export function Hero() {
           </div>
           <span className="text-[10px] sm:text-xs tracking-widest text-gray-600">SCROLL</span>
         </motion.div>
+
+        {/* Botão de áudio descrição no canto inferior direito */}
+        <div className="absolute bottom-4 sm:bottom-6 md:bottom-10 right-4 sm:right-6 md:right-8 z-20">
+          <AudioDescriptionButton
+            text="Reconhecer. Documentar. Celebrar. Sua voz importa. Este é o primeiro mapeamento cultural de artistas LGBTQIAPN+ do município de São Roque. Um projeto de resistência, visibilidade e celebração das nossas existências."
+            sectionId="hero-description"
+            variant="icon-only"
+          />
+        </div>
       </section>
     </>
   )

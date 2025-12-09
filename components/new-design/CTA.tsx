@@ -8,6 +8,7 @@ import { RegistrationFormLoader } from '@/components/registration-form-loader'
 import { Instagram, Sparkles, Star, Network } from 'lucide-react'
 import { X } from 'lucide-react'
 import { toast } from 'sonner'
+import { AudioDescriptionButton } from '@/components/accessibility/AudioDescriptionButton'
 
 export function CTA() {
   const ref = useRef<HTMLElement>(null)
@@ -104,6 +105,13 @@ export function CTA() {
             <div className="absolute bottom-0 left-0 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 bg-yellow-400 opacity-20 rounded-full" aria-hidden="true" />
 
             <div className="relative z-10 max-w-4xl mx-auto text-center">
+              <div className="absolute bottom-4 right-4">
+                <AudioDescriptionButton
+                  text="Artista LGBTQIAPN+ de São Roque, sua história importa! Responda ao questionário e ajude a construir um mapeamento que celebra nossa diversidade e potência criativa."
+                  sectionId="cta-call"
+                  variant="icon-only"
+                />
+              </div>
               <div className="mb-6 sm:mb-8">
                 <div className="text-2xl sm:text-3xl md:text-4xl mb-4 sm:mb-6 tracking-tight leading-tight px-4">
                   Artista LGBTQIAPN+ de São Roque,

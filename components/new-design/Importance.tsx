@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { useRef } from 'react'
 import { useInView } from '@/hooks/use-in-view'
+import { AudioDescriptionButton } from '@/components/accessibility/AudioDescriptionButton'
 
 export function Importance() {
   const ref = useRef<HTMLElement>(null)
@@ -108,12 +109,19 @@ export function Importance() {
 
             <div className="relative z-10 max-w-4xl mx-auto">
               <div className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl text-yellow-400 mb-4 sm:mb-6 md:mb-8" style={{ fontWeight: '900', lineHeight: '0.8' }}>"</div>
-              <blockquote className="text-lg sm:text-xl md:text-2xl lg:text-4xl leading-relaxed mb-4 sm:mb-6 md:mb-8 tracking-tight">
+              <blockquote className="text-lg sm:text-xl md:text-2xl lg:text-4xl leading-relaxed tracking-tight mb-4 sm:mb-6 md:mb-8">
                 Registrar nossas trajetórias como artistas LGBTQIAPN+ é romper apagamentos, ampliar oportunidades e mostrar a potência criativa que existe aqui!
               </blockquote>
-              <div className="flex items-center gap-3 sm:gap-4">
+              <div className="flex items-center gap-3 sm:gap-4 mb-4">
                 <div className="w-12 sm:w-16 h-0.5 sm:h-1 bg-pink-500" />
                 <div className="text-xs sm:text-sm tracking-widest text-gray-400">VISIBILIDADE EM FOCO</div>
+              </div>
+              <div className="flex justify-center">
+                <AudioDescriptionButton
+                  text="Registrar nossas trajetórias como artistas LGBTQIAPN+ é romper apagamentos, ampliar oportunidades e mostrar a potência criativa que existe aqui!"
+                  sectionId="importance-quote"
+                  variant="icon-only"
+                />
               </div>
             </div>
           </div>
