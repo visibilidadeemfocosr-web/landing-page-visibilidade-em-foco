@@ -212,18 +212,11 @@ export function CTA() {
             className="text-center"
           >
             <div className="mb-6">
-              <div className="text-xs sm:text-sm tracking-widest text-gray-500 mb-3 sm:mb-4">SIGA NAS REDES</div>
               <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap px-4">
                 <div className="w-8 sm:w-12 h-0.5 sm:h-1 bg-purple-600" />
-                <a 
-                  href="https://instagram.com/visibilidadeemfocosr" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black hover:text-purple-600 transition-colors tracking-tight break-all"
-                  aria-label="Abrir perfil do Instagram em nova aba: @visibilidadeemfocosr"
-                >
-                  @visibilidadeemfocosr
-                </a>
+                <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black tracking-tight">
+                  - SIGA NAS REDES -
+                </div>
                 <div className="w-8 sm:w-12 h-0.5 sm:h-1 bg-pink-500" />
               </div>
             </div>
