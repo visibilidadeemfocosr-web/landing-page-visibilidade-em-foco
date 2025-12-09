@@ -110,7 +110,7 @@ export function Importance() {
             <div className="relative z-10 max-w-4xl mx-auto">
               <div className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl text-yellow-400 mb-4 sm:mb-6 md:mb-8" style={{ fontWeight: '900', lineHeight: '0.8' }}>"</div>
               <blockquote className="text-lg sm:text-xl md:text-2xl lg:text-4xl leading-relaxed tracking-tight mb-4 sm:mb-6 md:mb-8">
-                Registrar nossas trajetórias como artistas LGBTQIAPN+ é romper apagamentos, ampliar oportunidades e mostrar a potência criativa que existe aqui!
+                Mapear nossas trajetórias como artistas LGBTQIAPN+ é romper apagamentos, ampliar oportunidades e mostrar a potência criativa que existe aqui!
               </blockquote>
               <div className="flex items-center gap-3 sm:gap-4 mb-4">
                 <div className="w-12 sm:w-16 h-0.5 sm:h-1 bg-pink-500" />
@@ -118,7 +118,7 @@ export function Importance() {
               </div>
               <div className="flex justify-center">
                 <AudioDescriptionButton
-                  text="Registrar nossas trajetórias como artistas LGBTQIAPN+ é romper apagamentos, ampliar oportunidades e mostrar a potência criativa que existe aqui!"
+                  text="Mapear nossas trajetórias como artistas LGBTQIAPN+ é romper apagamentos, ampliar oportunidades e mostrar a potência criativa que existe aqui!"
                   sectionId="importance-quote"
                   variant="icon-only"
                 />
