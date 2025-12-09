@@ -87,9 +87,6 @@ export function Footer() {
                 width={220}
                 height={100}
                 className="h-full w-auto object-contain"
-                style={{ 
-                  filter: 'brightness(0) invert(1)',
-                }}
                 unoptimized
               />
             </div>
@@ -100,9 +97,6 @@ export function Footer() {
                 width={180}
                 height={80}
                 className="h-full w-auto object-contain"
-                style={{ 
-                  filter: 'brightness(0) invert(1)',
-                }}
                 unoptimized
               />
             </div>
@@ -113,9 +107,6 @@ export function Footer() {
                 width={180}
                 height={80}
                 className="h-full w-auto object-contain"
-                style={{ 
-                  filter: 'brightness(0) invert(1)',
-                }}
                 unoptimized
               />
             </div>
@@ -126,9 +117,6 @@ export function Footer() {
                 width={180}
                 height={80}
                 className="h-full w-auto object-contain"
-                style={{ 
-                  filter: 'brightness(0) invert(1)',
-                }}
                 unoptimized
               />
             </div>
