@@ -1117,7 +1117,6 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                 type="file"
                 id={fieldId}
                 accept="image/*"
-                capture="environment"
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0]
