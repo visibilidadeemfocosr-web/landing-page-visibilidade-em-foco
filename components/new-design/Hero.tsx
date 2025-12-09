@@ -261,33 +261,33 @@ export function Hero() {
 
                   {/* Formas sobrepostas */}
                   <motion.div
-                    className="absolute top-20 left-10 w-40 h-40 bg-purple-600"
+                    className="absolute top-10 left-4 w-40 h-40 bg-purple-600"
                     animate={{ y: [0, -20, 0] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                     style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
                   />
 
                   <motion.div
-                    className="absolute bottom-32 right-4 w-48 h-48 bg-yellow-400 rounded-full"
+                    className="absolute bottom-20 right-0 w-48 h-48 bg-yellow-400 rounded-full"
                     animate={{ scale: [1, 1.1, 1] }}
                     transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                   />
 
                   <motion.div
-                    className="absolute top-1/2 left-[60%] -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-orange-500"
+                    className="absolute top-1/3 right-8 w-32 h-32 bg-orange-500"
                     animate={{ rotate: [0, 180, 360] }}
                     transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
                   />
 
                   <motion.div
-                    className="absolute bottom-20 left-28 w-24 h-64 bg-blue-600"
+                    className="absolute bottom-10 left-4 w-24 h-64 bg-blue-600"
                     animate={{ x: [0, 10, 0] }}
                     transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                     style={{ clipPath: 'polygon(0 0, 100% 20%, 100% 100%, 0 80%)' }}
                   />
 
                   <motion.div
-                    className="absolute top-10 right-32 w-20 h-20 bg-pink-500 rounded-full"
+                    className="absolute top-4 right-16 w-20 h-20 bg-pink-500 rounded-full"
                     animate={{ y: [0, 30, 0] }}
                     transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
                   />
