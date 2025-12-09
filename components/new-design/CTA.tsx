@@ -215,7 +215,7 @@ export function CTA() {
               <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap px-4">
                 <div className="w-8 sm:w-12 h-0.5 sm:h-1 bg-purple-600" />
                 <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black tracking-tight">
-                  - SIGA NAS REDES -
+                  SIGA NAS REDES
                 </div>
                 <div className="w-8 sm:w-12 h-0.5 sm:h-1 bg-pink-500" />
               </div>
