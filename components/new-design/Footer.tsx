@@ -80,7 +80,7 @@ export function Footer() {
             Realização
           </p>
           <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 md:gap-12">
-            <div className="h-14 sm:h-18 md:h-20 lg:h-24 flex items-center">
+            <div className="h-12 sm:h-16 md:h-18 lg:h-20 flex items-center">
               <Image 
                 src="/pnab.png"
                 alt="PNAB"
