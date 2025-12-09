@@ -14,7 +14,7 @@ export function Footer() {
               <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 relative">
                 <Image 
                   src="/logoN.png"
-                  alt="Visibilidade em Foco"
+                  alt="Logo do projeto Visibilidade em Foco - Mapeamento de artistas LGBTQIAPN+ do município de São Roque"
                   width={112}
                   height={112}
                   className="w-full h-full object-contain"
@@ -23,8 +23,8 @@ export function Footer() {
                   }}
                   unoptimized
                 />
-                <div className="absolute -top-2 -right-6 w-3 h-3 sm:w-4 sm:h-4 bg-yellow-400 rounded-full" />
-                <div className="absolute -bottom-2 -left-4 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 bg-purple-600 rounded-full" />
+                <div className="absolute -top-2 -right-6 w-3 h-3 sm:w-4 sm:h-4 bg-yellow-400 rounded-full" aria-hidden="true" />
+                <div className="absolute -bottom-2 -left-4 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 bg-purple-600 rounded-full" aria-hidden="true" />
               </div>
             </div>
             <p className="text-sm sm:text-base text-gray-400 max-w-md leading-relaxed">
@@ -37,16 +37,16 @@ export function Footer() {
             <h3 className="mb-4 sm:mb-6 tracking-widest text-xs sm:text-sm text-gray-500">NAVEGAÇÃO</h3>
             <ul className="space-y-2 sm:space-y-3">
               <li>
-                <a href="#sobre" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors">Sobre o Projeto</a>
+                <a href="#sobre" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors" aria-label="Ir para seção sobre o projeto">Sobre o Projeto</a>
               </li>
               <li>
-                <a href="#impacto" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors">Impacto</a>
+                <a href="#impacto" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors" aria-label="Ir para seção de impacto">Impacto</a>
               </li>
               <li>
-                <a href="#participar" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors">Participar</a>
+                <a href="#participar" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors" aria-label="Ir para seção de participação">Participar</a>
               </li>
               <li>
-                <Link href="/admin/login" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors">Acesso Admin</Link>
+                <Link href="/admin/login" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors" aria-label="Ir para página de acesso administrativo">Acesso Admin</Link>
               </li>
             </ul>
           </div>
@@ -59,12 +59,13 @@ export function Footer() {
                 <a 
                   href="mailto:visibilidade.emfocosr@gmail.com" 
                   className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors break-all"
+                  aria-label="Enviar email para visibilidade.emfocosr@gmail.com"
                 >
                   Email
                 </a>
               </li>
               <li>
-                <a href="https://instagram.com/visibilidadeemfocosr" target="_blank" rel="noopener noreferrer" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors">Instagram</a>
+                <a href="https://instagram.com/visibilidadeemfocosr" target="_blank" rel="noopener noreferrer" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors" aria-label="Abrir perfil do Instagram em nova aba: @visibilidadeemfocosr">Instagram</a>
               </li>
             </ul>
           </div>
@@ -123,7 +124,7 @@ export function Footer() {
         </div>
 
         {/* Bandeira visual no rodapé */}
-        <div className="mt-12 h-2 flex">
+        <div className="mt-12 h-2 flex" aria-hidden="true" role="presentation">
           <div className="flex-1 bg-red-500" />
           <div className="flex-1 bg-orange-500" />
           <div className="flex-1 bg-yellow-400" />

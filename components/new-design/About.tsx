@@ -12,8 +12,8 @@ export function About() {
   return (
     <section ref={ref} id="sobre" className="py-12 sm:py-16 md:py-20 lg:py-24 bg-white relative overflow-hidden">
       {/* Elemento decorativo lateral */}
-      <div className="absolute left-0 top-1/4 w-1 sm:w-2 h-32 sm:h-48 md:h-64 bg-yellow-400 opacity-60 sm:opacity-100" />
-      <div className="absolute right-0 top-1/2 w-1.5 sm:w-2 md:w-3 h-24 sm:h-36 md:h-48 bg-purple-600 opacity-60 sm:opacity-100" />
+      <div className="absolute left-0 top-1/4 w-1 sm:w-2 h-32 sm:h-48 md:h-64 bg-yellow-400 opacity-60 sm:opacity-100" aria-hidden="true" />
+      <div className="absolute right-0 top-1/2 w-1.5 sm:w-2 md:w-3 h-24 sm:h-36 md:h-48 bg-purple-600 opacity-60 sm:opacity-100" aria-hidden="true" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         {/* Header da seção */}
@@ -24,7 +24,7 @@ export function About() {
           className="mb-12 sm:mb-16 md:mb-20"
         >
           <div className="flex items-start gap-4 sm:gap-6 md:gap-8">
-            <div className="hidden md:block w-32 h-32 bg-pink-500 flex-shrink-0" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 75%, 0 100%)' }} />
+            <div className="hidden md:block w-32 h-32 bg-pink-500 flex-shrink-0" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 75%, 0 100%)' }} aria-hidden="true" />
             <div className="flex-1">
               <div className="text-xs sm:text-sm tracking-widest text-gray-500 mb-3 sm:mb-4">01 / SOBRE O PROJETO</div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl tracking-tight leading-tight mb-4 sm:mb-6">
@@ -57,7 +57,7 @@ export function About() {
           className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10 md:gap-12 mb-12 sm:mb-16 md:mb-20"
         >
           <div className="text-center">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 mx-auto mb-4 sm:mb-6 relative">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 mx-auto mb-4 sm:mb-6 relative" aria-hidden="true">
               <div className="absolute inset-0 bg-orange-100" />
               <div className="absolute inset-3 sm:inset-4">
                 <RecognitionIcon />
@@ -70,7 +70,7 @@ export function About() {
           </div>
 
           <div className="text-center">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 mx-auto mb-4 sm:mb-6 relative">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 mx-auto mb-4 sm:mb-6 relative" aria-hidden="true">
               <div className="absolute inset-0 bg-purple-100" />
               <div className="absolute inset-3 sm:inset-4">
                 <EyeIllustration />
@@ -83,7 +83,7 @@ export function About() {
           </div>
 
           <div className="text-center">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 mx-auto mb-4 sm:mb-6 relative">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 mx-auto mb-4 sm:mb-6 relative" aria-hidden="true">
               <div className="absolute inset-0 bg-pink-100" />
               <div className="absolute inset-3 sm:inset-4">
                 <HeartHandIllustration />
@@ -119,9 +119,9 @@ export function About() {
             </div>
           </div>
 
-          <div className="relative bg-black text-white p-8 sm:p-12 md:p-16">
-            <div className="absolute top-4 right-4 sm:top-8 sm:right-8 w-16 h-16 sm:w-24 sm:h-24 bg-yellow-400 rounded-full opacity-60 sm:opacity-100" />
-            <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 w-24 h-24 sm:w-32 sm:h-32 bg-pink-500 opacity-60 sm:opacity-100" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} />
+            <div className="relative bg-black text-white p-8 sm:p-12 md:p-16">
+            <div className="absolute top-4 right-4 sm:top-8 sm:right-8 w-16 h-16 sm:w-24 sm:h-24 bg-yellow-400 rounded-full opacity-60 sm:opacity-100" aria-hidden="true" />
+            <div className="absolute bottom-4 left-4 sm:bottom-8 sm:left-8 w-24 h-24 sm:w-32 sm:h-32 bg-pink-500 opacity-60 sm:opacity-100" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} aria-hidden="true" />
             
             <div className="relative z-10 max-w-4xl">
               <p className="text-xl sm:text-2xl md:text-3xl leading-relaxed mb-4 sm:mb-6">
@@ -136,7 +136,7 @@ export function About() {
           <div className="grid md:grid-cols-2 gap-6 sm:gap-8 items-center">
             <div className="order-2 md:order-1">
               <div className="relative h-48 sm:h-56 md:h-64 bg-purple-600">
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center" aria-hidden="true">
                   <div className="text-6xl sm:text-7xl md:text-9xl opacity-20 select-none" style={{ fontWeight: '900' }}>
                     +
                   </div>

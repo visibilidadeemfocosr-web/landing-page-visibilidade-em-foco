@@ -36,7 +36,8 @@ export function Impact() {
                       transform: 'translateY(4px)',
                       zIndex: 1,
                       pointerEvents: 'none'
-                    }} 
+                    }}
+                    aria-hidden="true"
                   />
                 </div>
                 <div className="text-black">E RESISTIR</div>
@@ -98,7 +99,7 @@ export function Impact() {
           className="grid md:grid-cols-2 gap-12 mb-20"
         >
           <div className="bg-stone-100 p-12 relative">
-            <div className="absolute top-0 right-0 w-32 h-32 opacity-30">
+            <div className="absolute top-0 right-0 w-32 h-32 opacity-30" aria-hidden="true">
               <PeopleIllustration />
             </div>
             <div className="relative z-10">
@@ -111,7 +112,7 @@ export function Impact() {
           </div>
 
           <div className="bg-stone-100 p-12 relative">
-            <div className="absolute top-0 right-0 w-32 h-32 opacity-30">
+            <div className="absolute top-0 right-0 w-32 h-32 opacity-30" aria-hidden="true">
               <SpeakerIllustration />
             </div>
             <div className="relative z-10">
@@ -134,13 +135,13 @@ export function Impact() {
           <div className="grid md:grid-cols-5 gap-8">
             {/* Bloco visual */}
             <div className="md:col-span-2 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-500 p-12 flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 opacity-20">
+              <div className="absolute inset-0 opacity-20" aria-hidden="true">
                 <div className="absolute top-10 left-10 w-20 h-20 border-4 border-white rounded-full" />
                 <div className="absolute bottom-10 right-10 w-32 h-32 border-4 border-white" />
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-white rounded-full" />
               </div>
               <div className="text-white text-center relative z-10">
-                <div className="flex items-center justify-center mb-4">
+                <div className="flex items-center justify-center mb-4" aria-hidden="true">
                   <div className="w-32 h-32 bg-pink-300 rounded-full flex items-center justify-center">
                     <div className="text-6xl md:text-7xl" style={{ fontWeight: '900', lineHeight: '1' }}>+</div>
                   </div>

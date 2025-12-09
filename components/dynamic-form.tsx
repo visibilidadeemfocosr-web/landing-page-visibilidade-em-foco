@@ -1766,6 +1766,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                           }, 150)
                         }}
                         className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-6 text-base sm:text-lg font-semibold min-h-[56px]"
+                        aria-label="Voltar para o bloco anterior do formulário"
                       >
                         Voltar
                       </Button>
@@ -1774,6 +1775,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                     {/* Botão Continuar */}
                     <Button
                     type="button"
+                    aria-label={`Continuar para o próximo bloco do formulário. Bloco ${currentBlockIndex + 1} de ${totalBlocks}`}
                     onClick={async () => {
                       // Validar campos do bloco atual antes de continuar
                       const currentBlockQuestions = grouped[currentBlock] || []
@@ -1897,6 +1899,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
                         }, 150)
                       }}
                       className="w-full border-2 border-gray-300 text-gray-700 hover:bg-gray-100 py-6 text-base sm:text-lg font-semibold min-h-[56px]"
+                      aria-label="Voltar para o bloco anterior do formulário"
                     >
                       Voltar
                     </Button>
@@ -1939,6 +1942,8 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             type="submit"
             className="w-full bg-purple-600 hover:bg-purple-700 text-white py-6 text-base sm:text-lg font-semibold min-h-[56px] touch-manipulation active:scale-[0.98]"
             disabled={loading || !watch('consent') || isCepInvalid || previewMode}
+            aria-label={previewMode ? 'Preview - Envio desabilitado' : loading ? 'Enviando participação, aguarde' : 'Enviar participação no mapeamento'}
+            aria-busy={loading}
           >
             {previewMode ? 'Preview - Envio Desabilitado' : loading ? 'Enviando...' : 'Enviar Participação'}
           </Button>
@@ -2201,7 +2206,7 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
             className="min-h-[48px] text-base sm:text-sm touch-manipulation pl-10"
             autoComplete="postal-code"
           />
-          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
           {loadingCep && (
             <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
           )}
@@ -2218,7 +2223,7 @@ function CepField({ question, fieldId, register, setValue, watch, error, questio
       {(addressData.logradouro || addressData.bairro || addressData.cidade || addressData.estado) && (
         <div className="space-y-3 p-4 pb-5 bg-muted/30 rounded-lg border border-border mb-2">
           <p className="text-sm sm:text-base font-semibold text-foreground mb-3 flex items-center gap-2">
-            <MapPin className="h-4 w-4" />
+            <MapPin className="h-4 w-4" aria-hidden="true" />
             Endereço encontrado:
           </p>
           

@@ -41,8 +41,8 @@ export function CTA() {
     <>
       <section ref={ref} id="participar" className="py-12 sm:py-16 md:py-20 lg:py-24 bg-stone-50 relative overflow-hidden">
         {/* Elementos decorativos */}
-        <div className="absolute top-20 left-10 w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 bg-yellow-400 opacity-20 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-40 h-40 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-purple-600 opacity-20 rounded-full blur-3xl" />
+        <div className="absolute top-20 left-10 w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 bg-yellow-400 opacity-20 rounded-full blur-3xl" aria-hidden="true" />
+        <div className="absolute bottom-20 right-10 w-40 h-40 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-purple-600 opacity-20 rounded-full blur-3xl" aria-hidden="true" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 relative z-10">
           {/* Header */}
@@ -57,7 +57,7 @@ export function CTA() {
               <div className="text-black">SUA VOZ</div>
               <div className="relative inline-block">
                 <span className="text-black">TRANSFORMA</span>
-                <div className="absolute -bottom-2 left-0 right-0 h-3 sm:h-4 bg-pink-500 -z-10" />
+                <div className="absolute -bottom-2 left-0 right-0 h-3 sm:h-4 bg-pink-500 -z-10" aria-hidden="true" />
               </div>
             </h2>
             <p className="text-lg sm:text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto px-4">
@@ -100,8 +100,8 @@ export function CTA() {
             className="bg-black text-white p-8 sm:p-12 md:p-16 mb-12 relative overflow-hidden"
           >
             {/* Elementos decorativos */}
-            <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 bg-pink-500 opacity-20" style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }} />
-            <div className="absolute bottom-0 left-0 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 bg-yellow-400 opacity-20 rounded-full" />
+            <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 bg-pink-500 opacity-20" style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }} aria-hidden="true" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 bg-yellow-400 opacity-20 rounded-full" aria-hidden="true" />
 
             <div className="relative z-10 max-w-4xl mx-auto text-center">
               <div className="mb-6 sm:mb-8">
@@ -121,10 +121,11 @@ export function CTA() {
                     <DialogTrigger asChild>
                       <button 
                         className="group bg-pink-500 hover:bg-pink-600 text-white px-8 sm:px-10 md:px-12 py-4 sm:py-5 text-base sm:text-lg md:text-xl tracking-wide transition-all duration-300 relative overflow-hidden active:scale-95 sm:active:scale-100 w-full sm:w-auto"
+                        aria-label="Abrir formulário de participação no mapeamento de artistas LGBTQIAPN+"
                       >
                         <span className="relative z-10">PARTICIPAR AGORA</span>
-                        <div className="absolute inset-0 bg-white transform translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
-                        <span className="absolute inset-0 flex items-center justify-center text-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 tracking-wide">
+                        <div className="absolute inset-0 bg-white transform translate-x-full group-hover:translate-x-0 transition-transform duration-300" aria-hidden="true" />
+                        <span className="absolute inset-0 flex items-center justify-center text-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 tracking-wide" aria-hidden="true">
                           PARTICIPAR AGORA
                         </span>
                       </button>
@@ -154,8 +155,9 @@ export function CTA() {
                         <button
                           onClick={() => setDialogOpen(false)}
                           className="absolute top-8 right-8 z-20 text-white hover:text-gray-300 transition-colors"
+                          aria-label="Fechar formulário de cadastro"
                         >
-                          <X className="w-8 h-8" />
+                          <X className="w-8 h-8" aria-hidden="true" />
                         </button>
                       </div>
                       
@@ -179,11 +181,14 @@ export function CTA() {
                 <button 
                   onClick={handleShare}
                   className="border-2 border-white text-white hover:bg-white hover:text-black px-8 sm:px-10 md:px-12 py-4 sm:py-5 text-base sm:text-lg md:text-xl tracking-wide transition-all duration-300 relative overflow-hidden active:scale-95 sm:active:scale-100 w-full sm:w-auto"
+                  aria-label="Compartilhar link do site"
+                  aria-describedby="share-description"
                 >
+                  <span id="share-description" className="sr-only">Copia a URL do site para compartilhar</span>
                   <span className={`relative z-10 transition-opacity duration-300 ${copied ? 'opacity-0' : 'opacity-100'}`}>
                     COMPARTILHAR
                   </span>
-                  <span className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${copied ? 'opacity-100' : 'opacity-0'}`}>
+                  <span className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${copied ? 'opacity-100' : 'opacity-0'}`} aria-live="polite">
                     COPIADO!
                   </span>
                 </button>
@@ -207,6 +212,7 @@ export function CTA() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black hover:text-purple-600 transition-colors tracking-tight break-all"
+                  aria-label="Abrir perfil do Instagram em nova aba: @visibilidadeemfocosr"
                 >
                   @visibilidadeemfocosr
                 </a>
@@ -217,19 +223,19 @@ export function CTA() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto mt-8 sm:mt-12 px-4">
               <div className="bg-purple-600 p-4 sm:p-5 md:p-6 text-white flex flex-col items-center justify-center text-center">
                 <div className="text-xs sm:text-sm tracking-widest mb-2">INSTAGRAM</div>
-                <Instagram className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" />
+                <Instagram className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" aria-hidden="true" />
               </div>
               <div className="bg-pink-500 p-4 sm:p-5 md:p-6 text-white flex flex-col items-center justify-center text-center">
                 <div className="text-xs sm:text-sm tracking-widest mb-2">HISTÓRIAS</div>
-                <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" />
+                <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" aria-hidden="true" />
               </div>
               <div className="bg-orange-500 p-4 sm:p-5 md:p-6 text-white flex flex-col items-center justify-center text-center">
                 <div className="text-xs sm:text-sm tracking-widest mb-2">DESTAQUES</div>
-                <Star className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" />
+                <Star className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" aria-hidden="true" />
               </div>
               <div className="bg-blue-600 p-4 sm:p-5 md:p-6 text-white flex flex-col items-center justify-center text-center">
                 <div className="text-xs sm:text-sm tracking-widest mb-2">CONEXÕES</div>
-                <Network className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" />
+                <Network className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" aria-hidden="true" />
               </div>
             </div>
           </motion.div>

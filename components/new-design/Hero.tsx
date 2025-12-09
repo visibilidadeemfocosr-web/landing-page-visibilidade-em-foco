@@ -31,14 +31,14 @@ export function Hero() {
               <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 relative">
                 <Image 
                   src="/logoN.png"
-                  alt="Visibilidade em Foco"
+                  alt="Logo do projeto Visibilidade em Foco - Mapeamento de artistas LGBTQIAPN+ do município de São Roque"
                   width={96}
                   height={96}
                   className="w-full h-full object-contain drop-shadow-2xl"
                   unoptimized
                 />
-                <div className="absolute -top-2 -right-8 w-6 h-6 bg-yellow-400 rounded-full" />
-                <div className="absolute -bottom-1 -left-4 w-8 h-8 bg-purple-600 rounded-full" />
+                <div className="absolute -top-2 -right-8 w-6 h-6 bg-yellow-400 rounded-full" aria-hidden="true" />
+                <div className="absolute -bottom-1 -left-4 w-8 h-8 bg-purple-600 rounded-full" aria-hidden="true" />
               </div>
             </motion.div>
 
@@ -48,9 +48,9 @@ export function Hero() {
               transition={{ duration: 0.6 }}
               className="hidden md:flex gap-8 text-sm tracking-wide"
             >
-              <a href="#sobre" className="text-black hover:text-purple-600 transition-colors">SOBRE</a>
-              <a href="#impacto" className="text-black hover:text-purple-600 transition-colors">IMPACTO</a>
-              <a href="#participar" className="text-black hover:text-purple-600 transition-colors">PARTICIPAR</a>
+              <a href="#sobre" className="text-black hover:text-purple-600 transition-colors" aria-label="Ir para seção sobre o projeto">SOBRE</a>
+              <a href="#impacto" className="text-black hover:text-purple-600 transition-colors" aria-label="Ir para seção de impacto">IMPACTO</a>
+              <a href="#participar" className="text-black hover:text-purple-600 transition-colors" aria-label="Ir para seção de participação">PARTICIPAR</a>
             </motion.div>
           </div>
         </nav>
@@ -61,6 +61,7 @@ export function Hero() {
             className="absolute top-20 right-10 w-32 h-32 opacity-80 hidden sm:block"
             animate={{ rotate: 360 }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            aria-hidden="true"
           >
             <StarBurstShape />
           </motion.div>
@@ -69,6 +70,7 @@ export function Hero() {
             className="absolute bottom-40 left-20 w-48 h-48 opacity-60 hidden md:block"
             animate={{ rotate: -360 }}
             transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            aria-hidden="true"
           >
             <AbstractShape1 />
           </motion.div>
@@ -79,6 +81,7 @@ export function Hero() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
+            aria-hidden="true"
           />
           
           <motion.div
@@ -86,6 +89,7 @@ export function Hero() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ duration: 0.8, delay: 0.7 }}
+            aria-hidden="true"
           />
 
           <motion.div
@@ -94,6 +98,7 @@ export function Hero() {
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             style={{ clipPath: 'polygon(0 0, 100% 25%, 100% 100%, 0 75%)' }}
+            aria-hidden="true"
           />
         </div>
 
@@ -150,10 +155,11 @@ export function Hero() {
                       <DialogTrigger asChild>
                         <button 
                           className="group bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white px-10 py-4 rounded-full transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 relative overflow-hidden"
+                          aria-label="Abrir formulário de participação no mapeamento de artistas LGBTQIAPN+"
                         >
                           <span className="relative z-10">PARTICIPAR AGORA</span>
-                          <div className="absolute inset-0 bg-black transform translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                          <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                          <div className="absolute inset-0 bg-black transform translate-y-full group-hover:translate-y-0 transition-transform duration-300" aria-hidden="true" />
+                          <span className="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20" aria-hidden="true">
                             PARTICIPAR AGORA
                           </span>
                         </button>
@@ -183,8 +189,9 @@ export function Hero() {
                           <button
                             onClick={() => setDialogOpen(false)}
                             className="absolute top-8 right-8 z-20 text-white hover:text-gray-300 transition-colors"
+                            aria-label="Fechar formulário de cadastro"
                           >
-                            <X className="w-8 h-8" />
+                            <X className="w-8 h-8" aria-hidden="true" />
                           </button>
                         </div>
                         
@@ -213,6 +220,7 @@ export function Hero() {
                       }
                     }}
                     className="border-2 border-black text-black hover:bg-black hover:text-white px-6 sm:px-8 md:px-10 py-3 sm:py-4 text-base sm:text-lg tracking-wide transition-all duration-300 active:scale-95 w-full sm:w-auto"
+                    aria-label="Rolar para a seção sobre o projeto"
                   >
                     SAIBA MAIS
                   </button>
@@ -231,6 +239,7 @@ export function Hero() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.5 }}
                 className="relative h-[600px] hidden lg:block"
+                aria-hidden="true"
               >
                 {/* Composição artística exclusiva */}
                 <div className="relative w-full h-full">
@@ -290,6 +299,7 @@ export function Hero() {
           className="absolute bottom-4 sm:bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 sm:gap-2"
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          aria-hidden="true"
         >
           <div className="w-5 h-8 sm:w-6 sm:h-10 border-2 border-black rounded-full flex justify-center pt-1.5 sm:pt-2">
             <div className="w-0.5 h-1.5 sm:w-1 sm:h-2 bg-black rounded-full" />

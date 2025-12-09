@@ -38,8 +38,8 @@ export function Importance() {
   return (
     <section ref={ref} className="py-12 sm:py-16 md:py-20 lg:py-24 bg-stone-50 relative overflow-hidden">
       {/* Elementos decorativos geométricos */}
-      <div className="absolute top-20 right-10 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 border-4 sm:border-6 md:border-8 border-yellow-400 rounded-full opacity-60 sm:opacity-100 hidden sm:block" />
-      <div className="absolute bottom-20 left-20 w-24 h-24 sm:w-32 sm:h-32 bg-purple-600 opacity-60 sm:opacity-100 hidden md:block" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} />
+      <div className="absolute top-20 right-10 w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 border-4 sm:border-6 md:border-8 border-yellow-400 rounded-full opacity-60 sm:opacity-100 hidden sm:block" aria-hidden="true" />
+      <div className="absolute bottom-20 left-20 w-24 h-24 sm:w-32 sm:h-32 bg-purple-600 opacity-60 sm:opacity-100 hidden md:block" style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }} aria-hidden="true" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         {/* Header */}
@@ -63,7 +63,8 @@ export function Importance() {
                   transform: 'translateY(4px)',
                   zIndex: 1,
                   pointerEvents: 'none'
-                }} 
+                }}
+                aria-hidden="true"
               />
             </div>
             <div className="text-black mt-4">PARTICIPAR?</div>
@@ -101,9 +102,9 @@ export function Importance() {
         >
           <div className="bg-black text-white p-8 sm:p-12 md:p-20 relative overflow-hidden">
             {/* Elementos decorativos da citação */}
-            <div className="absolute top-4 left-4 sm:top-8 sm:left-8 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-yellow-400 rounded-full opacity-60 sm:opacity-100" />
-            <div className="absolute bottom-4 right-4 sm:bottom-8 sm:right-8 w-24 h-24 sm:w-32 sm:h-32 bg-pink-500 opacity-60 sm:opacity-100" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%)' }} />
-            <div className="absolute top-1/2 right-1/4 w-12 h-12 sm:w-16 sm:h-16 border-2 sm:border-4 border-purple-600 opacity-60 sm:opacity-100 hidden sm:block" />
+            <div className="absolute top-4 left-4 sm:top-8 sm:left-8 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-yellow-400 rounded-full opacity-60 sm:opacity-100" aria-hidden="true" />
+            <div className="absolute bottom-4 right-4 sm:bottom-8 sm:right-8 w-24 h-24 sm:w-32 sm:h-32 bg-pink-500 opacity-60 sm:opacity-100" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%)' }} aria-hidden="true" />
+            <div className="absolute top-1/2 right-1/4 w-12 h-12 sm:w-16 sm:h-16 border-2 sm:border-4 border-purple-600 opacity-60 sm:opacity-100 hidden sm:block" aria-hidden="true" />
 
             <div className="relative z-10 max-w-4xl mx-auto">
               <div className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl text-yellow-400 mb-4 sm:mb-6 md:mb-8" style={{ fontWeight: '900', lineHeight: '0.8' }}>"</div>
