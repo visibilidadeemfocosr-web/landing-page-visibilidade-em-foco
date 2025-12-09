@@ -124,10 +124,10 @@ export function About() {
               <div className="absolute top-0 left-0 w-12 sm:w-16 h-1 bg-orange-500" />
               <div className="flex items-start justify-between gap-3 mb-2">
                 <p className="text-base sm:text-lg text-gray-800 leading-relaxed flex-1">
-                  O Visibilidade em Foco nasce para mapear e conhecer melhor os artistas LGBTQIAPN+ de São Roque, entendendo suas potências, barreiras e perspectivas.
+                  O Visibilidade em Foco nasce com o propósito de dar voz e protagonismo a artistas LGBTQIAPN+ da cidade, mapeando suas histórias, trajetórias e desafios!
                 </p>
                 <AudioDescriptionButton
-                  text="O Visibilidade em Foco nasce para mapear e conhecer melhor os artistas LGBTQIAPN+ de São Roque, entendendo suas potências, barreiras e perspectivas."
+                  text="O Visibilidade em Foco nasce com o propósito de dar voz e protagonismo a artistas LGBTQIAPN+ da cidade, mapeando suas histórias, trajetórias e desafios!"
                   sectionId="about-project"
                   variant="icon-only"
                   className="flex-shrink-0"
