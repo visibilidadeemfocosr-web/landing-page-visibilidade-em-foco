@@ -248,11 +248,17 @@ export function Hero() {
                 <div className="relative w-full h-full">
                   {/* Fundo grande com texto recortado */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-[280px] tracking-tighter leading-none select-none"
+                    <div className="text-[280px] leading-none select-none"
                       style={{
                         color: 'transparent',
-                        WebkitTextStroke: '2px black',
-                        fontWeight: '900'
+                        WebkitTextStroke: '2.5px black',
+                        fontWeight: '900',
+                        fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+                        letterSpacing: '-0.02em',
+                        textRendering: 'geometricPrecision',
+                        WebkitFontSmoothing: 'antialiased',
+                        MozOsxFontSmoothing: 'grayscale',
+                        transform: 'translateZ(0)'
                       }}
                     >
                       SR
