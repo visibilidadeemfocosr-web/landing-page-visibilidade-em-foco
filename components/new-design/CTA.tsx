@@ -229,7 +229,7 @@ export function CTA() {
                 className="bg-purple-600 p-4 sm:p-5 md:p-6 text-white flex flex-col items-center justify-center text-center hover:bg-purple-700 transition-colors"
                 aria-label="Abrir perfil do Instagram em nova aba"
               >
-                <div className="text-xs sm:text-sm tracking-widest mb-2">REDES</div>
+                <div className="text-xs sm:text-sm tracking-widest mb-2">INSTAGRAM</div>
                 <Instagram className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" aria-hidden="true" />
               </a>
               <a 
