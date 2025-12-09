@@ -109,10 +109,10 @@ export function About() {
               <div className="absolute top-0 left-0 w-12 sm:w-16 h-1 bg-purple-600" />
               <div className="flex items-start justify-between gap-3 mb-2">
                 <p className="text-base sm:text-lg text-gray-800 leading-relaxed flex-1">
-                  Historicamente, artistas LGBTQIAPN+ enfrentam o apagamento de suas trajetórias e a invisibilização de suas obras. Em cidades do interior, essa realidade é ainda mais profunda.
+                  Historicamente, artistas LGBTQIAPN+ enfrentam o apagamento de suas trajetórias e a invisibilização de suas obras. Em cidades do interior, essa realidade é ainda mais profunda, onde a falta de espaços de representação dificultam a circulação de suas produções.
                 </p>
                 <AudioDescriptionButton
-                  text="Historicamente, artistas LGBTQIAPN+ enfrentam o apagamento de suas trajetórias e a invisibilização de suas obras. Em cidades do interior, essa realidade é ainda mais profunda."
+                  text="Historicamente, artistas LGBTQIAPN+ enfrentam o apagamento de suas trajetórias e a invisibilização de suas obras. Em cidades do interior, essa realidade é ainda mais profunda, onde a falta de espaços de representação dificultam a circulação de suas produções."
                   sectionId="about-historical"
                   variant="icon-only"
                   className="flex-shrink-0"
