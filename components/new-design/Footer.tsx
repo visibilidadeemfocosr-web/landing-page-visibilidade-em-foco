@@ -67,6 +67,9 @@ export function Footer() {
               <li>
                 <a href="https://instagram.com/visibilidadeemfocosr" target="_blank" rel="noopener noreferrer" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors" aria-label="Abrir perfil do Instagram em nova aba: @visibilidadeemfocosr">Instagram</a>
               </li>
+              <li>
+                <a href="https://www.facebook.com/share/14UaAhPw5VN/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors" aria-label="Abrir página do Facebook em nova aba">Facebook</a>
+              </li>
             </ul>
           </div>
         </div>
