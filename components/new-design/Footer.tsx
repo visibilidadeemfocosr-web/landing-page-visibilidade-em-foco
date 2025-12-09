@@ -80,7 +80,7 @@ export function Footer() {
             Realização
           </p>
           <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 md:gap-12">
-            <div className="h-12 sm:h-16 md:h-18 lg:h-20 flex items-center relative">
+            <div className="h-12 sm:h-16 md:h-18 lg:h-20 flex items-center">
               <Image 
                 src="/pnab.png"
                 alt="PNAB"
@@ -88,14 +88,6 @@ export function Footer() {
                 height={100}
                 className="h-full w-auto object-contain"
                 unoptimized
-              />
-              <div 
-                className="absolute top-0 left-0 right-0 h-[45%] bg-white pointer-events-none"
-                style={{ 
-                  mixBlendMode: 'screen',
-                  opacity: 0.9
-                }}
-                aria-hidden="true"
               />
             </div>
             <div className="h-12 sm:h-14 md:h-16 lg:h-20 flex items-center">
