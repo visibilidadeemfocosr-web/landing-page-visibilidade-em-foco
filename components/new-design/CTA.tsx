@@ -230,7 +230,7 @@ export function CTA() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto mt-8 sm:mt-12 px-4">
               <div className="bg-purple-600 p-4 sm:p-5 md:p-6 text-white flex flex-col items-center justify-center text-center">
-                <div className="text-xs sm:text-sm tracking-widest mb-2">Redes</div>
+                <div className="text-xs sm:text-sm tracking-widest mb-2">REDES</div>
                 <Instagram className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" aria-hidden="true" />
               </div>
               <div className="bg-pink-500 p-4 sm:p-5 md:p-6 text-white flex flex-col items-center justify-center text-center">
