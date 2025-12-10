@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { sendPostPublishedEmail } from '@/lib/email'
 
 // GET - Buscar artistas que responderam "Sim" à pergunta sobre rede social
 export async function GET() {
@@ -106,6 +107,7 @@ export async function GET() {
       const photoAnswer = findAnswer('foto') || submissionAnswers.find(a => a.file_url)
       const mainLanguageAnswer = findAnswer('linguagem artística principal')
       const otherLanguagesAnswer = findAnswer('outras linguagens')
+      const emailAnswer = findAnswer('e-mail') || findAnswer('email')
       
       // Extrair redes sociais (campo social_media)
       const socialMediaQuestion = allQuestions?.find(q => q.field_type === 'social_media')
@@ -146,6 +148,7 @@ export async function GET() {
         photo_crop: submission?.photo_crop || null,
         main_artistic_language: mainLanguageAnswer?.value || '',
         other_artistic_languages: otherLanguagesAnswer?.value || '',
+        email: emailAnswer?.value || null,
         instagram,
         facebook,
         linkedin,
@@ -179,7 +182,7 @@ export async function PATCH(request: Request) {
   try {
     const adminClient = createAdminClient()
     const body = await request.json()
-    const { submission_id, status, edited_bio, moderator_notes, edited_instagram, edited_facebook, edited_linkedin, edited_caption } = body
+    const { submission_id, status, edited_bio, moderator_notes, edited_instagram, edited_facebook, edited_linkedin, edited_caption, instagram_post_id, instagram_permalink } = body
 
     if (!submission_id || !status) {
       return NextResponse.json(
@@ -224,6 +227,10 @@ export async function PATCH(request: Request) {
       updateData.edited_caption = edited_caption
     }
 
+    if (instagram_post_id !== undefined) {
+      updateData.instagram_post_id = instagram_post_id
+    }
+
     if (status === 'approved' || status === 'rejected') {
       // TODO: Pegar ID do admin logado
       // updateData.moderated_by = adminUserId
@@ -255,6 +262,55 @@ export async function PATCH(request: Request) {
 
       if (error) throw error
       result = data
+    }
+
+    // Se o status for 'published' e tiver instagram_post_id, enviar e-mail
+    if (status === 'published' && instagram_post_id) {
+      try {
+        // Buscar dados do artista para enviar e-mail
+        const { data: allQuestions } = await adminClient
+          .from('questions')
+          .select('id, text, field_type')
+          .eq('active', true)
+
+        const { data: allAnswers } = await adminClient
+          .from('answers')
+          .select('question_id, value')
+          .eq('submission_id', submission_id)
+
+        // Função auxiliar para encontrar resposta
+        const findAnswer = (questionText: string) => {
+          const question = allQuestions?.find(q => 
+            q.text.toLowerCase().includes(questionText.toLowerCase())
+          )
+          if (!question) return null
+          return allAnswers?.find(a => a.question_id === question.id)
+        }
+
+        const nameAnswer = findAnswer('gostaria de ser chamado') || findAnswer('nome')
+        const emailAnswer = findAnswer('e-mail') || findAnswer('email')
+
+        const artistName = nameAnswer?.value || 'Artista'
+        const artistEmail = emailAnswer?.value
+
+        // Construir URL do Instagram (usar permalink se disponível, senão construir com ID)
+        const instagramPostUrl = instagram_permalink || `https://www.instagram.com/p/${instagram_post_id}/`
+
+        // Enviar e-mail se tiver e-mail válido
+        if (artistEmail && artistEmail.includes('@')) {
+          await sendPostPublishedEmail({
+            to: artistEmail,
+            artistName,
+            instagramPostUrl,
+          })
+          console.log(`📧 E-mail de notificação enviado para ${artistEmail}`)
+        } else {
+          console.warn(`⚠️ E-mail não encontrado ou inválido para submission_id: ${submission_id}`)
+        }
+      } catch (emailError) {
+        // Não falhar a requisição se o e-mail falhar
+        console.error('❌ Erro ao enviar e-mail de notificação:', emailError)
+      }
     }
 
     return NextResponse.json({ success: true, moderation: result }, { status: 200 })

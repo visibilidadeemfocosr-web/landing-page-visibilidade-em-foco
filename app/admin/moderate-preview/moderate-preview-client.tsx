@@ -425,6 +425,7 @@ export default function AdminModeratePreviewClient() {
               submission_id: submissionId,
               status: 'published',
               instagram_post_id: publishData.data.id,
+              instagram_permalink: publishData.data.permalink || null,
             }),
           })
 
