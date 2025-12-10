@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Instagram, Facebook, Linkedin, Download, Edit2, Check, X, ChevronRight, Copy, Camera, FileText, Guitar, Palette, Film, BookOpen, Shirt, PersonStanding, Theater, Sparkles, MicVocal, Crop } from 'lucide-react'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { Instagram, Facebook, Linkedin, Download, Edit2, Check, X, ChevronRight, Copy, Camera, FileText, Guitar, Palette, Film, BookOpen, Shirt, PersonStanding, Theater, Sparkles, MicVocal, Crop, AlertTriangle } from 'lucide-react'
 import Image from 'next/image'
 import { toast } from 'sonner'
 import html2canvas from 'html2canvas'
@@ -41,6 +42,8 @@ interface ArtistData {
 export default function AdminModeratePreviewClient() {
   const [loading, setLoading] = useState(false)
   const [submissionId, setSubmissionId] = useState<string | null>(null)
+  const [showRateLimitDialog, setShowRateLimitDialog] = useState(false)
+  const [pendingPublishData, setPendingPublishData] = useState<{ id: string; permalink: string | null } | null>(null)
   
   // Dados de exemplo ou dados reais
   const [previewData, setPreviewData] = useState({
@@ -426,30 +429,11 @@ export default function AdminModeratePreviewClient() {
           
           if (isRateLimit) {
             // Erro de limite sem ID - mas o post pode ter sido publicado mesmo assim
-            // Perguntar ao moderador se o post foi publicado
-            const confirmed = window.confirm(
-              '⚠️ Limite de requisições da API do Instagram atingido.\n\n' +
-              'O post pode ter sido publicado mesmo com o erro.\n\n' +
-              'Você consegue ver o post no Instagram? Se sim, clique em OK para marcar como publicado e enviar o e-mail.\n\n' +
-              'Se não, clique em Cancelar para tentar novamente mais tarde.'
-            )
-            
-            if (confirmed) {
-              // Assumir que foi publicado - usar um ID temporário baseado no timestamp
-              // O moderador pode editar o instagram_post_id depois se necessário
-              const tempId = `temp_${Date.now()}`
-              publishData = {
-                success: true,
-                data: {
-                  id: tempId,
-                  permalink: null
-                }
-              }
-              console.warn('⚠️ Post marcado como publicado manualmente pelo moderador (erro de limite)')
-              toast.warning('Post marcado como publicado manualmente. Verifique no Instagram e atualize o ID se necessário.')
-            } else {
-              throw new Error('Publicação cancelada. Tente novamente mais tarde quando o limite da API for resetado.')
-            }
+            // Mostrar diálogo customizado para perguntar ao moderador
+            setPendingPublishData({ id: `temp_${Date.now()}`, permalink: null })
+            setShowRateLimitDialog(true)
+            setLoading(false) // Resetar loading já que vamos aguardar confirmação
+            return // Sair da função - o diálogo vai processar a confirmação
           } else {
             throw new Error(errorMessage)
           }
@@ -507,11 +491,10 @@ export default function AdminModeratePreviewClient() {
       // Mensagem de erro mais detalhada
       let errorMessage = error.message || 'Erro desconhecido ao publicar no Instagram'
       
-      // Se for erro de limite, mostrar mensagem especial
+      // Se for erro de limite, não mostrar toast (já temos o diálogo customizado)
       if (errorMessage.includes('Limite de requisições')) {
-        toast.error('⏰ ' + errorMessage, {
-          duration: 8000, // Mostrar por mais tempo
-        })
+        // O diálogo já foi mostrado, não precisa de toast
+        return
       } else {
         toast.error('❌ Erro ao publicar: ' + errorMessage, {
           duration: 6000,
@@ -1867,6 +1850,88 @@ export default function AdminModeratePreviewClient() {
           initialCrop={photoCrop || undefined}
         />
       )}
+
+      {/* Diálogo de confirmação para erro de limite */}
+      <AlertDialog open={showRateLimitDialog} onOpenChange={setShowRateLimitDialog}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-orange-600" />
+              </div>
+              <AlertDialogTitle className="text-xl font-bold text-gray-900">
+                Limite da API do Instagram
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-base text-gray-700 space-y-3 pt-2">
+              <p>
+                O limite de requisições da API do Instagram foi atingido (25 posts por dia).
+              </p>
+              <p className="font-medium text-gray-900">
+                ⚠️ O post pode ter sido publicado mesmo com o erro.
+              </p>
+              <p>
+                Você consegue ver o post no Instagram? Se sim, confirme para marcar como publicado e enviar o e-mail ao artista.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel 
+              onClick={() => {
+                setPendingPublishData(null)
+                setLoading(false)
+              }}
+              className="bg-gray-100 hover:bg-gray-200 text-gray-900 border-0"
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (!pendingPublishData || !submissionId) {
+                  setShowRateLimitDialog(false)
+                  return
+                }
+                
+                setShowRateLimitDialog(false)
+                setLoading(true)
+                
+                try {
+                  // Atualizar status na moderação
+                  const moderateResponse = await fetch('/api/admin/moderate', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      submission_id: submissionId,
+                      status: 'published',
+                      instagram_post_id: pendingPublishData.id,
+                      instagram_permalink: pendingPublishData.permalink || null,
+                    }),
+                  })
+
+                  if (!moderateResponse.ok) {
+                    console.warn('Erro ao atualizar status na moderação')
+                    toast.error('Erro ao atualizar status. Tente novamente.')
+                  } else {
+                    toast.success('✅ Post marcado como publicado! O e-mail será enviado.', {
+                      description: 'Verifique no Instagram e atualize o ID se necessário.'
+                    })
+                  }
+                  
+                  setPendingPublishData(null)
+                } catch (updateError) {
+                  console.warn('Erro ao atualizar status na moderação:', updateError)
+                  toast.error('Erro ao atualizar status. Tente novamente.')
+                } finally {
+                  setLoading(false)
+                }
+              }}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              Sim, foi publicado
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
