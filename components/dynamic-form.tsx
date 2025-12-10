@@ -1331,7 +1331,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
         </h2>
         <div className="max-w-md space-y-4">
           <p className="text-base sm:text-lg text-foreground leading-relaxed">
-            Seu cadastro foi enviado com sucesso! Sua voz é importante para dar visibilidade à comunidade LGBTS de São Roque.
+            Seu cadastro foi enviado com sucesso! Sua voz é importante para dar visibilidade à comunidade LGBTQIAPN+ de São Roque.
           </p>
           <p className="text-sm sm:text-base text-muted-foreground">
             Agradecemos por fazer parte deste mapeamento e por contribuir para a construção de uma sociedade mais inclusiva e representativa.
