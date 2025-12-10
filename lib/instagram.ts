@@ -243,6 +243,8 @@ export async function publishInstagramPost(
     throw new Error('Access Token do Instagram não configurado');
   }
   
+  let publishedId: string | null = null;
+  
   try {
     // 1. Obtém o ID da conta do Instagram
     const instagramAccountId = await getInstagramAccountId(token);
@@ -260,10 +262,19 @@ export async function publishInstagramPost(
     
     // 4. Publica o post
     const result = await publishMedia(instagramAccountId, token, creationId);
+    publishedId = result.id;
     
     return result;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao publicar post no Instagram:', error);
+    
+    // Se conseguimos publicar mas houve erro depois (ex: buscar permalink),
+    // retornar pelo menos o ID
+    if (publishedId) {
+      console.warn('⚠️ Post publicado mas houve erro ao buscar informações adicionais. ID:', publishedId);
+      return { id: publishedId };
+    }
+    
     throw error;
   }
 }
