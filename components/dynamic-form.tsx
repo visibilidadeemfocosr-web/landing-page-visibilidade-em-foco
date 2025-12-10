@@ -1353,7 +1353,7 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             }
           }}
           size="lg"
-          className="mt-6 bg-orange-500 hover:bg-orange-600 text-white px-8 py-6 text-base sm:text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 min-h-[56px] touch-manipulation"
+          className="mt-6 bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 text-base sm:text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 min-h-[56px] touch-manipulation"
         >
           Voltar para o início
         </Button>
