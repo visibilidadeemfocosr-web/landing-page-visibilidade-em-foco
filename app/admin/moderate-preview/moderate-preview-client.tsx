@@ -1853,7 +1853,7 @@ export default function AdminModeratePreviewClient() {
 
       {/* Diálogo de confirmação para erro de limite */}
       <AlertDialog open={showRateLimitDialog} onOpenChange={setShowRateLimitDialog}>
-        <AlertDialogContent className="max-w-md">
+        <AlertDialogContent className="max-w-md !bg-white">
           <AlertDialogHeader>
             <div className="flex items-center gap-3 mb-2">
               <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
