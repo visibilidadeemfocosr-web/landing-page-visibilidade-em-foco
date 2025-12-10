@@ -112,6 +112,7 @@ export function Importance() {
               <blockquote className="text-lg sm:text-xl md:text-2xl lg:text-4xl leading-relaxed tracking-tight mb-4 sm:mb-6 md:mb-8">
                 Mapear nossas trajetórias como artistas LGBTQIAPN+ é romper apagamentos, ampliar oportunidades e mostrar a potência criativa que existe aqui!
               </blockquote>
+              <div className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl text-pink-500 mb-4 sm:mb-6 md:mb-8 text-right" style={{ fontWeight: '900', lineHeight: '0.8' }}>"</div>
               <div className="flex items-center gap-3 sm:gap-4 mb-4">
                 <div className="w-12 sm:w-16 h-0.5 sm:h-1 bg-pink-500" />
                 <div className="text-xs sm:text-sm tracking-widest text-gray-400">VISIBILIDADE EM FOCO</div>
