@@ -82,7 +82,10 @@ export async function GET() {
       text: q.text.substring(0, 30) + '...'
     })))
 
-    return NextResponse.json(sortedQuestions)
+    // Adicionar headers de cache para melhorar performance
+    const response = NextResponse.json(sortedQuestions)
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
+    return response
   } catch (error) {
     return NextResponse.json(
       { error: 'Erro ao buscar perguntas' },

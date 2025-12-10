@@ -16,9 +16,20 @@ export function CTA() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [prefetchedQuestions, setPrefetchedQuestions] = useState<any[] | null>(null)
 
   useEffect(() => {
     setMounted(true)
+    
+    // Prefetch das perguntas em background para melhorar performance
+    fetch('/api/questions')
+      .then(res => res.json())
+      .then(data => {
+        setPrefetchedQuestions(data)
+      })
+      .catch(err => {
+        console.warn('Erro ao fazer prefetch das perguntas:', err)
+      })
   }, [])
 
   const handleShare = async () => {
@@ -170,7 +181,10 @@ export function CTA() {
                       </div>
                       
                       <div id="form-scroll-container" className="flex-1 overflow-y-auto p-8 md:p-10 lg:p-12 min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
-                        <RegistrationFormLoader onSuccess={() => setDialogOpen(false)} />
+                        <RegistrationFormLoader 
+                          onSuccess={() => setDialogOpen(false)} 
+                          prefetchedQuestions={prefetchedQuestions || undefined}
+                        />
                       </div>
                     </DialogContent>
                   </Dialog>
