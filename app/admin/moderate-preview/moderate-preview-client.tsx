@@ -398,22 +398,17 @@ export default function AdminModeratePreviewClient() {
       })
 
       let publishData
+      let hasError = false
+      let errorMessage = ''
       
       if (!publishResponse.ok) {
         const errorData = await publishResponse.json().catch(() => ({}))
-        const errorMessage = errorData.details || errorData.error || 'Erro ao publicar no Instagram'
+        errorMessage = errorData.details || errorData.error || 'Erro ao publicar no Instagram'
+        hasError = true
         
-        // Verificar se é erro de limite de requisições
-        const isRateLimit = errorMessage.toLowerCase().includes('request limit') || 
-                            errorMessage.toLowerCase().includes('rate limit') ||
-                            errorMessage.toLowerCase().includes('quota') ||
-                            errorMessage.toLowerCase().includes('application request limit') ||
-                            errorData.isRateLimit
-        
-        // Se for erro de limite, verificar se ainda assim temos dados de sucesso
-        // (pode ter publicado mas falhado ao buscar permalink)
-        if (isRateLimit && errorData.data?.id) {
-          // Post foi publicado mas houve erro ao buscar permalink
+        // Verificar se temos ID mesmo com erro (post pode ter sido publicado)
+        if (errorData.data?.id) {
+          // Post foi publicado mas houve erro (ex: ao buscar permalink)
           publishData = {
             success: true,
             data: {
@@ -421,18 +416,26 @@ export default function AdminModeratePreviewClient() {
               permalink: errorData.data.permalink || null
             }
           }
-          console.warn('⚠️ Post publicado mas limite de API atingido ao buscar permalink')
-        } else if (isRateLimit) {
-          // Erro de limite sem ID - post pode não ter sido publicado
-          throw new Error('Limite de requisições da API do Instagram atingido. Aguarde algumas horas ou tente novamente mais tarde. A API do Instagram permite até 25 posts por dia por conta.')
+          console.warn('⚠️ Post publicado mas houve erro ao buscar informações adicionais:', errorMessage)
         } else {
-          throw new Error(errorMessage)
+          // Não temos ID - verificar se é erro de limite
+          const isRateLimit = errorMessage.toLowerCase().includes('request limit') || 
+                              errorMessage.toLowerCase().includes('rate limit') ||
+                              errorMessage.toLowerCase().includes('quota') ||
+                              errorMessage.toLowerCase().includes('application request limit')
+          
+          if (isRateLimit) {
+            // Erro de limite sem ID - post provavelmente não foi publicado
+            throw new Error('Limite de requisições da API do Instagram atingido. Aguarde algumas horas ou tente novamente mais tarde. A API do Instagram permite até 25 posts por dia por conta.')
+          } else {
+            throw new Error(errorMessage)
+          }
         }
       } else {
         publishData = await publishResponse.json()
       }
       
-      // Verificar se a publicação foi bem-sucedida mesmo se houve algum erro parcial
+      // Verificar se a publicação foi bem-sucedida (mesmo com erro parcial)
       if (publishData.success && publishData.data?.id) {
         // 4. Atualizar status na moderação
         try {
@@ -454,7 +457,14 @@ export default function AdminModeratePreviewClient() {
           console.warn('Erro ao atualizar status na moderação:', updateError)
         }
 
-        toast.success('✅ Post publicado no Instagram com sucesso!')
+        // Mostrar mensagem de sucesso (com aviso se houve erro parcial)
+        if (hasError) {
+          toast.success('✅ Post publicado no Instagram! (Houve um aviso, mas o post foi publicado)', {
+            description: 'O e-mail será enviado normalmente.'
+          })
+        } else {
+          toast.success('✅ Post publicado no Instagram com sucesso!')
+        }
         
         // 5. Abrir o post no Instagram (se tiver permalink)
         if (publishData.data?.permalink) {

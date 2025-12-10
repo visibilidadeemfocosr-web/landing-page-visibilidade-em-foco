@@ -72,10 +72,28 @@ export async function POST(request: NextRequest) {
       message: 'Post publicado no Instagram com sucesso',
       data: result,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Erro ao publicar no Instagram:', error);
     
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+    
+    // Verificar se o erro contém um ID (pode ter publicado antes do erro)
+    // Isso pode acontecer se a publicação funcionou mas houve erro ao buscar permalink
+    if (error.id || (error as any).data?.id) {
+      const postId = error.id || (error as any).data?.id;
+      console.warn('⚠️ Erro ao publicar, mas ID do post encontrado:', postId);
+      console.warn('   Considerando como sucesso parcial - post pode ter sido publicado');
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Post pode ter sido publicado (com avisos)',
+        data: {
+          id: postId,
+          permalink: null
+        },
+        warning: errorMessage
+      });
+    }
     
     return NextResponse.json(
       { 

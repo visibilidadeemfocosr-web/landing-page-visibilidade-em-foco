@@ -184,9 +184,19 @@ export async function publishMedia(
       }
     );
     
+    const responseData = await response.json();
+    
     if (!response.ok) {
-      const error = await response.json();
+      const error = responseData;
       const errorMessage = error.error?.message || 'Erro desconhecido';
+      
+      // Verificar se mesmo com erro, temos um ID (pode ter publicado antes do erro)
+      // Alguns erros do Instagram podem retornar o ID mesmo com status de erro
+      if (responseData.id) {
+        console.warn('⚠️ Instagram retornou erro mas forneceu ID do post:', responseData.id);
+        // Retornar o ID mesmo com erro - o post pode ter sido publicado
+        return { id: responseData.id };
+      }
       
       // Preservar a mensagem original do erro para melhor tratamento no frontend
       const fullError = new Error(`Erro ao publicar mídia: ${errorMessage}`);
@@ -201,7 +211,7 @@ export async function publishMedia(
       throw fullError;
     }
     
-    const data = await response.json();
+    const data = responseData;
     
     // Obtém o permalink do post publicado (opcional - não falha se der erro)
     try {
@@ -273,6 +283,12 @@ export async function publishInstagramPost(
     if (publishedId) {
       console.warn('⚠️ Post publicado mas houve erro ao buscar informações adicionais. ID:', publishedId);
       return { id: publishedId };
+    }
+    
+    // Verificar se o erro em si contém um ID (pode ter sido retornado pelo publishMedia)
+    if (error.id) {
+      console.warn('⚠️ Erro ao publicar, mas ID encontrado no erro:', error.id);
+      return { id: error.id };
     }
     
     throw error;
