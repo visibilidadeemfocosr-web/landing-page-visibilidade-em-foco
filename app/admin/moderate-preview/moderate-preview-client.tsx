@@ -37,6 +37,7 @@ interface ArtistData {
   original_photo?: string | null
   photo_crop?: CropData | null
   edited_caption?: string | null
+  email?: string | null
 }
 
 export default function AdminModeratePreviewClient() {
@@ -55,6 +56,7 @@ export default function AdminModeratePreviewClient() {
     facebook: 'facebook.com/artista',
     linkedin: 'linkedin.com/in/artista',
     photo: PLACEHOLDER_IMAGE,
+    email: null as string | null,
     isEditing: false,
     status: 'pending' as string,
     moderator_notes: null as string | null,
@@ -88,6 +90,7 @@ export default function AdminModeratePreviewClient() {
           facebook: artist.facebook || '',
           linkedin: artist.linkedin || '',
           photo: artist.photo || PLACEHOLDER_IMAGE,
+          email: (artist as any).email || null,
           isEditing: false,
           status: (artist as any).status || 'pending',
           moderator_notes: (artist as any).moderator_notes || null,
@@ -1377,6 +1380,23 @@ export default function AdminModeratePreviewClient() {
                 placeholder="Nome do Artista"
               />
             </div>
+
+            {/* E-mail */}
+            {previewData.email && (
+              <div className="space-y-2">
+                <Label htmlFor="email">E-mail do Respondente</Label>
+                <Input
+                  id="email"
+                  value={previewData.email}
+                  disabled
+                  className="bg-muted cursor-not-allowed"
+                  placeholder="E-mail não informado"
+                />
+                <p className="text-xs text-muted-foreground">
+                  E-mail informado pelo respondente (somente leitura)
+                </p>
+              </div>
+            )}
 
             {/* Linguagens Artísticas */}
             <div className="space-y-4">
