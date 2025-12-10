@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Slider } from '@/components/ui/slider'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Upload, Loader2, MapPin } from 'lucide-react'
+import { Upload, Loader2, MapPin, Instagram, Facebook } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Question } from '@/lib/supabase/types'
 
@@ -1337,6 +1337,36 @@ export function DynamicForm({ questions, previewMode = false, onSuccess }: Dynam
             Agradecemos por fazer parte deste mapeamento e por contribuir para a construção de uma sociedade mais inclusiva e representativa.
           </p>
         </div>
+        
+        {/* Seção de redes sociais */}
+        <div className="max-w-md space-y-3 mt-6 pt-6 border-t border-gray-200">
+          <p className="text-sm sm:text-base font-semibold text-foreground text-center">
+            Nos siga nas redes sociais
+          </p>
+          <div className="flex items-center justify-center gap-4">
+            <a
+              href="https://instagram.com/visibilidadeemfocosr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-full hover:from-purple-700 hover:to-pink-600 transition-all duration-300 shadow-md hover:shadow-lg"
+              aria-label="Abrir perfil do Instagram em nova aba"
+            >
+              <Instagram className="w-5 h-5" aria-hidden="true" />
+              <span className="text-sm font-medium">Instagram</span>
+            </a>
+            <a
+              href="https://www.facebook.com/share/14UaAhPw5VN/?mibextid=wwXIfr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
+              aria-label="Abrir página do Facebook em nova aba"
+            >
+              <Facebook className="w-5 h-5" aria-hidden="true" />
+              <span className="text-sm font-medium">Facebook</span>
+            </a>
+          </div>
+        </div>
+        
         <Button
           onClick={() => {
             // Reset form
