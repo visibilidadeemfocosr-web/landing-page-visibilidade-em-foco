@@ -425,8 +425,31 @@ export default function AdminModeratePreviewClient() {
                               errorMessage.toLowerCase().includes('application request limit')
           
           if (isRateLimit) {
-            // Erro de limite sem ID - post provavelmente não foi publicado
-            throw new Error('Limite de requisições da API do Instagram atingido. Aguarde algumas horas ou tente novamente mais tarde. A API do Instagram permite até 25 posts por dia por conta.')
+            // Erro de limite sem ID - mas o post pode ter sido publicado mesmo assim
+            // Perguntar ao moderador se o post foi publicado
+            const confirmed = window.confirm(
+              '⚠️ Limite de requisições da API do Instagram atingido.\n\n' +
+              'O post pode ter sido publicado mesmo com o erro.\n\n' +
+              'Você consegue ver o post no Instagram? Se sim, clique em OK para marcar como publicado e enviar o e-mail.\n\n' +
+              'Se não, clique em Cancelar para tentar novamente mais tarde.'
+            )
+            
+            if (confirmed) {
+              // Assumir que foi publicado - usar um ID temporário baseado no timestamp
+              // O moderador pode editar o instagram_post_id depois se necessário
+              const tempId = `temp_${Date.now()}`
+              publishData = {
+                success: true,
+                data: {
+                  id: tempId,
+                  permalink: null
+                }
+              }
+              console.warn('⚠️ Post marcado como publicado manualmente pelo moderador (erro de limite)')
+              toast.warning('Post marcado como publicado manualmente. Verifique no Instagram e atualize o ID se necessário.')
+            } else {
+              throw new Error('Publicação cancelada. Tente novamente mais tarde quando o limite da API for resetado.')
+            }
           } else {
             throw new Error(errorMessage)
           }

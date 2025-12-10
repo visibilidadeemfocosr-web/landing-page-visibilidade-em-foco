@@ -294,7 +294,14 @@ export async function PATCH(request: Request) {
         const artistEmail = emailAnswer?.value
 
         // Construir URL do Instagram (usar permalink se disponível, senão construir com ID)
-        const instagramPostUrl = instagram_permalink || `https://www.instagram.com/p/${instagram_post_id}/`
+        // Se o ID for temporário (começa com "temp_"), usar link genérico do perfil
+        let instagramPostUrl: string
+        if (instagram_post_id?.startsWith('temp_')) {
+          // ID temporário - usar link do perfil ao invés do post específico
+          instagramPostUrl = 'https://www.instagram.com/visibilidadeemfocosr/'
+        } else {
+          instagramPostUrl = instagram_permalink || `https://www.instagram.com/p/${instagram_post_id}/`
+        }
 
         // Enviar e-mail se tiver e-mail válido
         if (artistEmail && artistEmail.includes('@')) {
