@@ -247,7 +247,7 @@ export function Hero() {
 
                 <div className="mt-6 sm:mt-8 bg-black text-white px-4 sm:px-6 py-3 sm:py-4 inline-block">
                   <p className="text-xs sm:text-sm tracking-wider">
-                    <span className="text-yellow-400">15/12/2025</span> até <span className="text-yellow-400">15/02/2026</span>
+                    <span className="text-yellow-400">12/12/2025</span> até <span className="text-yellow-400">12/02/2026</span>
                   </p>
                 </div>
               </motion.div>
