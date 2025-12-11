@@ -33,18 +33,41 @@ export function CTA() {
   }, [])
 
   const handleShare = async () => {
+    const url = window.location.href
+    const text = 'Participe do 1º Mapeamento Cultural de Artistas LGBTQIAPN+ de São Roque! 🎨✨'
+    const hashtags = '#VisibilidadeEmFoco #SãoRoque #ArteLGBTQIAPN+ #CulturaLGBTQIAPN+'
+    
+    // Tentar usar Web Share API (WhatsApp, Instagram, etc.)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Visibilidade em Foco - Mapeamento Cultural',
+          text: `${text} ${hashtags}`,
+          url: url,
+        })
+        return
+      } catch (err: any) {
+        // Se o usuário cancelar, não mostrar erro
+        if (err.name !== 'AbortError') {
+          console.error('Erro ao compartilhar:', err)
+        } else {
+          return // Usuário cancelou
+        }
+      }
+    }
+    
+    // Fallback: copiar para área de transferência
     try {
-      const url = window.location.href
-      await navigator.clipboard.writeText(url)
+      const shareText = `${text}\n\n${url}\n\n${hashtags}`
+      await navigator.clipboard.writeText(shareText)
       setCopied(true)
-      toast.success('URL copiada para a área de transferência!')
+      toast.success('Link copiado! Cole onde quiser compartilhar 📋')
       
-      // Resetar o estado após 2 segundos
       setTimeout(() => {
         setCopied(false)
       }, 2000)
     } catch (err) {
-      toast.error('Erro ao copiar URL')
+      toast.error('Erro ao copiar link')
       console.error('Erro ao copiar:', err)
     }
   }
@@ -87,11 +110,11 @@ export function CTA() {
             <div className="bg-white p-6 sm:p-8 md:p-10 border-l-4 sm:border-l-6 md:border-l-8 border-purple-600">
               <div className="text-xs sm:text-sm tracking-widest text-gray-500 mb-3 sm:mb-4">PERÍODO</div>
               <div className="text-3xl sm:text-4xl md:text-5xl mb-3 sm:mb-4 tracking-tight">
-                15/12<span className="text-purple-600">/</span>2025
+                12/12<span className="text-purple-600">/</span>2025
               </div>
               <div className="text-xl sm:text-2xl text-gray-600 mb-3 sm:mb-4">até</div>
               <div className="text-3xl sm:text-4xl md:text-5xl tracking-tight">
-                15/02<span className="text-pink-500">/</span>2026
+                12/02<span className="text-pink-500">/</span>2026
               </div>
             </div>
 
