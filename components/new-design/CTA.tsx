@@ -34,6 +34,9 @@ export function CTA() {
 
   // Bloquear scroll do body quando dialog estiver aberto no mobile
   useEffect(() => {
+    // Só executar no cliente
+    if (typeof window === 'undefined') return
+    
     if (dialogOpen) {
       // Bloquear scroll do body
       document.body.style.overflow = 'hidden'
@@ -51,9 +54,11 @@ export function CTA() {
     
     return () => {
       // Cleanup ao desmontar
-      document.body.style.overflow = ''
-      document.body.style.position = ''
-      document.body.style.width = ''
+      if (typeof document !== 'undefined') {
+        document.body.style.overflow = ''
+        document.body.style.position = ''
+        document.body.style.width = ''
+      }
     }
   }, [dialogOpen])
 
