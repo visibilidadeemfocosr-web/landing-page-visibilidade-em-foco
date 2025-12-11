@@ -62,7 +62,7 @@ export function Impact() {
           <div className="bg-orange-500 p-4 sm:p-6 md:p-8 text-white aspect-square flex flex-col justify-between">
             <div className="text-xs sm:text-sm tracking-widest">01</div>
             <div>
-              <div className="text-xl sm:text-2xl md:text-3xl tracking-tight mb-1 sm:mb-2">RESISTÊNCIA</div>
+              <div className="text-xl sm:text-2xl md:text-3xl tracking-tight mb-1 sm:mb-2">RESISTIR</div>
               <p className="text-xs sm:text-sm text-orange-100">Combater apagamento histórico</p>
             </div>
           </div>
