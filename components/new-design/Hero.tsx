@@ -192,7 +192,7 @@ export function Hero() {
                           <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500" style={{ clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }} />
                           <div className="absolute bottom-0 left-0 w-24 h-24 bg-yellow-400 rounded-full opacity-50" />
                           
-                          <div className="relative z-10">
+                          <div className="relative z-10 pr-16 sm:pr-20">
                             <h2 className="text-3xl md:text-4xl lg:text-5xl tracking-tight mb-4">
                               CADASTRO DE ARTISTA
                             </h2>
