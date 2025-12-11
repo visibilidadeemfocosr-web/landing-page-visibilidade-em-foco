@@ -87,7 +87,7 @@ export function Impact() {
             <div className="text-xs sm:text-sm tracking-widest">04</div>
             <div>
               <div className="text-xl sm:text-2xl md:text-3xl tracking-tight mb-1 sm:mb-2">CONECTAR</div>
-              <p className="text-xs sm:text-sm text-pink-100">Fomentar a rede local da comunidade</p>
+              <p className="text-xs sm:text-sm text-pink-100">Fomentar a rede local</p>
             </div>
           </div>
         </motion.div>
