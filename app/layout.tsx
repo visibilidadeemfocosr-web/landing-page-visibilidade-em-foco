@@ -17,9 +17,31 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Visibilidade em Foco | Mapeamento de Artistas LGBTS - São Roque',
-  description: 'Projeto de mapeamento e visibilidade de artistas LGBTS da cidade de São Roque. Participe e faça parte dessa história.',
+  title: 'Visibilidade em Foco | Mapeamento de Artistas LGBTQIAPN+ - São Roque',
+  description: '1º Mapeamento Cultural de Artistas LGBTQIAPN+ do município de São Roque. Um projeto de resistência, visibilidade e celebração das nossas existências. Participe!',
   generator: 'v0.app',
+  openGraph: {
+    title: 'Visibilidade em Foco | Mapeamento de Artistas LGBTQIAPN+',
+    description: '1º Mapeamento Cultural de Artistas LGBTQIAPN+ de São Roque. Participe e faça parte dessa história de visibilidade e resistência!',
+    url: 'https://visibilidadeemfoco.com.br',
+    siteName: 'Visibilidade em Foco',
+    type: 'website',
+    locale: 'pt_BR',
+    images: [
+      {
+        url: '/logo-gradient.png',
+        width: 1200,
+        height: 630,
+        alt: 'Visibilidade em Foco - Logo',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Visibilidade em Foco | Mapeamento de Artistas LGBTQIAPN+',
+    description: '1º Mapeamento Cultural de Artistas LGBTQIAPN+ de São Roque. Participe!',
+    images: ['/logo-gradient.png'],
+  },
   icons: {
     icon: [
       {
