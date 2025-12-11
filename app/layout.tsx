@@ -90,7 +90,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${spaceGrotesk.variable} ${dmSans.variable} font-sans antialiased`}>
         {children}
         <Analytics />
