@@ -86,8 +86,8 @@ export function Impact() {
           <div className="bg-pink-500 p-4 sm:p-6 md:p-8 text-white aspect-square flex flex-col justify-between">
             <div className="text-xs sm:text-sm tracking-widest">04</div>
             <div>
-              <div className="text-xl sm:text-2xl md:text-3xl tracking-tight mb-1 sm:mb-2">VOZ</div>
-              <p className="text-xs sm:text-sm text-pink-100">Amplificar histórias</p>
+              <div className="text-xl sm:text-2xl md:text-3xl tracking-tight mb-1 sm:mb-2">CONECTAR</div>
+              <p className="text-xs sm:text-sm text-pink-100">Fomentar a rede local da comunidade</p>
             </div>
           </div>
         </motion.div>
