@@ -173,7 +173,7 @@ export function CTA() {
                       </button>
                     </DialogTrigger>
                     <DialogContent 
-                      className="!max-w-[100vw] w-[100vw] !max-h-[100vh] h-[100vh] !top-0 !left-0 !translate-x-0 !translate-y-0 rounded-none p-0 sm:max-w-[95vw] sm:w-[95vw] sm:max-h-[95vh] sm:h-[95vh] sm:!top-[50%] sm:!left-[50%] sm:!translate-x-[-50%] sm:!translate-y-[-50%] sm:rounded-lg sm:p-6 overflow-hidden flex flex-col bg-white !z-[60]"
+                      className="!fixed !inset-0 !max-w-[100vw] w-[100vw] !max-h-[100vh] h-[100vh] !top-0 !left-0 !right-0 !bottom-0 !translate-x-0 !translate-y-0 rounded-none p-0 sm:!inset-auto sm:max-w-[95vw] sm:w-[95vw] sm:max-h-[95vh] sm:h-[95vh] sm:!top-[50%] sm:!left-[50%] sm:!translate-x-[-50%] sm:!translate-y-[-50%] sm:rounded-lg sm:p-6 overflow-hidden flex flex-col bg-white !z-[60]"
                       showCloseButton={false}
                     >
                       {/* DialogTitle oculto para acessibilidade */}
