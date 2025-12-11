@@ -32,6 +32,31 @@ export function CTA() {
       })
   }, [])
 
+  // Bloquear scroll do body quando dialog estiver aberto no mobile
+  useEffect(() => {
+    if (dialogOpen) {
+      // Bloquear scroll do body
+      document.body.style.overflow = 'hidden'
+      // Esconder conteúdo do site no mobile
+      if (window.innerWidth < 640) {
+        document.body.style.position = 'fixed'
+        document.body.style.width = '100%'
+      }
+    } else {
+      // Restaurar scroll
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.width = ''
+    }
+    
+    return () => {
+      // Cleanup ao desmontar
+      document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.width = ''
+    }
+  }, [dialogOpen])
+
   const handleShare = async () => {
     const url = window.location.href
     const text = 'Participe do 1º Mapeamento Cultural de Artistas LGBTQIAPN+ de São Roque! 🎨✨'
@@ -173,7 +198,7 @@ export function CTA() {
                       </button>
                     </DialogTrigger>
                     <DialogContent 
-                      className="!fixed !inset-0 !max-w-[100vw] w-[100vw] !max-h-[100vh] h-[100vh] !top-0 !left-0 !right-0 !bottom-0 !translate-x-0 !translate-y-0 rounded-none p-0 sm:!inset-auto sm:max-w-[95vw] sm:w-[95vw] sm:max-h-[95vh] sm:h-[95vh] sm:!top-[50%] sm:!left-[50%] sm:!translate-x-[-50%] sm:!translate-y-[-50%] sm:rounded-lg sm:p-6 overflow-hidden flex flex-col bg-white !z-[60] !m-0"
+                      className="!fixed !inset-0 !max-w-[100vw] w-[100vw] !max-h-[100vh] h-[100vh] !top-0 !left-0 !right-0 !bottom-0 !translate-x-0 !translate-y-0 rounded-none p-0 sm:!inset-auto sm:max-w-[95vw] sm:w-[95vw] sm:max-h-[95vh] sm:h-[95vh] sm:!top-[50%] sm:!left-[50%] sm:!translate-x-[-50%] sm:!translate-y-[-50%] sm:rounded-lg sm:p-6 overflow-hidden flex flex-col bg-white !z-[9999] !m-0"
                       showCloseButton={false}
                     >
                       {/* DialogTitle oculto para acessibilidade */}
