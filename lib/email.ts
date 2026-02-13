@@ -121,9 +121,15 @@ export async function sendPostPublishedEmail({ to, artistName, instagramPostUrl 
       service: 'gmail',
       auth: {
         user: gmailUser,
-        pass: gmailAppPassword,
+        pass: gmailAppPassword.trim(), // Remove espaços que podem causar erro
       },
+      // Configurações adicionais para melhor compatibilidade
+      secure: true, // Usa TLS
+      port: 465, // Porta SSL
     })
+
+    // Verificar conexão antes de enviar
+    await transporter.verify()
 
     // Criar template do e-mail
     const htmlContent = createEmailTemplate({ artistName, instagramPostUrl })
@@ -157,8 +163,31 @@ Facebook: https://www.facebook.com/share/14UaAhPw5VN/?mibextid=wwXIfr
     })
 
     console.log('✅ E-mail enviado com sucesso:', info.messageId)
-  } catch (error) {
-    console.error('❌ Erro ao enviar e-mail:', error)
+    console.log('📧 E-mail enviado para:', to)
+  } catch (error: any) {
+    // Logs detalhados para ajudar no diagnóstico
+    console.error('❌ Erro ao enviar e-mail:', error.message)
+    
+    if (error.code) {
+      console.error('❌ Código do erro:', error.code)
+    }
+    
+    if (error.response) {
+      console.error('❌ Resposta do servidor:', error.response)
+    }
+    
+    // Mensagens específicas para erros comuns
+    if (error.code === 'EAUTH') {
+      console.error('🔐 Erro de autenticação: Verifique se:')
+      console.error('   1. A App Password está correta (16 caracteres, sem espaços)')
+      console.error('   2. A Verificação em duas etapas está ativada')
+      console.error('   3. A variável GMAIL_APP_PASSWORD não tem espaços extras')
+    } else if (error.code === 'ECONNECTION' || error.code === 'ETIMEDOUT') {
+      console.error('🌐 Erro de conexão: Verifique sua conexão com a internet')
+    } else if (error.code === 'EMESSAGE') {
+      console.error('📝 Erro no formato da mensagem')
+    }
+    
     // Não lançar erro para não quebrar o fluxo de publicação
     // O post já foi publicado, então apenas logamos o erro
   }

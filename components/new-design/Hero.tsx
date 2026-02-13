@@ -8,6 +8,7 @@ import { RegistrationFormLoader } from '@/components/registration-form-loader'
 import { X } from 'lucide-react'
 import Image from 'next/image'
 import { AudioDescriptionButton } from '@/components/accessibility/AudioDescriptionButton'
+import { SURVEY_ENDED } from '@/lib/survey-ended'
 
 export function Hero() {
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -94,7 +95,7 @@ export function Hero() {
             >
               <a href="#sobre" className="text-black hover:text-purple-600 transition-colors" aria-label="Ir para seção sobre o projeto">SOBRE</a>
               <a href="#impacto" className="text-black hover:text-purple-600 transition-colors" aria-label="Ir para seção de impacto">IMPACTO</a>
-              <a href="#participar" className="text-black hover:text-purple-600 transition-colors" aria-label="Ir para seção de participação">PARTICIPAR</a>
+              <a href="#participar" className="text-black hover:text-purple-600 transition-colors" aria-label="Ir para seção de participação">{SURVEY_ENDED ? 'ENCERRADO' : 'PARTICIPAR'}</a>
             </motion.div>
           </div>
         </nav>
@@ -196,7 +197,16 @@ export function Hero() {
                   transition={{ duration: 0.8, delay: 1.2 }}
                   className="flex flex-col sm:flex-row gap-4"
                 >
-                  {mounted ? (
+                  {SURVEY_ENDED ? (
+                    <button
+                      type="button"
+                      disabled
+                      className="bg-gray-400 text-white px-10 py-4 rounded-full cursor-not-allowed opacity-90"
+                      aria-label="Mapeamento encerrado"
+                    >
+                      MAPEAMENTO ENCERRADO
+                    </button>
+                  ) : mounted ? (
                     <Dialog open={dialogOpen} onOpenChange={setDialogOpen} modal={true}>
                       <DialogTrigger asChild>
                         <button 

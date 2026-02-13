@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { SURVEY_ENDED } from '@/lib/survey-ended'
 
 export function Footer() {
   return (
@@ -43,7 +44,7 @@ export function Footer() {
                 <a href="#impacto" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors" aria-label="Ir para seção de impacto">Impacto</a>
               </li>
               <li>
-                <a href="#participar" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors" aria-label="Ir para seção de participação">Participar</a>
+                <a href="#participar" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors" aria-label="Ir para seção de participação">{SURVEY_ENDED ? 'Encerrado' : 'Participar'}</a>
               </li>
               <li>
                 <Link href="/admin/login" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors" aria-label="Ir para página de acesso administrativo">Acesso Admin</Link>

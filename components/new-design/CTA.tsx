@@ -9,6 +9,7 @@ import { Instagram, Facebook } from 'lucide-react'
 import { X } from 'lucide-react'
 import { toast } from 'sonner'
 import { AudioDescriptionButton } from '@/components/accessibility/AudioDescriptionButton'
+import { SURVEY_ENDED } from '@/lib/survey-ended'
 
 export function CTA() {
   const ref = useRef<HTMLElement>(null)
@@ -117,7 +118,7 @@ export function CTA() {
             transition={{ duration: 0.6 }}
             className="text-center mb-12 sm:mb-16"
           >
-            <div className="text-xs sm:text-sm tracking-widest text-gray-500 mb-3 sm:mb-4">04 / PARTICIPE</div>
+            <div className="text-xs sm:text-sm tracking-widest text-gray-500 mb-3 sm:mb-4">04 / {SURVEY_ENDED ? 'MAPEAMENTO ENCERRADO' : 'PARTICIPE'}</div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl tracking-tight leading-tight mb-6 sm:mb-8">
               <div className="text-black">SUA VOZ</div>
               <div className="relative inline-block">
@@ -188,7 +189,16 @@ export function CTA() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4">
-                {mounted ? (
+                {SURVEY_ENDED ? (
+                  <button
+                    type="button"
+                    disabled
+                    className="bg-gray-400 text-white px-8 sm:px-10 md:px-12 py-4 sm:py-5 text-base sm:text-lg md:text-xl tracking-wide cursor-not-allowed opacity-90 w-full sm:w-auto"
+                    aria-label="Mapeamento encerrado"
+                  >
+                    MAPEAMENTO ENCERRADO
+                  </button>
+                ) : mounted ? (
                   <Dialog open={dialogOpen} onOpenChange={setDialogOpen} modal={true}>
                     <DialogTrigger asChild>
                       <button 
