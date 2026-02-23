@@ -1,11 +1,16 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Cropper from 'react-easy-crop'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Slider } from '@/components/ui/slider'
 import { ZoomIn, ZoomOut } from 'lucide-react'
+
+const ZOOM_MIN = 0.5
+const ZOOM_MAX = 3
+const ZOOM_STEP = 0.1
+const ZOOM_BUTTON_STEP = 0.25
 
 interface PhotoCropEditorProps {
   photoUrl: string
@@ -36,8 +41,16 @@ export function PhotoCropEditor({
   initialCrop 
 }: PhotoCropEditorProps) {
   const [crop, setCrop] = useState({ x: initialCrop?.x || 0, y: initialCrop?.y || 0 })
-  const [zoom, setZoom] = useState(initialCrop?.zoom || 0.5)
+  const [zoom, setZoom] = useState(initialCrop?.zoom ?? 0.5)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null)
+
+  // Sincronizar estado quando o dialog abrir ou initialCrop mudar
+  useEffect(() => {
+    if (open) {
+      setCrop({ x: initialCrop?.x || 0, y: initialCrop?.y || 0 })
+      setZoom(initialCrop?.zoom ?? 0.5)
+    }
+  }, [open, initialCrop?.x, initialCrop?.y, initialCrop?.zoom])
 
   const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {
     setCroppedAreaPixels(croppedAreaPixels)
@@ -97,6 +110,13 @@ export function PhotoCropEditor({
     setZoom(0.5)
   }
 
+  const handleZoomOut = () => {
+    setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_BUTTON_STEP) * 100) / 100))
+  }
+  const handleZoomIn = () => {
+    setZoom((z) => Math.min(ZOOM_MAX, Math.round((z + ZOOM_BUTTON_STEP) * 100) / 100))
+  }
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] bg-white dark:bg-gray-950">
@@ -128,25 +148,49 @@ export function PhotoCropEditor({
             />
           </div>
 
-          {/* Controle de Zoom */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground flex items-center gap-2">
-                <ZoomOut className="w-4 h-4" />
-                Zoom
-              </span>
-              <span className="text-muted-foreground flex items-center gap-2">
-                <ZoomIn className="w-4 h-4" />
-              </span>
+          {/* Controle de Zoom: botões + valor + slider */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-sm font-medium text-muted-foreground">Zoom</span>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={handleZoomOut}
+                  disabled={zoom <= ZOOM_MIN}
+                  aria-label="Diminuir zoom"
+                  className="h-10 w-10 shrink-0"
+                >
+                  <ZoomOut className="w-5 h-5" />
+                </Button>
+                <span className="min-w-[3.5rem] text-center text-sm font-semibold tabular-nums" aria-live="polite">
+                  {zoom.toFixed(1)}x
+                </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={handleZoomIn}
+                  disabled={zoom >= ZOOM_MAX}
+                  aria-label="Aumentar zoom"
+                  className="h-10 w-10 shrink-0"
+                >
+                  <ZoomIn className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
-            <Slider
-              value={[zoom]}
-              min={0.5}
-              max={3}
-              step={0.05}
-              onValueChange={(values) => setZoom(values[0])}
-              className="w-full"
-            />
+            <div className="py-2 px-1">
+              <Slider
+                value={[zoom]}
+                min={ZOOM_MIN}
+                max={ZOOM_MAX}
+                step={ZOOM_STEP}
+                onValueChange={(values) => setZoom(values[0])}
+                className="w-full"
+                aria-label="Controle de zoom da foto"
+              />
+            </div>
           </div>
 
           {/* Instruções */}

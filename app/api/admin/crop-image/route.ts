@@ -59,14 +59,42 @@ export async function POST(request: Request) {
     // Processar imagem com sharp
     let croppedImageBuffer
     try {
-      const extractParams = {
-        left: Math.max(0, Math.round(cropData.x)),
-        top: Math.max(0, Math.round(cropData.y)),
-        width: Math.max(1, Math.round(cropData.width)),
-        height: Math.max(1, Math.round(cropData.height))
+      const sharpInstance = sharp(buffer)
+      const metadata = await sharpInstance.metadata()
+      const imgWidth = metadata.width ?? 0
+      const imgHeight = metadata.height ?? 0
+
+      if (imgWidth < 1 || imgHeight < 1) {
+        throw new Error('Não foi possível obter dimensões da imagem')
       }
 
-      console.log('Extraindo imagem com sharp:', extractParams)
+      let left = Math.max(0, Math.round(cropData.x))
+      let top = Math.max(0, Math.round(cropData.y))
+      let width = Math.max(1, Math.round(cropData.width))
+      let height = Math.max(1, Math.round(cropData.height))
+
+      // Garantir que a área de extração não ultrapasse os limites da imagem
+      width = Math.min(width, imgWidth)
+      height = Math.min(height, imgHeight)
+      if (left + width > imgWidth) {
+        left = Math.max(0, imgWidth - width)
+        width = imgWidth - left
+      }
+      if (top + height > imgHeight) {
+        top = Math.max(0, imgHeight - height)
+        height = imgHeight - top
+      }
+      if (left >= imgWidth || top >= imgHeight) {
+        left = 0
+        top = 0
+        width = Math.min(width, imgWidth)
+        height = Math.min(height, imgHeight)
+      }
+      width = Math.max(1, width)
+      height = Math.max(1, height)
+
+      const extractParams = { left, top, width, height }
+      console.log('Extraindo imagem com sharp:', extractParams, 'imagem:', imgWidth, 'x', imgHeight)
 
       croppedImageBuffer = await sharp(buffer)
         .extract(extractParams)

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export async function PATCH(
@@ -6,7 +6,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     const { photo_crop, cropped_photo_url } = await request.json()
     const { id } = await params
 
@@ -17,7 +17,7 @@ export async function PATCH(
       updateData.cropped_photo_url = cropped_photo_url
     }
 
-    // Atualizar crop da foto
+    // Atualizar crop da foto (admin client para contornar RLS e persistir)
     const { error } = await supabase
       .from('submissions')
       .update(updateData)
