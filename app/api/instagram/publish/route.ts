@@ -25,8 +25,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verifica se o token está configurado
-    if (!process.env.INSTAGRAM_ACCESS_TOKEN) {
+    // Verifica se o token está configurado (trim para evitar espaços/quebras de linha da env)
+    const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN?.trim();
+    if (!accessToken) {
       return NextResponse.json(
         { error: 'Access Token do Instagram não configurado' },
         { status: 500 }
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
       result = await publishInstagramCarousel(
         imageUrl,
         caption,
-        process.env.INSTAGRAM_ACCESS_TOKEN
+        accessToken
       );
     } else {
       // Publicar post único
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
       result = await publishInstagramPost(
         singleImageUrl,
         caption,
-        process.env.INSTAGRAM_ACCESS_TOKEN
+        accessToken
       );
     }
 

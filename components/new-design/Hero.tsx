@@ -93,9 +93,34 @@ export function Hero() {
               transition={{ duration: 0.6 }}
               className="hidden md:flex gap-8 text-sm tracking-wide"
             >
-              <a href="#sobre" className="text-black hover:text-purple-600 transition-colors" aria-label="Ir para seção sobre o projeto">SOBRE</a>
-              <a href="#impacto" className="text-black hover:text-purple-600 transition-colors" aria-label="Ir para seção de impacto">IMPACTO</a>
-              <a href="#participar" className="text-black hover:text-purple-600 transition-colors" aria-label="Ir para seção de participação">{SURVEY_ENDED ? 'ENCERRADO' : 'PARTICIPAR'}</a>
+              <a
+                href="#sobre"
+                className="text-black hover:text-purple-600 transition-colors"
+                aria-label="Ir para seção sobre o projeto"
+              >
+                SOBRE
+              </a>
+              <a
+                href="#impacto"
+                className="text-black hover:text-purple-600 transition-colors"
+                aria-label="Ir para seção de impacto"
+              >
+                IMPACTO
+              </a>
+              <a
+                href="/artistas-em-foco"
+                className="text-black hover:text-purple-600 transition-colors"
+                aria-label="Ver artistas em foco"
+              >
+                ARTISTAS EM FOCO
+              </a>
+              <a
+                href="#participar"
+                className="text-black hover:text-purple-600 transition-colors"
+                aria-label="Ir para seção de participação"
+              >
+                {SURVEY_ENDED ? 'ENCERRADO' : 'PARTICIPAR'}
+              </a>
             </motion.div>
           </div>
         </nav>
@@ -198,14 +223,13 @@ export function Hero() {
                   className="flex flex-col sm:flex-row gap-4"
                 >
                   {SURVEY_ENDED ? (
-                    <button
-                      type="button"
-                      disabled
-                      className="bg-gray-400 text-white px-10 py-4 rounded-full cursor-not-allowed opacity-90"
-                      aria-label="Mapeamento encerrado"
+                    <a
+                      href="/artistas-em-foco"
+                      className="group bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white px-10 py-4 rounded-full transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 text-center"
+                      aria-label="Ver artistas em foco"
                     >
-                      MAPEAMENTO ENCERRADO
-                    </button>
+                      CONHEÇA OS ARTISTAS EM FOCO
+                    </a>
                   ) : mounted ? (
                     <Dialog open={dialogOpen} onOpenChange={setDialogOpen} modal={true}>
                       <DialogTrigger asChild>
@@ -286,8 +310,8 @@ export function Hero() {
                 </motion.div>
 
                 <div className="mt-6 sm:mt-8 bg-black text-white px-4 sm:px-6 py-3 sm:py-4 inline-block">
-                  <p className="text-xs sm:text-sm tracking-wider">
-                    <span className="text-yellow-400">12/12/2025</span> até <span className="text-yellow-400">12/02/2026</span>
+                  <p className="text-xs sm:text-sm tracking-wider text-yellow-400">
+                    #visibilidadeemfocosr
                   </p>
                 </div>
               </motion.div>

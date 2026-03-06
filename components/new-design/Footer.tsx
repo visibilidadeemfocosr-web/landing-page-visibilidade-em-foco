@@ -44,6 +44,11 @@ export function Footer() {
                 <a href="#impacto" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors" aria-label="Ir para seção de impacto">Impacto</a>
               </li>
               <li>
+                <Link href="/artistas-em-foco" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors" aria-label="Ir para página Artistas em Foco">
+                  Artistas em Foco
+                </Link>
+              </li>
+              <li>
                 <a href="#participar" className="text-sm sm:text-base text-gray-300 hover:text-white transition-colors" aria-label="Ir para seção de participação">{SURVEY_ENDED ? 'Encerrado' : 'Participar'}</a>
               </li>
               <li>

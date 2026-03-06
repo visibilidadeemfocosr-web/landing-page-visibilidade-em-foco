@@ -247,7 +247,7 @@ export async function publishInstagramPost(
   caption: string,
   accessToken?: string
 ): Promise<InstagramPublishResult> {
-  const token = accessToken || process.env.INSTAGRAM_ACCESS_TOKEN;
+  const token = (accessToken || process.env.INSTAGRAM_ACCESS_TOKEN)?.trim();
   
   if (!token) {
     throw new Error('Access Token do Instagram não configurado');
@@ -303,7 +303,7 @@ export async function publishInstagramCarousel(
   caption: string,
   accessToken?: string
 ): Promise<InstagramPublishResult> {
-  const token = accessToken || process.env.INSTAGRAM_ACCESS_TOKEN;
+  const token = (accessToken || process.env.INSTAGRAM_ACCESS_TOKEN)?.trim();
   
   if (!token) {
     throw new Error('Access Token do Instagram não configurado');
